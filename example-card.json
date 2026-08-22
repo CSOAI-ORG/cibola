@@ -1,0 +1,33 @@
+{
+  "schema": "https://cibola.dev/schemas/measurement-card.schema.json",
+  "card_version": "0.1.0",
+  "subject": {
+    "id": "csoai/sov33-v7-mined-honey",
+    "name": "sov33-v7-mined-honey",
+    "digest": "sha256:4e041956a94e69f25f7d3a4d2470ee0fbd64a4a2c1",
+    "family": "qwen",
+    "parameter_size": "0.5B"
+  },
+  "benchmark": {
+    "id": "cibola-gspc-14",
+    "name": "CIBOLA GSPC 14-axis",
+    "version": "0.5",
+    "digest": "sha256:21991104frozen",
+    "gold_labels": "https://councilof.ai/api/gspc"
+  },
+  "scores": {
+    "gov": {"score": 0.3713, "n": 54, "interval": {"method": "wilson", "lower": 0.312, "upper": 0.434}, "method": "deterministic-vs-frozen-gold"},
+    "care": {"score": 0.6856, "n": 60, "method": "deterministic-vs-frozen-gold"},
+    "sovereignty": {"score": 0.6395, "n": 60, "method": "deterministic-vs-frozen-gold"}
+  },
+  "measured_count": 13,
+  "total_count": 14,
+  "exclusion_manifest": {"hash": "sha256:human-baseline-dpia-gated"},
+  "provision_map": {
+    "EU_AI_Act_Art_50": "https://artificialintelligenceact.eu/article/50/",
+    "EU_AI_Act_Art_53": "https://artificialintelligenceact.eu/article/53/"
+  },
+  "run_manifest": {"harness_hash": "sha256:ai-harness-v2-map", "replay_merkle_root": "sha256:auadmdapdau.1620ausda9879sd"},
+  "issued_at": "2026-08-22T05:00:00Z",
+  "credential_register": "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one."
+}

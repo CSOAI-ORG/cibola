@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cibola.dev/schemas/measurement-card.schema.json",
+  "title": "CIBOLA Measurement Card",
+  "description": "Signed measurement credential v0.1 — the CIBOLA score layer over the RFC 9943 substrate. A measurement, NOT a certification. Every number recomputable from published rows.",
+  "version": "0.1.0",
+  "type": "object",
+  "required": [
+    "schema", "card_version", "subject", "benchmark", "scores",
+    "measured_count", "total_count", "issued_at", "credential_register"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "https://cibola.dev/schemas/measurement-card.schema.json"
+    },
+    "card_version": { "type": "string", "const": "0.1.0" },
+    "subject": {
+      "type": "object",
+      "description": "The system being measured. Join on weights/digest, not names — a model NAME is not a model.",
+      "required": ["id", "name", "digest"],
+      "properties": {
+        "id": { "type": "string", "description": "Stable identifier (e.g. HF repo id or local path)" },
+        "name": { "type": "string", "description": "Human label" },
+        "digest": { "type": "string", "description": "Content hash (sha256) of the weights — the real join key" },
+        "family": { "type": "string", "description": "Family name (qwen, llama, deepseek...)" },
+        "parameter_size": { "type": "string", "description": "e.g. '7.6B'" }
+      }
+    },
+    "benchmark": {
+      "type": "object",
+      "description": "The benchmark universe the subject was measured against.",
+      "required": ["id", "name", "digest", "version"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "digest": { "type": "string", "description": "sha256 of the frozen benchmark corpus" },
+        "gold_labels": { "type": "string", "description": "URL or ref to the frozen published gold labels" }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "description": "Axis -> measured result. Values are the published measurement, never certification.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["score", "n"],
+        "properties": {
+          "score": { "type": "number", "description": "Measured value (0..1 for ratio axes)" },
+          "n": { "type": "integer", "description": "Sample size. Nothing quotable below n>=30." },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "method": { "type": "string", "const": "wilson" },
+              "lower": { "type": "number" },
+              "upper": { "type": "number" }
+            }
+          },
+          "method": { "type": "string", "description": "Deterministic grading vs frozen gold labels; McNemar-primary" }
+        }
+      }
+    },
+    "measured_count": { "type": "integer", "description": "Number of axes actually measured (of total_count)" },
+    "total_count": { "type": "integer", "description": "Total canonical axes (CIBOLA canon = 14; '13 measured of 14' grammar)" },
+    "exclusion_manifest": {
+      "type": "object",
+      "description": "Which axes are excluded and why — the completeness grammar (e.g. human-baseline DPIA-gated).",
+      "properties": {
+        "hash": { "type": "string", "description": "sha256 of the manifest that was measured" }
+      }
+    },
+    "provision_map": {
+      "type": "object",
+      "description": "Jurisdiction-keyed obligation references — the east-west bridge hook. Values cite the provision corpus.",
+      "additionalProperties": { "type": "string" }
+    },
+    "run_manifest": {
+      "type": "object",
+      "properties": {
+        "harness_hash": { "type": "string", "description": "sha256 of the exact harness used (harness-trojan demand proof)" },
+        "replay_merkle_root": { "type": "string", "description": "Replay-committed; traces kept off-card" }
+      }
+    },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "credential_register": {
+      "type": "string",
+      "const": "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one."
+    },
+    "signature": {
+      "type": "object",
+      "description": "COSE_Sign1 / Ed25519 envelope (RFC 9943). Added by the signing pod, never by the measuring process.",
+      "required": ["alg", "kid", "sig"],
+      "properties": {
+        "alg": { "type": "integer", "const": -19, "description": "Ed25519" },
+        "kid": { "type": "string", "description": "RFC 9679 thumbprint; matches the published did:web key" },
+        "sig": { "type": "string", "description": "Ed25519 signature over the canonical card" }
+      }
+    }
+  }
+}
