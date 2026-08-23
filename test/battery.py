@@ -114,6 +114,32 @@ check(dispatch("cibola.listDomains", {})["domains"] == domain_files, "MCP listDo
 check(len(dispatch("cibola.crosswalk", {"domain": "cross-border"})) == 6, "MCP crosswalk returns 6 axes")
 check("error" in dispatch("cibola.nope", {}), "MCP unknown tool returns error")
 
+# A2A client module imports + audit() shape (hermetic: no server spawn, no network)
+sys.path.insert(0, agent_dir)
+from cibola_a2a_client import audit as _a2a_audit
+# A2A client spawns the server as a subprocess (stdio JSON-RPC). Test the audit
+# against a self-signed card + receipt + a fake self-consistent anchor.
+import tempfile as _temp
+import base64 as _b64
+sys.path.insert(0, os.path.join(ROOT, "engine"))
+from cibola_receipt import build_card_receipt as _bcr
+_tmpd = _temp.mkdtemp()
+_sc = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1")
+_r = _bcr(_sc, private_key=_Ed.generate(), kid="did:web:csoai.org#card-attestation-1")
+from cibola_anchor import card_digest as _cd
+_fa = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": _cd(_sc),
+       "anchors": [{"kind": "tsa-rfc3161", "digest_sha256": _cd(_sc), "message_imprint_matches": True, "gen_time": "2026-08-23T00:00:00Z"}]}
+_cpath, _rpath, _apath = os.path.join(_tmpd, "c.json"), os.path.join(_tmpd, "r.json"), os.path.join(_tmpd, "a.json")
+json.dump(_sc, open(_cpath, "w")); json.dump(_r, open(_rpath, "w")); json.dump(_fa, open(_apath, "w"))
+rep = _a2a_audit(_cpath, _rpath, _apath, server=os.path.join(agent_dir, "mcp_server.py"))
+check(rep["ok"] and all(s["ok"] for s in rep["steps"]), "A2A client full-chain audit passes")
+check(any(s["tool"] == "cibola.verify" and s["ok"] for s in rep["steps"]), "A2A client verified the card")
+check("server_tools" in rep and "cibola.crosswalk" in rep["server_tools"], "A2A client lists server tools")
+# verify.html + index.html link exist
+check(os.path.exists(os.path.join(ROOT, "verify.html")), "verify.html exists")
+check("verify.html" in open(os.path.join(ROOT, "index.html")).read(), "index.html links verify.html")
+check(os.path.exists(os.path.join(ROOT, "assets", "example-linked-anchor.json")), "linked anchor artifact published")
+
 # --- 4. harness -> card shape ---
 sys.path.insert(0, os.path.join(ROOT, "harness"))
 import run_axis as rax

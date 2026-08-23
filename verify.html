@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CIBOLA — Verify a Measurement</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:760px;margin:3rem auto;padding:0 1rem;line-height:1.5;color:#111}
+h1{color:#047857}h2{color:#0f766e;margin-top:2rem}code{background:#f0f4f3;padding:2px 5px;border-radius:4px}
+table{border-collapse:collapse;width:100%;margin-top:.5rem}th,td{border:1px solid #d1d5db;padding:6px 10px;text-align:left;font-size:.92rem}
+th{background:#f9fafb}.ok{color:#047857;font-weight:600}.reg{color:#6b7280;font-style:italic;font-size:.9rem}
+ol li{margin:.4rem 0}/* minimal */
+</style></head><body>
+<h1>CIBOLA — Verify a Measurement</h1>
+<p>Independent AI-governance <strong>measurement</strong> over the RFC 9943 substrate.
+A measurement card is evidence of what was measured and when. <em>It is not a
+certification, endorsement, or conformity mark, and must not be presented as one.</em></p>
+
+<p>Run the human one-command check against a card (with its receipt and RFC 3161 anchor):
+</p>
+<pre><code># one command — verifies card + receipt + anchor together
+cibola verify-all \
+  --card EXAMPLE-measured-card.json \
+  --receipt EXAMPLE-card-receipt.json \
+  --anchor EXAMPLE-card-anchor.json
+# optional identity pinning to the published key:
+  --pubkey &lt;did:web:csoai.org#card-attestation-1 published key&gt;</code></pre>
+
+<h2>What "valid" means (three independent legs)</h2>
+<ol>
+<li><strong>Card</strong> — the Ed25519 signature (alg -19) verifies over the canonical card
+form (signature fields stripped). A tampered card fails.</li>
+<li><strong>Receipt</strong> — the SCITT receipt's <code>content_id</code> recomputes and it
+attests to <em>this</em> card's digest (card-bind). A receipt for a different card fails.</li>
+<li><strong>Anchor</strong> — the RFC 3161 TSA's MessageImprint equals this card's digest
+(an external party bound the fingerprint to a time). A mismatched digest fails.</li>
+</ol>
+
+<h2>Published example (audited)</h2>
+<table>
+<tr><th>Registry</th><th>Benchmark id</th><th>Measured</th><th>Provision refs</th></tr>
+<tr><td>Cross-border / east-to-east</td><td><code>csoai.gspc-domains/cross-border/1.0</code></td>
+<td>6 / 6</td><td>6 axes cited</td></tr>
+</table>
+<p class="reg">The example was verified by <code>cibola verify-all</code> (PASS) and by an A2A
+agent via the CIBOLA MCP server (<code>cibola.verify</code> / <code>verifyReceipt</code> /
+<code>verifyAnchor</code>). The RFC 3161 TSA time-binding is real (GlobalSign R45 AATL chain);
+<code>gen_time 2026-08-23 06:00:11Z</code>.</p>
+<p class="reg"><strong>Note:</strong> the published example is signed with a development key to
+demonstrate the pipeline. A production card signs with
+<code>did:web:csoai.org#card-attestation-1</code> (Mac/keystone-held, never committed).</p>
+
+<h2>Do it yourself (A2A agent)</h2>
+<p>An A2A agent verifies independently via the CIBOLA MCP server
+(<code>agent/mcp_server.py</code>):</p>
+<pre><code>cibola_a2a_client.py --card card.json --receipt receipt.json --anchor anchor.json</code></pre>
+<p>Agent card: <a href="agent/agent.json">agent.json</a> | Contract: <a href="a2a.md">a2a.md</a> |
+Index: <a href="llms.txt">llms.txt</a></p>
+
+<h2>Doctrine</h2>
+<ul>
+<li><strong>Measurement, never certification.</strong> A credential is evidence of what was
+measured and when; never accreditation, endorsement, or conformity.</li>
+<li><strong>Neutrality.</strong> The scored entity never pays for its measurement. A vendor can
+buy the data; a vendor can never buy the score.</li>
+<li><strong>Join on weights, not names.</strong> Two cards that name the same model but measure
+different weights are distinct.</li>
+</ul>
+<p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:councilof.ai · Measurement
+credential, not certification.</p>
+</body></html>

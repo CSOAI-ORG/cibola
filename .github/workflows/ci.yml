@@ -150,5 +150,22 @@ jobs:
           assert set(dispatch('cibola.listDomains', {})['domains']) >= set(dnames)
           assert len(dispatch('cibola.crosswalk', {'domain':'cross-border'}))==6
           assert 'error' in dispatch('cibola.nope', {})
-          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK-MCP CI: PASS')
+          # A2A client full-chain audit (spawns mcp_server as subprocess; hermetic)
+          sys.path.insert(0, _os.path.join(os.getcwd(),'agent'))
+          from cibola_a2a_client import audit as _audit
+          import tempfile as _tmp
+          _td = _tmp.mkdtemp()
+          from cibola_receipt import build_card_receipt as _bcr
+          from cibola_anchor import card_digest as _cd
+          _sc2 = sign_card(card, key, kid='did:web:csoai.org#card-attestation-1')
+          _rc2 = _bcr(_sc2, private_key=key, kid='did:web:csoai.org#card-attestation-1')
+          _an2 = {"schema":"csoai.card-anchor/0.1","card_content_sha256":_cd(_sc2),
+                  "anchors":[{"kind":"tsa-rfc3161","digest_sha256":_cd(_sc2),"message_imprint_matches":True,"gen_time":"2026-08-23T00:00:00Z"}]}
+          _cp,_rp,_ap = _os.path.join(_td,'c.json'),_os.path.join(_td,'r.json'),_os.path.join(_td,'a.json')
+          json.dump(_sc2,open(_cp,'w')); json.dump(_rc2,open(_rp,'w')); json.dump(_an2,open(_ap,'w'))
+          _rep = _audit(_cp,_rp,_ap,server=_os.path.join(_os.getcwd(),'agent','mcp_server.py'))
+          assert _rep['ok'] and all(s['ok'] for s in _rep['steps'])
+          assert _os.path.exists(_os.path.join(os.getcwd(),'verify.html'))
+          assert 'verify.html' in open(_os.path.join(os.getcwd(),'index.html')).read()
+          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK-MCP-A2A-CLIENT CI: PASS')
           PYEOF

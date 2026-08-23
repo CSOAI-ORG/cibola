@@ -35,6 +35,9 @@ cibola verify-anchor  --anchor anchor.json  --card card.json    # external time-
 | `example-card-receipt.json` | An `a2a.signed-receipt/0.1` SCITT receipt binding the card's `content_id` to `did:web:csoai.org`. |
 | `example-card-anchor.json` | An **external RFC 3161 TSA time-binding** for the card's digest (GlobalSign R45 AATL chain), verified independently. |
 | `example-license-manifest.json` | A signed data-license manifest (mechanism; the illustrative buyer is a demo — only Nick countersigns a real deal). |
+| `example-linked-card.json` | A cross-border domain card, audited by A2A client (VALID) — the human/A2A-verifiable artifact. |
+| `example-linked-receipt.json` | Its SCITT receipt (binds to the card). |
+| `example-linked-anchor.json` | Its **real RFC 3161 TSA anchor** (genTime 2026-08-23 06:00:11Z, MessageImprint matches). |
 | `data/bench-data-qa.jsonl` | The core Q/A product (16 rows, per axis; answer-hash deduped). |
 | `data/bench-data-preference-pairs.jsonl` | Measured A/B preference pairs (16 rows). |
 | `data/bench-data-safety-incidents.jsonl` | Deterministically-flagged safety incidents (failures — the most valuable data). |
