@@ -10,9 +10,11 @@
 *.key
 keys/
 
-# data export products (regenerable from a measurement; not source)
+# data export products generated to ./data-out/ (regenerable from a measurement)
 data-out/
-*.jsonl
+
+# published example data products (deliberately committed under assets/)
+!assets/data/*.jsonl
 
 # local scratch
 /tmp/

@@ -113,6 +113,26 @@ check(all("not a certification" in json.dumps(qa_rec) for qa_rec in d["qa"]), "q
 # neutrality: exports what was measured, never alters a score
 check(all(r["verdict"] in ("PASS", "FAIL") for r in d["qa"]), "data carries deterministic verdicts only")
 
+# --- 8. SCITT receipt (RFC 9943): roundtrip + card-bind + tamper-detect ---
+from engine.cibola_receipt import build_card_receipt
+from engine.cibola_receipt_verify import verify_receipt
+import hashlib as _hl0
+from engine.cibola_sign import canonical as card_canonical
+receipt = build_card_receipt(card, private_key=key)  # same ephemeral key
+check(receipt["schema"] == "a2a.signed-receipt/0.1", "receipt schema a2a.signed-receipt/0.1")
+check(receipt["signature"]["alg"] == "Ed25519", "receipt sig alg Ed25519")
+check(receipt["kid"].startswith("did:web:csoai.org#"), "receipt kid did:web")
+check(receipt["subject_content_sha256"] == _hl0.sha256(card_canonical(card)).hexdigest(), "receipt binds card digest")
+rv = verify_receipt(receipt)
+check(rv["ok"], f"stranger-verify receipt (reason: {rv['reason']})")
+# receipt must attest to THE card, not some other card
+other_card = json.loads(json.dumps(card)); other_card["subject"]["id"] = "different"
+rv_mismatch = verify_receipt(receipt, other_card)
+check(not rv_mismatch["ok"], "receipt fails against a different card (card-bind)")
+# tamper a receipt claim -> content_id / sig invalid
+tampered_r = json.loads(json.dumps(receipt)); tampered_r["claims"][0]["detail"] = "altered"
+check(not verify_receipt(tampered_r)["ok"], "tampered receipt fails verification")
+
 print()
 if FAILS:
     print(f"CIBOLA TEST: FAIL ({len(FAILS)})")

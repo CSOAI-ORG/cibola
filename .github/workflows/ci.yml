@@ -86,5 +86,17 @@ jobs:
           d = export(fake, {'id':'t','name':'T'})
           assert len(d['qa'])==16 and len(d['preference_pairs'])==16
           assert all('not a certification' in json.dumps(r['provenance']) for r in d['preference_pairs'])
-          print('SIGN-VERIFY-EXPORT CI: PASS — signed card verifies, tamper rejected, 16/16 data rows')
+          # SCITT receipt (RFC 9943) roundtrip + card-bind + tamper-detect
+          from cibola_receipt import build_card_receipt
+          from cibola_receipt_verify import verify_receipt
+          import hashlib as _hl
+          from cibola_sign import canonical as card_canonical
+          rcp = build_card_receipt(card, private_key=key, kid='did:web:csoai.org#card-attestation-1')
+          assert verify_receipt(rcp)['ok'], verify_receipt(rcp)['reason']
+          assert rcp['subject_content_sha256'] == _hl.sha256(card_canonical(card)).hexdigest()
+          bad = json.loads(json.dumps(card)); bad['subject']['id']='x'
+          assert not verify_receipt(rcp, bad)['ok']  # receipt must not attest to a different card
+          tr = json.loads(json.dumps(rcp)); tr['claims'][0]['detail']='altered'
+          assert not verify_receipt(tr)['ok']  # tamper rejected
+          print('SIGN-VERIFY-EXPORT-RECEIPT CI: PASS — card+receipt verify, both tamper-rejected')
           PYEOF

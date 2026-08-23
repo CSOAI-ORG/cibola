@@ -5,7 +5,9 @@ Subcommands:
   axes      List the 16 GSPC axes (+probe/gold), --json for machine-readable
   measure   Measure a model on all axes (Ollama), emit axis-engine record + optional card
   sign      Sign a CIBOLA measurement card (Ed25519, COSE_Sign1, one-signer doctrine)
+  receipt   Build an SCITT receipt (RFC 9943, a2a.signed-receipt/0.1) binding a card
   verify    Stranger-verify a signed card with the public key only
+  verify-receipt  Stranger-verify an SCITT receipt (optionally against a card)
   export    Turn an axis-engine result into the licensable data product (Q/A + pairs + incidents)
   selfcheck Run the hermetic deterministic test battery (no network)
 
@@ -138,6 +140,37 @@ def cmd_export(args):
     print(f"exported: {n_qa} qa, {n_pp} preference pairs, {n_si} safety incidents -> {args.out_dir}", flush=True)
 
 
+def cmd_receipt(args):
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from cibola_receipt import build_card_receipt
+    card = json.load(open(args.card))
+    key = None
+    if args.key_file or os.environ.get("CIBOLA_SIGNING_KEY_FILE"):
+        if args.key_file:
+            os.environ["CIBOLA_SIGNING_KEY_FILE"] = args.key_file
+        key = _load_signing_key()
+    receipt = build_card_receipt(card, private_key=key, kid=args.kid)
+    dest = args.out or args.receipt_out
+    if dest:
+        json.dump(receipt, open(dest, "w"), indent=2)
+        print(f"wrote {dest}", flush=True)
+    signed = bool(receipt.get("signature", {}).get("sig"))
+    print(f"receipt content_id={receipt['content_id'][:16]}… "
+          f"subject_sha256={receipt['subject_content_sha256'][:16]}… "
+          f"[{'SIGNED' if signed else 'UNSIGNED (honestly-unsigned, no key)'}]", flush=True)
+    return receipt
+
+
+def cmd_verify_receipt(args):
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from cibola_receipt_verify import verify_receipt
+    receipt = json.load(open(args.receipt))
+    card = json.load(open(args.card)) if args.card else None
+    res = verify_receipt(receipt, card)
+    print(res["reason"], flush=True)
+    return 0 if res["ok"] else 1
+
+
 def main():
     ap = argparse.ArgumentParser(description="CIBOLA measurement CLI.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -171,6 +204,19 @@ def main():
     p.add_argument("--card", required=True)
     p.add_argument("--pubkey", default=None, help="Reference public key b64 to pin identity")
     p.set_defaults(func=cmd_verify)
+
+    p = sub.add_parser("receipt", help="Build an SCITT receipt (RFC 9943) binding a card")
+    p.add_argument("--card", required=True)
+    p.add_argument("--kid", default=None, help="kid (default did:web:csoai.org#card-attestation-1)")
+    p.add_argument("--key-file", default=None, help="Pod Ed25519 private key (repo never embeds it)")
+    p.add_argument("--out", default=None, help="Write receipt here")
+    p.add_argument("--receipt-out", default=None, help="Alias for --out")
+    p.set_defaults(func=cmd_receipt)
+
+    p = sub.add_parser("verify-receipt", help="Stranger-verify an SCITT receipt (optionally against a card)")
+    p.add_argument("--receipt", required=True)
+    p.add_argument("--card", default=None, help="Card to bind-check the receipt against")
+    p.set_defaults(func=cmd_verify_receipt)
 
     p = sub.add_parser("export", help="Turn an axis-engine result into the licensable data product")
     p.add_argument("--in", dest="inp", required=True, help="axis-engine result JSON")

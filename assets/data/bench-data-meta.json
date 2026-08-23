@@ -1,0 +1,19 @@
+{
+  "schema": "csoai.bench-data/0.1",
+  "product": "Benchmark-as-a-Service data layer",
+  "kind": "measurement-derived data \u2014 NOT certification",
+  "register": "This data is derived from a measurement. It is not a certification, endorsement, or conformity mark.",
+  "neutrality": "sold as data, never as a purchased rank",
+  "subject": {
+    "id": "mac-local/qwen2.5:3b",
+    "name": "qwen2.5:3b"
+  },
+  "provenance": {
+    "benchmark": "csoai.gspc-16",
+    "benchmark_digest": "a7978f1d50a363de20eeb583ba4f4d802f29caec8211b0a7941920c2043a2b2b",
+    "subject_id": "mac-local/qwen2.5:3b",
+    "subject_name": "qwen2.5:3b",
+    "issued_at": "2026-08-23T05:05:55Z",
+    "register": "This data is derived from a measurement. It is not a certification, endorsement, or conformity mark."
+  }
+}
