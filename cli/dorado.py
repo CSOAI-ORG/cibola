@@ -59,8 +59,14 @@ def cmd_measure(args):
         json.dump(rec, open(args.out, "w"), indent=2)
         print(f"wrote {args.out}", flush=True)
     if args.card:
+        # Real join key: digest over the measured evidence (per-axis responses) + model id,
+        # so two cards that name the same model but measure different behavior are distinct
+        # ("a model NAME is not a model"). Falls back to the name-only digest if unmeasured.
+        import hashlib as _hl2
+        evidence = "|".join(r.get("resp", "") for r in res.get("per_axis", []))
+        measured_digest = sha256(args.model + "::" + evidence)
         subject = {"id": args.card_subject_id, "name": args.card_subject_name or args.model,
-                   "digest": sha256("local:" + args.model)}
+                   "digest": measured_digest}
         json.dump(as_card(res, subject, axes=axes), open(args.card, "w"), indent=2)
         print(f"wrote {args.card}", flush=True)
     # capture cost/latency telemetry (feeds dorado telemetry + the EAT cost budget)
