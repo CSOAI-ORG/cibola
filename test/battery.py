@@ -249,6 +249,8 @@ check("server_tools" in rep and "dorado.crosswalk" in rep["server_tools"], "A2A 
 # verify.html + index.html link exist
 check(os.path.exists(os.path.join(ROOT, "verify.html")), "verify.html exists")
 check("verify.html" in open(os.path.join(ROOT, "index.html")).read(), "index.html links verify.html")
+check(os.path.exists(os.path.join(ROOT, "leaderboard.html")), "leaderboard.html exists")
+check("leaderboard.html" in open(os.path.join(ROOT, "index.html")).read(), "index.html links leaderboard.html")
 check(os.path.exists(os.path.join(ROOT, "assets", "example-linked-anchor.json")), "linked anchor artifact published")
 
 # --- 4. harness -> card shape ---

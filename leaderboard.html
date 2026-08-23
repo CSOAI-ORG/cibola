@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DORADO — Measurement Leaderboard</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:820px;margin:3rem auto;padding:0 1rem;line-height:1.5;color:#111}
+h1{color:#047857}h2{color:#0f766e;margin-top:2rem}code{background:#f0f4f3;padding:2px 5px;border-radius:4px}
+table{border-collapse:collapse;width:100%;margin-top:.5rem}th,td{border:1px solid #d1d5db;padding:6px 10px;text-align:left;font-size:.92rem}
+th{background:#f9fafb}.ok{color:#047857;font-weight:600}.band{color:#6b7280;font-size:.86rem}.reg{color:#6b7280;font-style:italic;font-size:.9rem}
+/* tiny bar */
+.bar{display:inline-block;height:10px;background:#047857;border-radius:3px}
+</style></head><body>
+<h1>DORADO — Measurement Leaderboard</h1>
+<p>A measurement body over the RFC 9943 substrate. Absolute (governance), <strong>relative</strong>
+(Elo/Bradley-Terry with confidence bands) and <strong>operational</strong> (cost/latency/throughput)
+axes. <em>A rank is a measurement, never a certification.</em></p>
+
+<h2>Absolute governance (per domain)</h2>
+<p>The measurement board records each signed, RFC 3161-anchored result
+(<code>board/board-index.json</code>, served live on this site).</p>
+<table id="board"><thead><tr><th>Registry</th><th>Subject</th><th>Measured</th><th>Signed</th><th>Anchor</th></tr></thead><tbody></tbody></table>
+
+<h2>Relative (Elo / Bradley-Terry) with confidence band</h2>
+<p>Pairwise blind A/B — a rank is quotable only at <code>n ≥ n_min</code>. A band shows the
+honest uncertainty. Learn from LMArena's methodology; the difference is it is signed and
+content-addressed (measurement, never certification).</p>
+<table id="elo"><thead><tr><th>#</th><th>Model</th><th>Rating</th><th>Band</th><th>Win-rate</th><th>n</th></tr></thead><tbody></tbody></table>
+
+<h2>Operational (cost/latency/throughput)</h2>
+<p>The half OpenRouter throws away — we keep it (telemetry.jsonl). A vendor can license
+the operational data, never the score.</p>
+<table id="tel"><thead><tr><th>Model</th><th>Latency (ms)</th><th>tok/s</th><th>Cost USD</th><th>Runtime</th></tr></thead><tbody></tbody></table>
+
+<p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:councilof.ai · Measurement
+credential, not certification. Data derives from a measurement; it is not a certification,
+endorsement, or conformity mark.</p>
+
+<script>
+// Populate from the board-index.json served alongside; data is regenerated on the pod.
+async function loadBoard(){
+  try{
+    const b=await fetch('board/board-index.json').then(r=>r.json());
+    const tb=document.querySelector('#board tbody');
+    (b.measurements||[]).slice(0,14).forEach(m=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${m.registry||''}</td><td>${m.subject||''}</td>
+        <td>${m.measured}/${m.total}</td><td class="ok">${m.signed?'yes':'no'}</td>
+        <td>${(m.anchor_time||'none').slice(0,10)}</td>`;
+      tb.appendChild(tr);
+    });
+  }catch(e){document.querySelector('#board tbody').innerHTML='<tr><td colspan=5>(board data not served here)</td></tr>';}
+}
+async function loadElo(){
+  // Elo data is produced by `dorado elo`; if a public JSON is served it loads here.
+  try{
+    const e=await fetch('board/elo.json').then(r=>r.json());
+    const te=document.querySelector('#elo tbody');
+    (e.board||[]).forEach((m,i)=>{
+      const tr=document.createElement('tr');
+      const band=(m.rating_band||['?','?']);
+      const w0=m.rating - (m.rating_band&&m.rating_band[0]||0);
+      const bar=`<span class="bar" style="width:${Math.min(90,100*w0/200)}px"></span>`;
+      tr.innerHTML=`<td>${i+1}</td><td>${m.model}</td><td>${m.rating||''}</td>
+        <td class="band">[${band[0]},${band[1]}]</td><td>${m.win_rate||''}</td><td>${m.n||''}</td>`;
+      te.appendChild(tr);
+    });
+  }catch(e){document.querySelector('#elo tbody').innerHTML='<tr><td colspan=6>(run `dorado elo` to rank)</td></tr>';}
+}
+async function loadTel(){
+  try{
+    const t=await fetch('data/telemetry.jsonl').catch(()=>null);
+    if(!t) throw 0;
+    const lines=(await t.text()).trim().split('\n').filter(Boolean);
+    const tt=document.querySelector('#tel tbody');
+    lines.slice(-12).forEach(l=>{const r=JSON.parse(l);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${r.model}</td><td>${r.latency_ms}</td><td>${r.tok_s}</td><td>$${r.cost_usd}</td><td>${r.runtime}</td>`;
+      tt.appendChild(tr);});
+  }catch(e){document.querySelector('#tel tbody').innerHTML='<tr><td colspan=5>(telemetry not served here)</td></tr>';}
+}
+loadBoard();loadElo();loadTel();
+</script>
+</body></html>
