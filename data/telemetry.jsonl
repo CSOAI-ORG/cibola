@@ -1,1 +1,2 @@
 {"ts":"2026-08-23T16:14:13.662564+00:00","model":"qwen3:4b-8k","base":"pod-3090","runtime":"pod","latency_ms":812.5,"in_tok":210,"out_tok":64,"tok_s":337.2,"cost_usd":0.00021}
+{"ts":"2026-08-23T16:32:39.511180+00:00","model":"qwen3:4b-8k","base":"pod-3090:11434","runtime":"pod","latency_ms":812.5,"in_tok":210,"out_tok":64,"tok_s":337.2,"cost_usd":0.00021}
