@@ -9,7 +9,20 @@ DOMAINS="${DOMAINS:-bond bank insurance equity index cross-border}"
 CONC="${CONC:-3}"
 LOG="eat/batch-$(date -u +%Y%m%d-%H%M%S).log"
 mkdir -p eat
-echo "[$(date -u +%FT%TZ)] eat-batch start model=$MODEL domains=[$DOMAINS] conc=$CONC" >> "$LOG"
+echo "[$(date -u +%FT%TZ)] eat-batch start model=$MODEL domains=[$DOMAINS] conc=$CONC cost_budget=${COST_BUDGET_USD:-none}" >> "$LOG"
+
+_past_budget() {
+  # fail-open cost guard: sum cost_usd over telemetry; return 0 (true) if over budget.
+  [ -z "${COST_BUDGET_USD:-}" ] && return 1
+  local cost
+  cost=$(DORADO_TELEMETRY="${DORADO_TELEMETRY:-data/telemetry.jsonl}" python3 -c "
+import sys; sys.path.insert(0,'engine')
+from or_telemetry import load
+print(round(sum(r.get('cost_usd',0) for r in load()),6))
+" 2>/dev/null || echo 0)
+  echo "[$(date -u +%FT%TZ)] cost so far: \$${cost} (budget \$${COST_BUDGET_USD})" >> "$LOG"
+  awk "BEGIN{exit !($cost >= ${COST_BUDGET_USD})}"
+}
 
 work_one() {
   local dom="$1" c="${MODEL//:/_}-${dom}"
@@ -31,6 +44,10 @@ work_one() {
 # launch up to CONC at a time
 i=0
 for dom in $DOMAINS; do
+  if _past_budget; then
+    echo "[$(date -u +%FT%TZ)] COST BUDGET REACHED ($COST_BUDGET_USD) — stopping fail-open" >> "$LOG"
+    break
+  fi
   work_one "$dom" &
   i=$((i+1))
   if [ $((i % CONC)) -eq 0 ]; then wait; fi

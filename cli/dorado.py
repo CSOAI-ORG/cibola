@@ -45,11 +45,15 @@ def cmd_axes(args):
 
 def cmd_measure(args):
     sys.path.insert(0, os.path.join(ROOT, "harness"))
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
     from run_axis import measure, as_card, sha256, BASE, load_axes
     base = args.base or BASE
     axes, registry_id = load_axes(args.domain)
     print(f"Measuring {args.model} on {len(axes)} {registry_id or 'GSPC-16'} axes via {base} ...", flush=True)
+    import time as _t
+    t0 = _t.time()
     res = measure(args.model, axes=axes, base=base, delay=args.delay, registry_id=registry_id)
+    elapsed_ms = (_t.time() - t0) * 1000
     rec = {"schema": "csoai.axis-engine/0.3", "axes": len(axes), "registry": registry_id, **res}
     if args.out:
         json.dump(rec, open(args.out, "w"), indent=2)
@@ -59,6 +63,19 @@ def cmd_measure(args):
                    "digest": sha256("local:" + args.model)}
         json.dump(as_card(res, subject, axes=axes), open(args.card, "w"), indent=2)
         print(f"wrote {args.card}", flush=True)
+    # capture cost/latency telemetry (feeds dorado telemetry + the EAT cost budget)
+    try:
+        from or_telemetry import record, load as _lt
+        # only record real (measured) runs to avoid noise; estimate with OpenRouter price id
+        in_tok = sum(len(r.get("resp", "")) // 4 for r in res.get("per_axis", []))
+        out_tok = sum(16 for r in res.get("per_axis", []) if r.get("measured"))
+        from or_telemetry import cost_usd
+        # default OpenRouter-ish price if no provider mapping; cheap + honest
+        c_usd = cost_usd(in_tok, out_tok, {"prompt": 0.0000004, "completion": 0.0000012})
+        record(args.model, base=base, latency_ms=round(elapsed_ms, 1), in_tok=in_tok,
+               out_tok=out_tok, cost_usd=c_usd, runtime="pod")
+    except Exception:
+        pass  # telemetry capture is best-effort; never fail the measure
     print(f"[{args.model}] {res['ok']}/{res['n']} pass  {res['accuracy']}  "
           f"measured={res['measured']}/{res['total']}  registry={registry_id}", flush=True)
 
