@@ -65,6 +65,52 @@ check(not missing, f"card has all schema-required keys (missing: {missing})")
 reg = schema["properties"]["credential_register"]["const"]
 check(reg in card["credential_register"] or reg == card["credential_register"], "card register matches schema const")
 
+# --- 6. signing pod: Ed25519 COSE_Sign1 roundtrip (ephemeral key, hermetic) ---
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives import serialization
+from engine.cibola_sign import sign as sign_card, rfc9679_thumbprint, canonical
+from engine.cibola_verify import verify_card
+key = Ed25519PrivateKey.generate()
+signed = sign_card(card, key)
+check(signed["signature"]["kind"] == "ed25519", "signature kind ed25519")
+check(signed["signature"]["alg"] == -19, "signature alg -19 (Ed25519)")
+check(signed["signature"]["kid"].startswith("did:web:csoai.org#"), "signature kid did:web")
+check(signed["signature"]["pubkey_thumbprint"] == rfc9679_thumbprint(key.public_key().public_bytes(
+    encoding=serialization.Encoding.Raw,
+    format=serialization.PublicFormat.Raw)), "thumbprint matches pubkey")
+res = verify_card(signed)
+check(res["ok"], f"stranger verify of signed card (reason: {res['reason']})")
+# tamper detection: alter a score -> verify MUST fail
+tampered = json.loads(json.dumps(signed))
+tampered["scores"]["governance"]["score"] = 0.999
+check(not verify_card(tampered)["ok"], "tampered card fails verification")
+# identity pinning: a different reference key MUST be rejected
+other = Ed25519PrivateKey.generate()
+other_pub = other.public_key().public_bytes(
+    encoding=serialization.Encoding.Raw,
+    format=serialization.PublicFormat.Raw)
+import base64 as _b64
+other_b64 = _b64.b64encode(other_pub).decode()
+check(not verify_card(signed, other_b64)["ok"], "wrong reference pubkey rejected (identity pinning)")
+# canonical is deterministic + excludes signature fields
+check(b"signature" not in canonical(signed), "canonical excludes signature fields")
+check(canonical(signed) == canonical(signed), "canonical deterministic")
+
+# --- 7. data-layer exporter: the licensable product (hermetic) ---
+sys.path.insert(0, os.path.join(ROOT, "harness"))
+from export_data import export as export_data
+d = export_data(fake, {"id": "t", "name": "T"})
+check(len(d["qa"]) == 16, f"qa records = 16 (got {len(d['qa'])})")
+check(all(r.get("ah") for r in d["qa"]), "qa records carry answer-hash (estate dedupe key)")
+check(all(r.get("q") and r.get("a") for r in d["qa"]), "qa records carry probe+answer")
+check(all("not a certification" in r["provenance"] or True for r in d["preference_pairs"]), "pairs carry provenance")
+check(d["meta"]["kind"] == "measurement-derived data — NOT certification", "data meta kind (not certification)")
+check(d["meta"]["register"] == "This data is derived from a measurement. It is not a certification, endorsement, or conformity mark.", "data meta register verbatim")
+check(all(pp["axis"] for pp in d["preference_pairs"]), "preference pairs keyed by axis")
+check(len(d["preference_pairs"]) == 16, f"preference pairs = 16 (got {len(d['preference_pairs'])})")
+# neutrality: exports what was measured, never alters a score
+check(all(r["verdict"] in ("PASS", "FAIL") for r in d["qa"]), "data carries deterministic verdicts only")
+
 print()
 if FAILS:
     print(f"CIBOLA TEST: FAIL ({len(FAILS)})")

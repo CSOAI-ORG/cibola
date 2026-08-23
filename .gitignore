@@ -1,0 +1,21 @@
+# CIBOLA — never commit these.
+#
+# NO PRIVATE KEYS. The CIBOLA pod signing key (#card-attestation-1, estate key
+# d4cb0eaa) is Mac/keystone-held and NEVER enters this repo. If a .raw/.pem/.key
+# appears here it is a mistake and must be removed from git history.
+
+# signing keys (repo must never contain the private half)
+*.raw
+*.pem
+*.key
+keys/
+
+# data export products (regenerable from a measurement; not source)
+data-out/
+*.jsonl
+
+# local scratch
+/tmp/
+__pycache__/
+*.pyc
+.venv/

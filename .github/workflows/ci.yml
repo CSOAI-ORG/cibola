@@ -19,6 +19,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # cryptography is REQUIRED for the signing pod (Ed25519). The deterministic
+      # battery itself has no third-party deps, but the signer/verifier do.
+      - name: Install cryptography
+        run: pip install cryptography
+
       # Hermetic deterministic test battery — NO network, NO Ollama required.
       - name: Deterministic test battery
         run: python3 test/battery.py
@@ -49,3 +54,37 @@ jobs:
           python3 cli/cibola.py axes >/dev/null
           python3 cli/cibola.py selfcheck >/dev/null
           echo "CLI CI: PASS"
+
+      # Signing pod + stranger verifier + data exporter, all hermetic w/ an
+      # EPHEMERAL key (the real #card-attestation-1 private half is never in CI).
+      - name: Sign → verify → export (hermetic, ephemeral key)
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys, os, subprocess, base64
+          sys.path.insert(0, os.path.join(os.getcwd(), 'engine'))
+          from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+          from cryptography.hazmat.primitives import serialization
+          from cibola_sign import sign as sign_card
+          from cibola_verify import verify_card
+          axes = json.load(open('axes/gspc-16.json'))['axes']
+          # build a synthetic axis result + card
+          sys.path.insert(0, os.path.join(os.getcwd(), 'harness'))
+          import run_axis as rax
+          fake = {'model':'t','n':16,'ok':9,'accuracy':0.562,'measured':16,'total':16,'ts':'2026-08-23T00:00:00Z',
+                  'per_axis':[{'axis':a['slug'],'gold':a['gold'],'verdict':'PASS' if i<9 else 'FAIL','resp':'x','measured':True} for i,a in enumerate(axes)]}
+          card = rax.as_card(fake, {'id':'t','name':'T','digest':'x'})
+          key = Ed25519PrivateKey.generate()
+          signed = sign_card(card, key, kid='did:web:csoai.org#card-attestation-1')
+          # stranger-verify
+          v = verify_card(signed)
+          assert v['ok'], v['reason']
+          # tamper must fail
+          t = json.loads(json.dumps(signed)); t['scores']['governance']['score']=0.999
+          assert not verify_card(t)['ok']
+          # export data product
+          from export_data import export, write_jsonl
+          d = export(fake, {'id':'t','name':'T'})
+          assert len(d['qa'])==16 and len(d['preference_pairs'])==16
+          assert all('not a certification' in r['provenance'] for r in d['preference_pairs'])
+          print('SIGN-VERIFY-EXPORT CI: PASS — signed card verifies, tamper rejected, 16/16 data rows')
+          PYEOF
