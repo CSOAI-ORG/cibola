@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cibola_board.py — the CIBOLA measurement board (the body's record of what was measured).
+"""dorado_board.py — the DORADO measurement board (the body's record of what was measured).
 
 Mirrors the estate's chain-index pattern: each published measurement card is added
 as a content-addressed entry (hash = sha256 of the card's canonical form, the SAME
@@ -21,14 +21,14 @@ import hashlib, json, os, sys, time
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Board dir is read LAZILY (env CIBOLA_BOARD_DIR overrides for hermetic tests) so this
+# Board dir is read LAZILY (env DORADO_BOARD_DIR overrides for hermetic tests) so this
 # module can be imported once without freezing the dir; each call re-reads the env.
 REGISTER = ("This is a measurement credential. It is not a certification, endorsement, "
             "or conformity mark, and must not be presented as one.")
 
 
 def _board_dir() -> str:
-    return os.environ.get("CIBOLA_BOARD_DIR") or os.path.join(ROOT, "board")
+    return os.environ.get("DORADO_BOARD_DIR") or os.path.join(ROOT, "board")
 
 
 def _measurements_path() -> str:
@@ -42,7 +42,7 @@ def _index_path() -> str:
 def _card_hash(card: dict) -> str:
     """Content address = sha256 of the card's canonical form (matches receipt/anchor digest)."""
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_sign import canonical
+    from dorado_sign import canonical
     return hashlib.sha256(canonical(card)).hexdigest()
 
 
@@ -74,7 +74,7 @@ def publish(card: dict, receipt: dict | None = None, anchor: dict | None = None)
     Returns the entry (or an existing duplicate). Refuses to publish a card that is
     not signed (the board only records stranger-verifiable measurements)."""
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_sign import is_signed
+    from dorado_sign import is_signed
     if not is_signed(card):
         raise ValueError("refusing to publish an unsigned card to the measurement board "
                          "(the board records stranger-verifiable measurements only)")

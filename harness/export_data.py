@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""export_data.py — the CIBOLA data-layout exporter (the refined product).
+"""export_data.py — the DORADO data-layout exporter (the refined product).
 
 Takes an axis-engine result (from harness/run_axis.py `measure`) and turns it
 into the licensable data product: per-axis Q/A pairs, preference pairs, and
@@ -109,7 +109,7 @@ def write_jsonl(path: str, records: list[dict]) -> int:
 
 def main() -> int:
     import argparse
-    ap = argparse.ArgumentParser(description="Export a CIBOLA axis result as licensable data.")
+    ap = argparse.ArgumentParser(description="Export a DORADO axis result as licensable data.")
     ap.add_argument("--in", dest="inp", required=True, help="axis-engine result JSON")
     ap.add_argument("--out-dir", default=".", help="directory for the data products")
     a = ap.parse_args()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cibola_receipt_verify.py — STRANGER verifier for a CIBOLA SCITT receipt.
+"""dorado_receipt_verify.py — STRANGER verifier for a DORADO SCITT receipt.
 
 A stranger verifies a receipt with ONLY the receipt + the `cryptography`
 library (no signing key, no pod). Recomputes content_id, checks the Ed25519
@@ -7,7 +7,7 @@ signature, and (optionally) confirms the receipt's content_id matches a given
 card's digest — proving THIS receipt attests to THAT specific card.
 
 Usage:
-    python3 cibola_receipt_verify.py <receipt.json> [card.json]
+    python3 dorado_receipt_verify.py <receipt.json> [card.json]
 
 Prints the receipt register is a measurement, never a certification.
 """
@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cibola_receipt import canonical, content_id, content_id as cid_of
+from dorado_receipt import canonical, content_id, content_id as cid_of
 
 
 def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
@@ -40,7 +40,7 @@ def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
     # bind to a card, if given: the receipt's subject_content_sha256 must equal the card digest
     card_msg = None
     if card is not None:
-        from cibola_sign import canonical as card_canonical
+        from dorado_sign import canonical as card_canonical
         card_digest = hashlib.sha256(card_canonical(card)).hexdigest()
         if r.get("subject_content_sha256") != card_digest:
             return {"ok": False, "reason": f"receipt does NOT attest to this card (receipt={r.get('subject_content_sha256','')[:12]}…, card={card_digest[:12]}…)"}
@@ -51,7 +51,7 @@ def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        sys.exit("usage: python3 cibola_receipt_verify.py <receipt.json> [card.json]")
+        sys.exit("usage: python3 dorado_receipt_verify.py <receipt.json> [card.json]")
     receipt = json.load(open(sys.argv[1]))
     card = json.load(open(sys.argv[2])) if len(sys.argv) > 2 else None
     res = verify_receipt(receipt, card)

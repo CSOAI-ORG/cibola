@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""cibola MCP server — exposes CIBOLA measurement/verification as MCP tools.
+"""dorado MCP server — exposes DORADO measurement/verification as MCP tools.
 
 An A2A agent can call these to independently verify a measurement (never trust a
 self-reported number). JSON-RPC 2.0 over stdio (MCP), no third-party deps.
 
 Tools:
-  cibola.verify         Stranger-verify a signed card (tamper-detect + pinning)
-  cibola.verifyReceipt  Verify an SCITT receipt and bind it to a card
-  cibola.verifyAnchor   Verify an RFC 3161 external time-anchor (imprint + digest)
-  cibola.listDomains    List the domain axis registries
-  cibola.crosswalk      Return the domain->provision citation map
+  dorado.verify         Stranger-verify a signed card (tamper-detect + pinning)
+  dorado.verifyReceipt  Verify an SCITT receipt and bind it to a card
+  dorado.verifyAnchor   Verify an RFC 3161 external time-anchor (imprint + digest)
+  dorado.listDomains    List the domain axis registries
+  dorado.crosswalk      Return the domain->provision citation map
 
 Run:
   python3 agent/mcp_server.py          # stdio MCP
@@ -22,37 +22,37 @@ for _p in (ROOT, os.path.join(ROOT, "engine"), os.path.join(ROOT, "harness")):
     sys.path.insert(0, _p)
 
 TOOLS = {
-    "cibola.verify": {
-        "description": "Stranger-verify a signed CIBOLA measurement card using the published Ed25519 public key. Detects tampering; optional identity pinning. Returns VALID/INVALID. Never a certification.",
+    "dorado.verify": {
+        "description": "Stranger-verify a signed DORADO measurement card using the published Ed25519 public key. Detects tampering; optional identity pinning. Returns VALID/INVALID. Never a certification.",
         "inputSchema": {"type": "object", "properties": {
             "card": {"type": "object", "description": "The signed measurement card"},
             "pubkey": {"type": "string", "description": "Reference public key (b64) to pin identity (optional)"}},
             "required": ["card"]},
     },
-    "cibola.verifyReceipt": {
+    "dorado.verifyReceipt": {
         "description": "Verify an a2a.signed-receipt/0.1 SCITT (RFC 9943) receipt and confirm it attests to a specific card (content-id binding).",
         "inputSchema": {"type": "object", "properties": {
             "receipt": {"type": "object"},
             "card": {"type": "object"}}, "required": ["receipt"]},
     },
-    "cibola.verifyAnchor": {
+    "dorado.verifyAnchor": {
         "description": "Verify an RFC 3161 external time-anchor: TSA MessageImprint matches the card digest + digest binding.",
         "inputSchema": {"type": "object", "properties": {
             "anchor": {"type": "object"},
             "card": {"type": "object"}}, "required": ["anchor", "card"]},
     },
-    "cibola.listDomains": {
+    "dorado.listDomains": {
         "description": "List the GSPC domain axis registries (bond/bank/insurance/equity/index/cross-border) + axis counts.",
         "inputSchema": {"type": "object", "properties": {}},
     },
-    "cibola.crosswalk": {
+    "dorado.crosswalk": {
         "description": "Return the domain->provision crosswalk (jurisdiction-keyed legal/standard citations a score orbits). Cites provisions; never asserts legal compliance.",
         "inputSchema": {"type": "object", "properties": {
             "domain": {"type": "string", "description": "Optional: one domain (bond/bank/insurance/equity/index/cross-border)"}},
             "required": []},
     },
-    "cibola.board": {
-        "description": "Return the CIBOLA measurement board index (content-addressed + append-only): what has been measured, chainOk, per-measurement summary. A MEASUREMENT registry, not a rank table.",
+    "dorado.board": {
+        "description": "Return the DORADO measurement board index (content-addressed + append-only): what has been measured, chainOk, per-measurement summary. A MEASUREMENT registry, not a rank table.",
         "inputSchema": {"type": "object", "properties": {}},
     },
 }
@@ -60,23 +60,23 @@ TOOLS = {
 
 def _board(args):
     sys.path.insert(0, os.path.join(ROOT, "harness"))
-    from cibola_board import rebuild_index
+    from dorado_board import rebuild_index
     return rebuild_index()
 
 
 def _verify_card(args):
-    from cibola_verify import verify_card
+    from dorado_verify import verify_card
     res = verify_card(args.get("card", {}), args.get("pubkey"))
     return res
 
 
 def _verify_receipt(args):
-    from cibola_receipt_verify import verify_receipt
+    from dorado_receipt_verify import verify_receipt
     return verify_receipt(args.get("receipt", {}), args.get("card"))
 
 
 def _verify_anchor(args):
-    from cibola_anchor_verify import verify_anchor
+    from dorado_anchor_verify import verify_anchor
     return verify_anchor(args.get("anchor", {}), args.get("card", {}))
 
 
@@ -91,12 +91,12 @@ def _crosswalk(args):
 
 
 HANDLERS = {
-    "cibola.verify": _verify_card,
-    "cibola.verifyReceipt": _verify_receipt,
-    "cibola.verifyAnchor": _verify_anchor,
-    "cibola.listDomains": _list_domains,
-    "cibola.crosswalk": _crosswalk,
-    "cibola.board": _board,
+    "dorado.verify": _verify_card,
+    "dorado.verifyReceipt": _verify_receipt,
+    "dorado.verifyAnchor": _verify_anchor,
+    "dorado.listDomains": _list_domains,
+    "dorado.crosswalk": _crosswalk,
+    "dorado.board": _board,
 }
 
 
@@ -136,7 +136,7 @@ def main():
         elif method == "initialize":
             resp = {"jsonrpc": "2.0", "id": req_id,
                     "result": {"protocolVersion": "2025-03-26",
-                               "capabilities": {"tools": {}}, "serverInfo": {"name": "cibola", "version": "0.1.0"}}}
+                               "capabilities": {"tools": {}}, "serverInfo": {"name": "dorado", "version": "0.1.0"}}}
         else:
             resp = {"jsonrpc": "2.0", "id": req_id, "error": {"code": -32601, "message": f"method {method} not found"}}
         sys.stdout.write(json.dumps(resp) + "\n")

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.a2a-protocol.org/agent-card.json",
-  "name": "CIBOLA Measurement & Verification Agent",
+  "name": "DORADO Measurement & Verification Agent",
   "description": "A neutral AI-governance MEASUREMENT body. Produces and verifies signed measurement cards, SCITT receipts and RFC 3161 time-anchors over the RFC 9943 substrate. A measurement credential is NOT a certification, endorsement or conformity mark. This agent measures; it certifies nothing.",
-  "url": "https://github.com/CSOAI-ORG/cibola",
+  "url": "https://github.com/CSOAI-ORG/dorado",
   "version": "0.1.0",
   "protocolVersion": "https://schema.a2a-protocol.org/latest/",
   "capabilities": {
@@ -11,7 +11,7 @@
       "domains": ["bond", "bank", "insurance", "equity", "index", "cross-border"]
     },
     "verify": {
-      "description": "Stranger-verify a signed CIBOLA measurement card offline using only the published Ed25519 public key. Detects tampering and pinning to a reference identity.",
+      "description": "Stranger-verify a signed DORADO measurement card offline using only the published Ed25519 public key. Detects tampering and pinning to a reference identity.",
       "publicKey": "did:web:csoai.org#card-attestation-1"
     },
     "verifyReceipt": {
@@ -24,13 +24,13 @@
       "description": "Return the domain->provision crosswalk (jurisdiction-keyed legal/standard citations a score orbits). Cites provisions; never asserts legal compliance."
     }
   },
-  "extends": [{"url": "https://cibola.dev/schemas/measurement-card.schema.json", "description": "The measurement-card payload this agent produces/verifies."}],
+  "extends": [{"url": "https://dorado.dev/schemas/measurement-card.schema.json", "description": "The measurement-card payload this agent produces/verifies."}],
   "skills": [
-    {"name": "measure", "id": "cibola.measure", "tool": "cibola.measure", "description": "Run a deterministic GSPC measurement and emit a signed card."},
-    {"name": "verify", "id": "cibola.verify", "tool": "cibola.verify", "description": "Stranger-verify a signed card with the public key only."},
-    {"name": "verify-receipt", "id": "cibola.verify-receipt", "tool": "cibola.verify-receipt", "description": "Verify an SCITT receipt and bind it to a card."},
-    {"name": "verify-anchor", "id": "cibola.verify-anchor", "tool": "cibola.verify-anchor", "description": "Verify an RFC 3161 external time-anchor."},
-    {"name": "crosswalk", "id": "cibola.crosswalk", "tool": "cibola.crosswalk", "description": "Return the domain->provision crosswalk."}
+    {"name": "measure", "id": "dorado.measure", "tool": "dorado.measure", "description": "Run a deterministic GSPC measurement and emit a signed card."},
+    {"name": "verify", "id": "dorado.verify", "tool": "dorado.verify", "description": "Stranger-verify a signed card with the public key only."},
+    {"name": "verify-receipt", "id": "dorado.verify-receipt", "tool": "dorado.verify-receipt", "description": "Verify an SCITT receipt and bind it to a card."},
+    {"name": "verify-anchor", "id": "dorado.verify-anchor", "tool": "dorado.verify-anchor", "description": "Verify an RFC 3161 external time-anchor."},
+    {"name": "crosswalk", "id": "dorado.crosswalk", "tool": "dorado.crosswalk", "description": "Return the domain->provision crosswalk."}
   ],
   "provider": {
     "name": "CSOAI Ltd (Council of AI)",

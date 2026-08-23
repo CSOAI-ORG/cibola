@@ -1,5 +1,5 @@
 {
-  "schema": "https://cibola.dev/schemas/measurement-card.schema.json",
+  "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
   "card_version": "0.1.0",
   "subject": {
     "id": "csoai/sov33-v7-mined-honey",
@@ -9,8 +9,8 @@
     "parameter_size": "0.5B"
   },
   "benchmark": {
-    "id": "cibola-gspc-14",
-    "name": "CIBOLA GSPC 14-axis",
+    "id": "dorado-gspc-14",
+    "name": "DORADO GSPC 14-axis",
     "version": "0.5",
     "digest": "sha256:21991104frozen",
     "gold_labels": "https://councilof.ai/api/gspc"

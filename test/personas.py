@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""test/personas.py — CIBOLA front-end tested as ALL types of end users.
+"""test/personas.py — DORADO front-end tested as ALL types of end users.
 
 Simulates each user persona's real consumer flow against the public surfaces and
 asserts the outcome that persona cares about. Hermetic (no live Ollama/network
 for the crypto/subprocess checks; the optional live-surface smoke hits the Pages
-site when CIBOLA_LIVE=1).
+site when DORADO_LIVE=1).
 
 Personas:
   HUMAN-BUYER     a person who wants to publish/verify a measurement in the browser.
@@ -41,9 +41,9 @@ def require(cond, label):
 # ---------------------------------------------------------------------------
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from harness.run_axis import load_axes, as_card as _as_card
-from engine.cibola_sign import sign as sign_card, rfc9679_thumbprint
-from engine.cibola_receipt import build_card_receipt
-from engine.cibola_anchor import card_digest
+from engine.dorado_sign import sign as sign_card, rfc9679_thumbprint
+from engine.dorado_receipt import build_card_receipt
+from engine.dorado_anchor import card_digest
 
 key = Ed25519PrivateKey.generate()
 pub_raw = key.public_key().public_bytes(
@@ -77,7 +77,7 @@ require(os.path.exists(os.path.join(ROOT, "verify.html")), "human sees a verify 
 idx = open(os.path.join(ROOT, "index.html")).read()
 require("verify.html" in idx, "index links verify.html")
 require("measurement, not certification" in idx.lower() or "never a certification" in idx.lower(), "index states measurement-not-certification")
-from engine.cibola_verify import verify_card
+from engine.dorado_verify import verify_card
 hv = verify_card(signed, PUB)
 require(hv["ok"], "human verify-all card leg PASS")
 hr = verify_card(json.load(open(cp)))
@@ -88,18 +88,18 @@ require(hr["ok"], "human verify (no pin) PASS")
 # ---------------------------------------------------------------------------
 print("\n=== PERSONA: A2A-AGENT ===")
 from mcp_server import dispatch
-server_tools = dispatch("cibola.listDomains", {})
+server_tools = dispatch("dorado.listDomains", {})
 require("domains" in server_tools and len(server_tools["domains"]) >= 6, "agent discovers 6 domains")
-adhocs = dispatch("cibola.verify", {"card": signed, "pubkey": PUB})
+adhocs = dispatch("dorado.verify", {"card": signed, "pubkey": PUB})
 require(adhocs.get("ok"), f"agent independently verifies card ({adhocs.get('reason')})")
 # tamper must fail for the agent
 tampered = json.loads(json.dumps(signed)); tampered["scores"]["governance"] = {"score": 0.999, "n": 1}
-require(not dispatch("cibola.verify", {"card": tampered}).get("ok"), "agent detects a tampered card")
+require(not dispatch("dorado.verify", {"card": tampered}).get("ok"), "agent detects a tampered card")
 # A2A client full-chain audit (subprocess)
-from agent.cibola_a2a_client import audit as _audit
+from agent.dorado_a2a_client import audit as _audit
 rep = _audit(cp, rp, ap, server=os.path.join(ROOT, "agent", "mcp_server.py"))
 require(rep["ok"] and all(s["ok"] for s in rep["steps"]), "A2A client full-chain audit PASS")
-require("cibola.crosswalk" in rep["server_tools"], "agent card advertises crosswalk")
+require("dorado.crosswalk" in rep["server_tools"], "agent card advertises crosswalk")
 
 # ---------------------------------------------------------------------------
 # PERSONA 3 — REGULATOR / AUDITOR (prove it's a measurement, not a cert)
@@ -108,7 +108,7 @@ print("\n=== PERSONA: REGULATOR/AUDITOR ===")
 register = card.get("credential_register", "")
 require("not a certification" in register and "conformity mark" in register, "card carries register verbatim")
 require("provision_map" in card and len(card["provision_map"]) == len(axes), "card cites provisions per axis")
-cross = dispatch("cibola.crosswalk", {"domain": "bond"})
+cross = dispatch("dorado.crosswalk", {"domain": "bond"})
 require(isinstance(cross, dict) and len(cross) >= 5, "crosswalk returns citable provisions")
 require(all(isinstance(v, list) and v and isinstance(v[0], str) for v in cross.values()), "provisions are citable strings")
 # never a certification: no field permits claiming accreditation

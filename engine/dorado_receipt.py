@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cibola_receipt.py — SCITT receipt for a CIBOLA measurement card (RFC 9943).
+"""dorado_receipt.py — SCITT receipt for a DORADO measurement card (RFC 9943).
 
 Emits an `a2a.signed-receipt/0.1` receipt that rides the RFC 9943 SCITT
 substrate: it attests to WHAT was measured and WHEN (the card's content_id),
@@ -41,11 +41,11 @@ def content_id(receipt: dict) -> str:
 def build_card_receipt(card: dict, private_key=None, pubkey_raw=None, kid=None) -> dict:
     """Build an a2a.signed-receipt/0.1 binding the measurement card's content_id.
 
-    Uses the same canonical form the signature envelope uses (cibola_sign.canonical)
+    Uses the same canonical form the signature envelope uses (dorado_sign.canonical)
     so the card's content_id is reproducible. Signing with the pod key attaches a
     proof the issuer (did:web:csoai.org) bound this card's fingerprint at this time.
     """
-    from cibola_sign import canonical as card_canonical, rfc9679_thumbprint, KID_DEFAULT as CARD_KID
+    from dorado_sign import canonical as card_canonical, rfc9679_thumbprint, KID_DEFAULT as CARD_KID
 
     card_digest = hashlib.sha256(card_canonical(card)).hexdigest()
     # the receipt content_id is the card's digest (bind by fingerprint, not name)

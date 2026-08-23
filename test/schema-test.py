@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CIBOLA schema CI — every commit re-validates the example card against the schema."""
+"""DORADO schema CI — every commit re-validates the example card against the schema."""
 import json, os, sys
 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 schema = json.load(open(os.path.join(base, 'schemas', 'measurement-card.schema.json')))

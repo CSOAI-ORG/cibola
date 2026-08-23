@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""cibola — the CIBOLA measurement command-line interface.
+"""dorado — the DORADO measurement command-line interface.
 
 Subcommands:
   axes      List the 16 GSPC axes (+probe/gold), --json for machine-readable
   domains   List the domain axis registries (bond/bank/insurance/equity/index/cross-border)
   crosswalk Show the domain->provision crosswalk (east-west bridge), cite provisions per axis
   measure   Measure a model on all axes (Ollama), emit axis-engine record + optional card
-  sign      Sign a CIBOLA measurement card (Ed25519, COSE_Sign1, one-signer doctrine)
+  sign      Sign a DORADO measurement card (Ed25519, COSE_Sign1, one-signer doctrine)
   receipt   Build an SCITT receipt (RFC 9943, a2a.signed-receipt/0.1) binding a card
   verify    Stranger-verify a signed card with the public key only
   verify-receipt  Stranger-verify an SCITT receipt (optionally against a card)
@@ -15,12 +15,12 @@ Subcommands:
   anchor    Anchor a signed card to external time (RFC 3161 TSR) + optional Rekor log
   verify-anchor  Verify a card anchor (TSA imprint match + digest binding)
   license   Generate a signed data-license manifest (mechanism; binding only w/ Nick)
-  publish   Publish a (signed) measurement card to the CIBOLA measurement board
+  publish   Publish a (signed) measurement card to the DORADO measurement board
   board     Show the measurement board index (what's been measured, chainOk)
   export    Turn an axis-engine result into the licensable data product (Q/A + pairs + incidents)
   selfcheck Run the hermetic deterministic test battery (no network)
 
-Measurement, never certification. See GOVERNANCE.md and the CIBOLA card schema.
+Measurement, never certification. See GOVERNANCE.md and the DORADO card schema.
 """
 import argparse, json, os, subprocess, sys
 
@@ -106,14 +106,14 @@ def cmd_selfcheck(args):
 
 
 def _load_signing_key():
-    """Load the CIBOLA pod signing key. The private key NEVER comes from the repo.
+    """Load the DORADO pod signing key. The private key NEVER comes from the repo.
 
-    Sources, in order: --key-file path; env CIBOLA_SIGNING_KEY_FILE; the pod's
+    Sources, in order: --key-file path; env DORADO_SIGNING_KEY_FILE; the pod's
     keystone loader (csoai_city.keystone.load_signing_key). A key must be
     supplied by the signing pod — this repo never embeds the private half.
     """
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-    path = os.environ.get("CIBOLA_SIGNING_KEY_FILE")
+    path = os.environ.get("DORADO_SIGNING_KEY_FILE")
     if path and os.path.exists(path):
         from cryptography.hazmat.primitives import serialization
         raw = open(path, "rb").read()
@@ -129,18 +129,18 @@ def _load_signing_key():
         from csoai_city.keystone import load_signing_key
         return load_signing_key()
     except Exception as e:
-        raise SystemExit(f"no signing key: set CIBOLA_SIGNING_KEY_FILE to the pod key "
+        raise SystemExit(f"no signing key: set DORADO_SIGNING_KEY_FILE to the pod key "
                          f"(repo never embeds the private half). keystone: {e}")
 
 
 def cmd_sign(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_sign import sign, is_signed
+    from dorado_sign import sign, is_signed
     card = json.load(open(args.card))
     if args.pem_file:
         key = _load_signing_key_from_pem(args.pem_file)
     elif args.key_file:
-        os.environ["CIBOLA_SIGNING_KEY_FILE"] = args.key_file
+        os.environ["DORADO_SIGNING_KEY_FILE"] = args.key_file
         key = _load_signing_key()
     else:
         key = _load_signing_key()
@@ -165,7 +165,7 @@ def _load_signing_key_from_pem(path):
 
 def cmd_verify(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_verify import verify_card
+    from dorado_verify import verify_card
     card = json.load(open(args.card))
     res = verify_card(card, args.pubkey)
     print(f"{res['reason']}" + (f" (kid={res.get('kid')})" if res.get("kid") else ""), flush=True)
@@ -181,18 +181,18 @@ def cmd_verify_all(args):
     card = json.load(open(args.card))
     # card
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_verify import verify_card
+    from dorado_verify import verify_card
     r = verify_card(card, args.pubkey)
     print(f"[1/3 card          ] {r['reason']}" + (f" (kid={r.get('kid')})" if r.get("kid") else "") + ("" if r["ok"] else "  ✗"), flush=True)
     if r["ok"]: n_ok += 1
     if args.receipt:
-        from cibola_receipt_verify import verify_receipt
+        from dorado_receipt_verify import verify_receipt
         receipt = json.load(open(args.receipt))
         r2 = verify_receipt(receipt, card)
         print(f"[2/3 receipt       ] {r2['reason']}" + ("" if r2["ok"] else "  ✗"), flush=True)
         if r2["ok"]: n_ok += 1
     if args.anchor:
-        from cibola_anchor_verify import verify_anchor
+        from dorado_anchor_verify import verify_anchor
         anchor = json.load(open(args.anchor))
         r3 = verify_anchor(anchor, card)
         print(f"[3/3 anchor        ] {r3['reason']}" + ("" if r3["ok"] else "  ✗"), flush=True)
@@ -225,12 +225,12 @@ def cmd_export(args):
 
 def cmd_receipt(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_receipt import build_card_receipt
+    from dorado_receipt import build_card_receipt
     card = json.load(open(args.card))
     key = None
-    if args.key_file or os.environ.get("CIBOLA_SIGNING_KEY_FILE"):
+    if args.key_file or os.environ.get("DORADO_SIGNING_KEY_FILE"):
         if args.key_file:
-            os.environ["CIBOLA_SIGNING_KEY_FILE"] = args.key_file
+            os.environ["DORADO_SIGNING_KEY_FILE"] = args.key_file
         key = _load_signing_key()
     receipt = build_card_receipt(card, private_key=key, kid=args.kid)
     dest = args.out or args.receipt_out
@@ -246,7 +246,7 @@ def cmd_receipt(args):
 
 def cmd_verify_receipt(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_receipt_verify import verify_receipt
+    from dorado_receipt_verify import verify_receipt
     receipt = json.load(open(args.receipt))
     card = json.load(open(args.card)) if args.card else None
     res = verify_receipt(receipt, card)
@@ -256,13 +256,13 @@ def cmd_verify_receipt(args):
 
 def cmd_anchor(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_anchor import anchor_card
+    from dorado_anchor import anchor_card
     card = json.load(open(args.card))
     # if a pod key is available, sign the rekor entry request (else honest dependency report)
     rekor_key = None
-    if args.key_file or os.environ.get("CIBOLA_SIGNING_KEY_FILE"):
+    if args.key_file or os.environ.get("DORADO_SIGNING_KEY_FILE"):
         if args.key_file:
-            os.environ["CIBOLA_SIGNING_KEY_FILE"] = args.key_file
+            os.environ["DORADO_SIGNING_KEY_FILE"] = args.key_file
         rekor_key = _load_signing_key()
     a = anchor_card(card, tsa_url=args.tsa, do_rekor=not args.no_rekor, rekor_key=rekor_key)
     for an in a["anchors"]:
@@ -277,7 +277,7 @@ def cmd_anchor(args):
 
 def cmd_verify_anchor(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
-    from cibola_anchor_verify import verify_anchor
+    from dorado_anchor_verify import verify_anchor
     anchor = json.load(open(args.anchor))
     card = json.load(open(args.card))
     res = verify_anchor(anchor, card)
@@ -307,15 +307,15 @@ def cmd_license(args):
         "signature": None,
     }
     key = None
-    if args.key_file or os.environ.get("CIBOLA_SIGNING_KEY_FILE"):
+    if args.key_file or os.environ.get("DORADO_SIGNING_KEY_FILE"):
         if args.key_file:
-            os.environ["CIBOLA_SIGNING_KEY_FILE"] = args.key_file
+            os.environ["DORADO_SIGNING_KEY_FILE"] = args.key_file
         key = _load_signing_key()
     if key:
         # sign the canonical manifest (minus signature) like the card/board signer
         import sys as _s
         _s.path.insert(0, os.path.join(ROOT, "engine"))
-        from cibola_sign import canonical, rfc9679_thumbprint
+        from dorado_sign import canonical, rfc9679_thumbprint
         from cryptography.hazmat.primitives import serialization as _ser
         import base64 as _b64
         pub = key.public_key().public_bytes(encoding=_ser.Encoding.Raw, format=_ser.PublicFormat.Raw)
@@ -333,7 +333,7 @@ def cmd_license(args):
 
 def cmd_publish(args):
     sys.path.insert(0, os.path.join(ROOT, "harness"))
-    from cibola_board import publish
+    from dorado_board import publish
     card = json.load(open(args.card))
     receipt = json.load(open(args.receipt)) if args.receipt else None
     anchor = json.load(open(args.anchor)) if args.anchor else None
@@ -347,12 +347,12 @@ def cmd_publish(args):
 
 def cmd_board(args):
     sys.path.insert(0, os.path.join(ROOT, "harness"))
-    from cibola_board import rebuild_index
+    from dorado_board import rebuild_index
     idx = rebuild_index()
     if args.json:
         print(json.dumps(idx, indent=2))
         return
-    print(f"CIBOLA measurement board — {idx['count']} measurements, chainOk={idx['chainOk']} "
+    print(f"DORADO measurement board — {idx['count']} measurements, chainOk={idx['chainOk']} "
           f"(linked {idx['linked']}/{idx['count']})", flush=True)
     for m in idx["measurements"]:
         print(f"  {m['hash']} {m['registry']:38s} {m['measured']}/{m['total']} "
@@ -361,7 +361,7 @@ def cmd_board(args):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="CIBOLA measurement CLI.")
+    ap = argparse.ArgumentParser(description="DORADO measurement CLI.")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("axes", help="List the 16 GSPC axes")
@@ -373,7 +373,7 @@ def main():
     p.add_argument("--base", default=None, help="Ollama endpoint (default localhost:11434)")
     p.add_argument("--domain", default=None, help="Domain registry: bond/bank/insurance/equity/index/cross-border (default 16-axis)")
     p.add_argument("--out", default=None, help="Write axis-engine record here")
-    p.add_argument("--card", default=None, help="Write CIBOLA measurement card here")
+    p.add_argument("--card", default=None, help="Write DORADO measurement card here")
     p.add_argument("--card-subject-id", default="local")
     p.add_argument("--card-subject-name", default=None)
     p.add_argument("--delay", type=float, default=0.0)
@@ -390,7 +390,7 @@ def main():
     p = sub.add_parser("selfcheck", help="Run hermetic deterministic tests")
     p.set_defaults(func=cmd_selfcheck)
 
-    p = sub.add_parser("sign", help="Sign a CIBOLA measurement card (Ed25519, COSE_Sign1)")
+    p = sub.add_parser("sign", help="Sign a DORADO measurement card (Ed25519, COSE_Sign1)")
     p.add_argument("--card", required=True)
     p.add_argument("--key-file", default=None, help="Raw/PEM Ed25519 private key (pod-held; NOT in repo)")
     p.add_argument("--pem-file", default=None, help="PEM Ed25519 private key")
@@ -448,13 +448,13 @@ def main():
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_license)
 
-    p = sub.add_parser("publish", help="Publish a signed measurement card to the CIBOLA board")
+    p = sub.add_parser("publish", help="Publish a signed measurement card to the DORADO board")
     p.add_argument("--card", required=True)
     p.add_argument("--receipt", default=None)
     p.add_argument("--anchor", default=None)
     p.set_defaults(func=cmd_publish)
 
-    p = sub.add_parser("board", help="Show the CIBOLA measurement board index")
+    p = sub.add_parser("board", help="Show the DORADO measurement board index")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_board)
 

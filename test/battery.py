@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""CIBOLA deterministic test battery — runs with NO network/Ollama, so CI is hermetic.
+"""DORADO deterministic test battery — runs with NO network/Ollama, so CI is hermetic.
 
 Covers:
   1. judge: gold-label match (PASS/FAIL/ERR semantics)
   2. score: multi-class fraction
   3. axes registry: 16 axes, every one has slug/name/probe/gold, golds are a known three-class set
-  4. harness->card shape: a synthetic result maps to a valid CIBOLA measurement card
+  4. harness->card shape: a synthetic result maps to a valid DORADO measurement card
   5. schema structural check (mirrors test/schema-test.py, no jsonschema dependency)
 """
 import json, os, re, sys
@@ -91,7 +91,7 @@ card_b = _as_card(fake_b, {"id": "d", "name": "d", "digest": "x"}, axes=axes_b)
 check("provision_map" in card_b and len(card_b["provision_map"]) == 6, "domain card carries provision_map (6 axes)")
 
 # --- 3e. one-signer identity gate (a non-published key must not claim a production kid) ---
-from engine.cibola_sign import resolve_kid, signing_identity, PUBLISHED_IDENTITIES, TEST_KID
+from engine.dorado_sign import resolve_kid, signing_identity, PUBLISHED_IDENTITIES, TEST_KID
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as _Ed2
 from cryptography.hazmat.primitives import serialization as _ser2
 _tk = _Ed2.generate()
@@ -110,14 +110,14 @@ check(signing_identity(_pubraw)[1] is False, "random/other key is not a publishe
 
 # --- 3f. measurement board (content-addressed, append-only, refuses unsigned) ---
 import tempfile as _tmpb
-from harness.cibola_board import publish as _bpublish, rebuild_index as _bidx, _card_hash
-from harness.cibola_board import _card_hash as _board_hash
+from harness.dorado_board import publish as _bpublish, rebuild_index as _bidx, _card_hash
+from harness.dorado_board import _card_hash as _board_hash
 import hashlib as _hlb
-from engine.cibola_sign import canonical as _cardcanonical, sign as _boardsign
-from engine.cibola_receipt import build_card_receipt as _boardreceipt
+from engine.dorado_sign import canonical as _cardcanonical, sign as _boardsign
+from engine.dorado_receipt import build_card_receipt as _boardreceipt
 _bd = _tmpb.mkdtemp()
-_prior = os.environ.get("CIBOLA_BOARD_DIR")
-os.environ["CIBOLA_BOARD_DIR"] = _bd
+_prior = os.environ.get("DORADO_BOARD_DIR")
+os.environ["DORADO_BOARD_DIR"] = _bd
 _bk = _Ed2.generate()
 _check_hash = _board_hash(card_b)
 check(_check_hash == _hlb.sha256(_cardcanonical(card_b)).hexdigest(), "board content-address = card digest")
@@ -136,18 +136,18 @@ check(_e2.get("deduped", False), "board dedupes on republish")
 _idx = _bidx()
 check(_idx["count"] >= 1 and _idx["chainOk"], f"board index chainOk (count={_idx['count']})")
 if _prior:
-    os.environ["CIBOLA_BOARD_DIR"] = _prior
+    os.environ["DORADO_BOARD_DIR"] = _prior
 else:
-    os.environ.pop("CIBOLA_BOARD_DIR", None)
+    os.environ.pop("DORADO_BOARD_DIR", None)
 
 # --- 3g. rekor v1 anchor schema (corrected; honest dependency without a key) ---
-from engine.cibola_anchor import rekor_entry
+from engine.dorado_anchor import rekor_entry
 _re = rekor_entry("deadbeef" * 8)  # no key -> honest dependency report
 check(_re.get("recorded") is False, "rekor entry without a key is honestly not-recorded")
 check(_re.get("schema") == "rekor-v1", "rekor entry uses the corrected rekor-v1 schema")
 check("sigstore-signature" in _re.get("note", "") or "rekor v1 needs" in _re.get("note", ""), "rekor reports the exact dependency")
 # with a key+signature it builds the correct SHA-512 + PEM publicKey body (avoids the old blind 422)
-from engine.cibola_anchor import rekor_entry as _reke
+from engine.dorado_anchor import rekor_entry as _reke
 import base64 as _b64r
 from cryptography.hazmat.primitives import serialization as _serr
 _pk = _Ed2.generate()
@@ -173,35 +173,35 @@ sys.path.insert(0, agent_dir)
 sys.path.insert(0, os.path.join(ROOT, "engine"))
 from mcp_server import dispatch
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as _Ed
-from cibola_sign import sign as _sign
+from dorado_sign import sign as _sign
 _signed_card = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1", allow_test_identity=True)
-check("ok" in dispatch("cibola.verify", {"card": _signed_card}), "MCP verify dispatches")
-check(dispatch("cibola.listDomains", {})["domains"] == domain_files, "MCP listDomains returns all domains")
-check(len(dispatch("cibola.crosswalk", {"domain": "cross-border"})) == 6, "MCP crosswalk returns 6 axes")
-check("error" in dispatch("cibola.nope", {}), "MCP unknown tool returns error")
-check("count" in dispatch("cibola.board", {}), "MCP board tool returns index")
+check("ok" in dispatch("dorado.verify", {"card": _signed_card}), "MCP verify dispatches")
+check(dispatch("dorado.listDomains", {})["domains"] == domain_files, "MCP listDomains returns all domains")
+check(len(dispatch("dorado.crosswalk", {"domain": "cross-border"})) == 6, "MCP crosswalk returns 6 axes")
+check("error" in dispatch("dorado.nope", {}), "MCP unknown tool returns error")
+check("count" in dispatch("dorado.board", {}), "MCP board tool returns index")
 
 # A2A client module imports + audit() shape (hermetic: no server spawn, no network)
 sys.path.insert(0, agent_dir)
-from cibola_a2a_client import audit as _a2a_audit
+from dorado_a2a_client import audit as _a2a_audit
 # A2A client spawns the server as a subprocess (stdio JSON-RPC). Test the audit
 # against a self-signed card + receipt + a fake self-consistent anchor.
 import tempfile as _temp
 import base64 as _b64
 sys.path.insert(0, os.path.join(ROOT, "engine"))
-from cibola_receipt import build_card_receipt as _bcr
+from dorado_receipt import build_card_receipt as _bcr
 _tmpd = _temp.mkdtemp()
 _sc = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1", allow_test_identity=True)
 _r = _bcr(_sc, private_key=_Ed.generate(), kid="did:web:csoai.org#card-attestation-1")
-from cibola_anchor import card_digest as _cd
+from dorado_anchor import card_digest as _cd
 _fa = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": _cd(_sc),
        "anchors": [{"kind": "tsa-rfc3161", "digest_sha256": _cd(_sc), "message_imprint_matches": True, "gen_time": "2026-08-23T00:00:00Z"}]}
 _cpath, _rpath, _apath = os.path.join(_tmpd, "c.json"), os.path.join(_tmpd, "r.json"), os.path.join(_tmpd, "a.json")
 json.dump(_sc, open(_cpath, "w")); json.dump(_r, open(_rpath, "w")); json.dump(_fa, open(_apath, "w"))
 rep = _a2a_audit(_cpath, _rpath, _apath, server=os.path.join(agent_dir, "mcp_server.py"))
 check(rep["ok"] and all(s["ok"] for s in rep["steps"]), "A2A client full-chain audit passes")
-check(any(s["tool"] == "cibola.verify" and s["ok"] for s in rep["steps"]), "A2A client verified the card")
-check("server_tools" in rep and "cibola.crosswalk" in rep["server_tools"], "A2A client lists server tools")
+check(any(s["tool"] == "dorado.verify" and s["ok"] for s in rep["steps"]), "A2A client verified the card")
+check("server_tools" in rep and "dorado.crosswalk" in rep["server_tools"], "A2A client lists server tools")
 # verify.html + index.html link exist
 check(os.path.exists(os.path.join(ROOT, "verify.html")), "verify.html exists")
 check("verify.html" in open(os.path.join(ROOT, "index.html")).read(), "index.html links verify.html")
@@ -215,7 +215,7 @@ fake = {"model": "t", "n": 16, "ok": 9, "accuracy": round(9 / 16, 3), "measured"
         "per_axis": [{"axis": a["slug"], "gold": a["gold"], "verdict": "PASS" if i < 9 else "FAIL",
                       "resp": "x", "measured": True} for i, a in enumerate(axes)]}
 card = rax.as_card(fake, {"id": "t", "name": "T", "digest": "x"})
-check(card["schema"] == "https://cibola.dev/schemas/measurement-card.schema.json", "card schema id")
+check(card["schema"] == "https://dorado.dev/schemas/measurement-card.schema.json", "card schema id")
 check(card["card_version"] == "0.1.0", "card version")
 check(card["measured_count"] == 16 and card["total_count"] == 16, "card measured/total")
 check(card["scores"]["governance"]["score"] == 1.0 or card["scores"]["governance"]["score"] == 0.0, "card axis score 0/1")
@@ -231,15 +231,15 @@ check(reg in card["credential_register"] or reg == card["credential_register"], 
 # --- 6. signing pod: Ed25519 COSE_Sign1 roundtrip (ephemeral key, hermetic) ---
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives import serialization
-from engine.cibola_sign import sign as sign_card, rfc9679_thumbprint, canonical
-from engine.cibola_verify import verify_card
+from engine.dorado_sign import sign as sign_card, rfc9679_thumbprint, canonical
+from engine.dorado_verify import verify_card
 key = Ed25519PrivateKey.generate()
 signed = sign_card(card, key, allow_test_identity=True)
 check(signed["signature"]["kind"] == "ed25519", "signature kind ed25519")
 check(signed["signature"]["alg"] == -19, "signature alg -19 (Ed25519)")
 check(signed["signature"]["kid"] == "did:web:csoai.org#test-identity", "non-published key stamped kid=test (one-signer)")
 # identity gate: a non-published key MUST be rejected if it claims a production kid
-from engine.cibola_sign import resolve_kid, PUBLISHED_IDENTITIES
+from engine.dorado_sign import resolve_kid, PUBLISHED_IDENTITIES
 raw = key.public_key().public_bytes(encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw)
 try:
     resolve_kid(raw, "did:web:csoai.org#card-attestation-1", allow_test_identity=False)
@@ -250,7 +250,7 @@ except ValueError:
 import base64 as _b64
 pub_x_b64url = "1MsOqhbV9Qv3Yzo2qjT-CaVeEkuTFt7Sq9sSK7nDfjg"
 pub_x = _b64.urlsafe_b64decode(pub_x_b64url + "==")
-from engine.cibola_sign import signing_identity
+from engine.dorado_sign import signing_identity
 k, published = signing_identity(pub_x)
 check(published and k == "did:web:csoai.org#card-attestation-1", "published card-attestation-1 identity recognized")
 check(signed["signature"]["pubkey_thumbprint"] == rfc9679_thumbprint(key.public_key().public_bytes(
@@ -292,10 +292,10 @@ check(all("not a certification" in json.dumps(qa_rec) for qa_rec in d["qa"]), "q
 check(all(r["verdict"] in ("PASS", "FAIL") for r in d["qa"]), "data carries deterministic verdicts only")
 
 # --- 8. SCITT receipt (RFC 9943): roundtrip + card-bind + tamper-detect ---
-from engine.cibola_receipt import build_card_receipt
-from engine.cibola_receipt_verify import verify_receipt
+from engine.dorado_receipt import build_card_receipt
+from engine.dorado_receipt_verify import verify_receipt
 import hashlib as _hl0
-from engine.cibola_sign import canonical as card_canonical
+from engine.dorado_sign import canonical as card_canonical
 receipt = build_card_receipt(card, private_key=key)  # same ephemeral key
 check(receipt["schema"] == "a2a.signed-receipt/0.1", "receipt schema a2a.signed-receipt/0.1")
 check(receipt["signature"]["alg"] == "Ed25519", "receipt sig alg Ed25519")
@@ -313,8 +313,8 @@ check(not verify_receipt(tampered_r)["ok"], "tampered receipt fails verification
 
 # --- 9. anchor shape (hermetic: no network; verify TSA-anchor digest binding + manifest license) ---
 # Claim a TSA anchor as if issued, and confirm the verifier binds it to THIS card's digest.
-from engine.cibola_anchor import card_digest
-from engine.cibola_anchor_verify import verify_anchor
+from engine.dorado_anchor import card_digest
+from engine.dorado_anchor_verify import verify_anchor
 dig = card_digest(card)
 fake_anchor = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": dig,
                "anchors": [{"kind": "tsa-rfc3161", "digest_sha256": dig,
@@ -340,6 +340,6 @@ check(lp["bound_card_content_sha256"] == dig, "license manifest binds the card d
 
 print()
 if FAILS:
-    print(f"CIBOLA TEST: FAIL ({len(FAILS)})")
+    print(f"DORADO TEST: FAIL ({len(FAILS)})")
     sys.exit(1)
-print("CIBOLA TEST: PASS — all deterministic checks green")
+print("DORADO TEST: PASS — all deterministic checks green")

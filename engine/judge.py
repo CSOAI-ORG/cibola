@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CIBOLA deterministic judge — gold-label match, no LLM ever judges another LLM.
+"""DORADO deterministic judge — gold-label match, no LLM ever judges another LLM.
 Returns PASS/FAIL/ERR; a model's answer is compared to the frozen gold class.
 """
 import re

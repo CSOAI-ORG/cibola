@@ -1,7 +1,7 @@
-# CIBOLA — GOVERNANCE.md
+# DORADO — GOVERNANCE.md
 
-## What CIBOLA is
-CIBOLA is an independent AI-governance **measurement** body — the signed score layer
+## What DORADO is
+DORADO is an independent AI-governance **measurement** body — the signed score layer
 over the RFC 9943/9942 substrate. It produces **measurement credentials**, never
 certification. A measurement card is evidence of what was measured and when; it is
 not a certification, endorsement, or conformity mark.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""cibola_sign.py — CIBOLA measurement-card signing pod (one-signer doctrine).
+"""dorado_sign.py — DORADO measurement-card signing pod (one-signer doctrine).
 
-Signs a CIBOLA measurement card with Ed25519 (alg -19) over its CANONICAL form:
+Signs a DORADO measurement card with Ed25519 (alg -19) over its CANONICAL form:
 strip every signature field, sha256, then sign the digest. This mirrors the
 estate's sign_board.py/verify_signature.py so a stranger can verify a card
 offline with ONLY the published key (did:web:csoai.org#card-attestation-1).

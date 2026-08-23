@@ -1,6 +1,6 @@
-# CIBOLA — Example Measured Asset (Benchmark-as-a-Service)
+# DORADO — Example Measured Asset (Benchmark-as-a-Service)
 
-This is a **worked example** of the CIBOLA data layer: a measured card, its SCITT
+This is a **worked example** of the DORADO data layer: a measured card, its SCITT
 receipt, and the licensable data product it produced. It demonstrates the
 full pipeline —
 
@@ -9,8 +9,8 @@ full pipeline —
 ## ⚠️ Signing-key note (read first)
 
 These examples were signed with a **throwaway development key** to demonstrate the
-pipeline, NOT the production `did:web:csoai.org#card-attestation-1` key. The CIBOLA
-signing path now **enforces the one-signer doctrine** (`engine/cibola_sign.py`): a
+pipeline, NOT the production `did:web:csoai.org#card-attestation-1` key. The DORADO
+signing path now **enforces the one-signer doctrine** (`engine/dorado_sign.py`): a
 card can only be stamped with a **published** did:web identity's kid. A
 non-published key (like those used in these examples) is only allowed with
 `--allow-test-identity` and is stamped `kid=did:web:csoai.org#test-identity` — so a
@@ -24,24 +24,24 @@ production-signed card, provision the real `#card-attestation-1` key at the pod
 (keystone) path, then:
 
 ```bash
-CIBOLA_SIGNING_KEY_FILE=<pod key> cibola sign  --card card.json           # gate auto-recognizes card-attestation-1
-CIBOLA_SIGNING_KEY_FILE=<pod key> cibola receipt --card card.json --out receipt.json
-CIBOLA_SIGNING_KEY_FILE=<pod key> cibola anchor --card card.json --out anchor.json   # RFC 3161 TSA
+DORADO_SIGNING_KEY_FILE=<pod key> dorado sign  --card card.json           # gate auto-recognizes card-attestation-1
+DORADO_SIGNING_KEY_FILE=<pod key> dorado receipt --card card.json --out receipt.json
+DORADO_SIGNING_KEY_FILE=<pod key> dorado anchor --card card.json --out anchor.json   # RFC 3161 TSA
 ```
 
 A stranger verifies each leg with only the published key + `cryptography`
 (anchor verification also needs `pip install asn1crypto`):
 
 ```bash
-cibola verify-receipt --receipt receipt.json --card card.json   # binds receipt -> card
-cibola verify-anchor  --anchor anchor.json  --card card.json    # external time-binding verified
+dorado verify-receipt --receipt receipt.json --card card.json   # binds receipt -> card
+dorado verify-anchor  --anchor anchor.json  --card card.json    # external time-binding verified
 ```
 
 ## Files
 
 | File | What it is |
 |---|---|
-| `example-measured-card.json` | A signed CIBOLA measurement card (16/16 measured, `qwen2.5:3b`, score 0.5). |
+| `example-measured-card.json` | A signed DORADO measurement card (16/16 measured, `qwen2.5:3b`, score 0.5). |
 | `example-card-receipt.json` | An `a2a.signed-receipt/0.1` SCITT receipt binding the card's `content_id` to `did:web:csoai.org`. |
 | `example-card-anchor.json` | An **external RFC 3161 TSA time-binding** for the card's digest (GlobalSign R45 AATL chain), verified independently. |
 | `example-license-manifest.json` | A signed data-license manifest (mechanism; the illustrative buyer is a demo — only Nick countersigns a real deal). |
@@ -59,19 +59,19 @@ verified)`, `messageImprint matches=True`, digest binding `dig_ok=True`,
 
 ## Production-signing (drop-in, one command once the pod key is present)
 
-The real CIBOLA signing key is `did:web:csoai.org#card-attestation-1` (THE BRICK,
+The real DORADO signing key is `did:web:csoai.org#card-attestation-1` (THE BRICK,
 estate key `d4cb0eaa`), Mac/keystone-held. The moment the pod key is available,
 produce a **production-signed, externally-anchored** card — no code changes, just
 the real key:
 
 ```bash
 # measure a DOMAIN registry (e.g. bond) and emit its card
-cibola measure --model <model> --domain bond --card card.json --out axis.json
+dorado measure --model <model> --domain bond --card card.json --out axis.json
 
 # sign with the real #card-attestation-1 key
-CIBOLA_SIGNING_KEY_FILE=<pod key> cibola sign       --card card.json
-CIBOLA_SIGNING_KEY_FILE=<pod key> cibola receipt    --card card.json --out receipt.json
-CIBOLA_SIGNING_KEY_FILE=<pod key> cibola anchor     --card card.json --out anchor.json   # RFC 3161 TSA
+DORADO_SIGNING_KEY_FILE=<pod key> dorado sign       --card card.json
+DORADO_SIGNING_KEY_FILE=<pod key> dorado receipt    --card card.json --out receipt.json
+DORADO_SIGNING_KEY_FILE=<pod key> dorado anchor     --card card.json --out anchor.json   # RFC 3161 TSA
 ```
 
 The card carries a `provision_map` (east-west bridge) — jurisdiction-keyed
@@ -80,8 +80,8 @@ provision citations per axis — which cites the law/standards a score orbits bu
 
 A stranger verifies every leg with only the published key + `cryptography`
 (anchor also needs `pip install asn1crypto`):
-`cibola verify` · `cibola verify-receipt --receipt receipt.json --card card.json` ·
-`cibola verify-anchor --anchor anchor.json --card card.json`.
+`dorado verify` · `dorado verify-receipt --receipt receipt.json --card card.json` ·
+`dorado verify-anchor --anchor anchor.json --card card.json`.
 
 ## Doctrine (binding)
 

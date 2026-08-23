@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""CIBOLA axis engine harness — measures a model on the 16 GSPC axes.
+"""DORADO axis engine harness — measures a model on the 16 GSPC axes.
 
 Deterministic: temperature=0, judge = gold-label match (no LLM judges another LLM).
 Produces two artifacts:
   * axis-engine record (schema csoai.axis-engine-16/0.2) — raw per-axis, replayable
-  * measurement card  (schema https://cibola.dev/schemas/measurement-card.schema.json)
-    emitted under --card, consumable by the CIBOLA card schema (measurement, never cert).
+  * measurement card  (schema https://dorado.dev/schemas/measurement-card.schema.json)
+    emitted under --card, consumable by the DORADO card schema (measurement, never cert).
 
 Honesty: 'ok' counts only deterministic gold-fits; 'unmeasured' is a real state.
 """
@@ -63,7 +63,7 @@ def provision_map_for(domain: str | None) -> dict | None:
         return cm["domains"].get(domain)
     except Exception:
         return None
-CARD_SCHEMA = "https://cibola.dev/schemas/measurement-card.schema.json"
+CARD_SCHEMA = "https://dorado.dev/schemas/measurement-card.schema.json"
 REGISTER = ("This is a measurement credential. It is not a certification, endorsement, "
             "or conformity mark, and must not be presented as one.")
 
@@ -108,7 +108,7 @@ def measure(model, axes=None, base=BASE, delay=0.0, registry_id="csoai.gspc-16")
 
 
 def as_card(res, subject, axes=None):
-    """Map an axis-engine result to a CIBOLA measurement card (measurement, never cert)."""
+    """Map an axis-engine result to a DORADO measurement card (measurement, never cert)."""
     axes = axes or AXES
     registry = res.get("registry", "csoai.gspc-16")
     scores = {r["axis"]: {"score": 1.0 if r["verdict"] == "PASS" else
@@ -153,13 +153,13 @@ def as_card(res, subject, axes=None):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Measure a model on a CIBOLA GSPC axis registry.")
+    ap = argparse.ArgumentParser(description="Measure a model on a DORADO GSPC axis registry.")
     ap.add_argument("--model", required=True)
     ap.add_argument("--base", default=BASE, help="Ollama endpoint, e.g. http://127.0.0.1:11439")
     ap.add_argument("--domain", default=None,
                     help="Domain registry to measure: bond, bank, insurance, equity, index, cross-border (default: 16-axis)")
     ap.add_argument("--out", default=None, help="Write axis-engine record here")
-    ap.add_argument("--card", default=None, help="Write CIBOLA measurement card here")
+    ap.add_argument("--card", default=None, help="Write DORADO measurement card here")
     ap.add_argument("--card-subject-id", default="local", help="Subject id for the card")
     ap.add_argument("--card-subject-name", default=None, help="Subject name for the card")
     ap.add_argument("--delay", type=float, default=0.0, help="Seconds between axis probes")

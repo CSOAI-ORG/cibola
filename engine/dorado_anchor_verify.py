@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cibola_anchor_verify.py — verify a CIBOLA card anchor offline.
+"""dorado_anchor_verify.py — verify a DORADO card anchor offline.
 
 Checks, for an anchor object and a card:
   1. the TSA anchor: PKIStatus granted + the TSA's MessageImprint matches THIS card,
@@ -11,7 +11,7 @@ Requires asn1crypto for the TSR re-parse. Prints a measurement, not a certificat
 from __future__ import annotations
 import base64, hashlib, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cibola_anchor import card_digest
+from dorado_anchor import card_digest
 
 
 def _asn1crypto():
@@ -52,7 +52,7 @@ def verify_anchor(anchor: dict, card: dict) -> dict:
 
 def main() -> int:
     if len(sys.argv) < 3:
-        sys.exit("usage: python3 cibola_anchor_verify.py <anchor.json> <card.json>")
+        sys.exit("usage: python3 dorado_anchor_verify.py <anchor.json> <card.json>")
     anchor = json.load(open(sys.argv[1]))
     card = json.load(open(sys.argv[2]))
     res = verify_anchor(anchor, card)

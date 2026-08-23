@@ -1,15 +1,15 @@
-# CIBOLA Data License (Benchmark-as-a-Service) — v0.1
+# DORADO Data License (Benchmark-as-a-Service) — v0.1
 
-**This is the licensing mechanism for the CIBOLA data layer — not a signed deal.**
+**This is the licensing mechanism for the DORADO data layer — not a signed deal.**
 A buyer executes a license by accepting these terms AND the data license
-manifest (`license-manifest.json`, signed by the CIBOLA pod) that identifies the
+manifest (`license-manifest.json`, signed by the DORADO pod) that identifies the
 specific dataset(s), scope, and price. The manifest is the negotiable contract
 object; this document is the standing terms it references.
 
 ## 1. What is licensed
 
-The **measurement-derived data products** produced by the CIBOLA axis engine and
-exported by `cibola export` — specifically:
+The **measurement-derived data products** produced by the DORADO axis engine and
+exported by `dorado export` — specifically:
 - **Q/A product** (`bench-data-qa.jsonl`): per-axis probe + model answer + deterministic verdict.
 - **Preference pairs** (`bench-data-preference-pairs.jsonl`): measured A/B model-vs-policy outcomes.
 - **Safety incidents** (`bench-data-safety-incidents.jsonl`): deterministically-flagged failures.
@@ -33,7 +33,7 @@ neutrality register) so a buyer can trace it back to the measurement.
 
 ## 4. Prohibited use
 - Republishing the data as a standalone dataset without a separate license.
-- Using the data to license/sub-license, or to claim a CIBOLA certification/endorsement.
+- Using the data to license/sub-license, or to claim a DORADO certification/endorsement.
 - Rescoring or re-presenting the measured verdicts as anything other than measured results.
 
 ## 5. Neutrality / anti-capture (binds the estate, protects the buyer)

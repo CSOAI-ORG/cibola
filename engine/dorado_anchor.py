@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cibola_anchor.py — externally anchor a CIBOLA measurement card.
+"""dorado_anchor.py — externally anchor a DORADO measurement card.
 
 Produces a real, third-party timestamp/transparency-log anchor for a card's
 digest, so a signed card is not merely self-anchored: an independent TIME and
@@ -35,7 +35,7 @@ def _asn1crypto():
 
 def card_digest(card: dict) -> str:
     """sha256 hex of the card's canonical form (the same digest the receipt binds)."""
-    from cibola_sign import canonical
+    from dorado_sign import canonical
     return hashlib.sha256(canonical(card)).hexdigest()
 
 
@@ -131,7 +131,7 @@ def anchor_card(card: dict, *, tsa_url: str = TSA_DEFAULT, do_rekor: bool = True
     if do_rekor:
         sig, pub = None, None
         if rekor_key is not None:
-            from cibola_sign import canonical
+            from dorado_sign import canonical
             pub = rekor_key.public_key()
             sig = rekor_key.sign(canonical(card))
         anchors.append(rekor_entry(digest_hex, public_key_bytes=pub, signature=sig))

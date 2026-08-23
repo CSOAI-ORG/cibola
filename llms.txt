@@ -1,4 +1,4 @@
-# CIBOLA (CSOAI Ltd, Council of AI)
+# DORADO (CSOAI Ltd, Council of AI)
 
 Independent AI-governance **measurement** body. A signed score layer over the RFC 9943 substrate (RFC 9942 receipts). **Measurement, never certification** — a measurement card is NOT a certification, endorsement, or conformity mark.
 
@@ -23,46 +23,46 @@ A **signed measurement card** + **SCITT receipt (RFC 9943)** + **RFC 3161 extern
 ## CLI usage (humans)
 
 ```bash
-cibola domains                          # list registries
-cibola measure  --model X --domain bond --card card.json --out axis.json
-cibola sign     --card card.json                         # Ed25519 COSE_Sign1
-cibola receipt  --card card.json --out receipt.json      # SCITT RFC 9943
-cibola anchor   --card card.json --out anchor.json       # RFC 3161 TSA
-cibola verify   --card card.json --pubkey <b64>          # stranger-verify
-cibola verify-receipt   --receipt receipt.json --card card.json
-cibola verify-anchor    --anchor anchor.json  --card card.json
-cibola verify-all       --card card.json [--receipt r.json] [--anchor a.json]
-cibola export   --in axis.json --out-dir data-out        # licensable data product
-cibola crosswalk [--domain bond]                         # provision citations
-cibola selfcheck                                         # hermetic tests
-cibola license  --licensee X --dataset-id D --price-gbp 5000 --out manifest.json
+dorado domains                          # list registries
+dorado measure  --model X --domain bond --card card.json --out axis.json
+dorado sign     --card card.json                         # Ed25519 COSE_Sign1
+dorado receipt  --card card.json --out receipt.json      # SCITT RFC 9943
+dorado anchor   --card card.json --out anchor.json       # RFC 3161 TSA
+dorado verify   --card card.json --pubkey <b64>          # stranger-verify
+dorado verify-receipt   --receipt receipt.json --card card.json
+dorado verify-anchor    --anchor anchor.json  --card card.json
+dorado verify-all       --card card.json [--receipt r.json] [--anchor a.json]
+dorado export   --in axis.json --out-dir data-out        # licensable data product
+dorado crosswalk [--domain bond]                         # provision citations
+dorado selfcheck                                         # hermetic tests
+dorado license  --licensee X --dataset-id D --price-gbp 5000 --out manifest.json
 ```
 
 A stranger verifies with only the published Ed25519 key + `cryptography` (anchor also needs `pip install asn1crypto`).
 
 ## The measurement board
 
-The CIBOLA measurement **board** (the body's record of what it measured) is a
+The DORADO measurement **board** (the body's record of what it measured) is a
 content-addressed, append-only registry at `board/board-index.json` — fetch it as
-`https://csoai-org.github.io/cibola/board/board-index.json`. It is a MEASUREMENT
+`https://csoai-org.github.io/dorado/board/board-index.json`. It is a MEASUREMENT
 registry, not a rank table. Each entry records a signed card's content hash,
 registry, subject, measured/total, kid, receipt content_id, anchor time, and
 provision-axis count, with `chainOk` / `linked` diagnostics.
 
 ```bash
-cibola publish --card card.json [--receipt r.json] [--anchor a.json]   # append (dedupe)
-cibola board [--json]                                                 # show the index
+dorado publish --card card.json [--receipt r.json] [--anchor a.json]   # append (dedupe)
+dorado board [--json]                                                 # show the index
 ```
 
 ## Verification (free, public)
 
-- `cibola verify` → checks the Ed25519 signature (tamper-detect) + optional identity pinning.
-- `cibola verify-receipt` → checks content_id + binds the receipt to a specific card.
-- `cibola verify-anchor` → checks the RFC 3161 TSA MessageImprint matches this card's digest (external time-binding).
+- `dorado verify` → checks the Ed25519 signature (tamper-detect) + optional identity pinning.
+- `dorado verify-receipt` → checks content_id + binds the receipt to a specific card.
+- `dorado verify-anchor` → checks the RFC 3161 TSA MessageImprint matches this card's digest (external time-binding).
 
 ## A2A agents
 
-See `agent/agent.json` (A2A agent card) and `a2a.md` for the exact contract. An agent calls `cibola.verify*` tools to independently check a measurement — it never has to trust a self-reported number.
+See `agent/agent.json` (A2A agent card) and `a2a.md` for the exact contract. An agent calls `dorado.verify*` tools to independently check a measurement — it never has to trust a self-reported number.
 
 ## Files
 

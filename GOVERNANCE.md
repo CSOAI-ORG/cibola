@@ -1,7 +1,7 @@
-# CIBOLA — GOVERNANCE.md
+# DORADO — GOVERNANCE.md
 
-## What CIBOLA is
-CIBOLA is an independent AI-governance **measurement** body — the signed score layer
+## What DORADO is
+DORADO is an independent AI-governance **measurement** body — the signed score layer
 over the RFC 9943/9942 substrate. It produces **measurement credentials**, never
 certification. A measurement card is evidence of what was measured and when; it is
 not a certification, endorsement, or conformity mark.
@@ -56,7 +56,7 @@ what keeps measurement neutral and data genuine.
 ## The vertical verifies every domain (sign-all guarantee)
 The measurement engine is a **vertical** — the same deterministic judge, the same
 COSE_Sign1 card, the same SCITT receipt, the same RFC 3161 anchor — applied
-across every horizontal market domain. CIBOLA does not have a different engine
+across every horizontal market domain. DORADO does not have a different engine
 per market; it has one engine and a domain axis-registry per market:
 
 | Domain | Registry | State |

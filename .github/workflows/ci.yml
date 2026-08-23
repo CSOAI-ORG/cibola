@@ -1,4 +1,4 @@
-name: CIBOLA CI
+name: DORADO CI
 
 on:
   push:
@@ -48,15 +48,15 @@ jobs:
           fake = {'model':'t','n':16,'ok':9,'accuracy':0.562,'measured':16,'total':16,'ts':'2026-08-23T00:00:00Z',
                   'per_axis':[{'axis':a['slug'],'gold':a['gold'],'verdict':'PASS' if i<9 else 'FAIL','resp':'x','measured':True} for i,a in enumerate(axes)]}
           card = rax.as_card(fake, {'id':'t','name':'T','digest':'x'})
-          assert card['schema'] == 'https://cibola.dev/schemas/measurement-card.schema.json'
+          assert card['schema'] == 'https://dorado.dev/schemas/measurement-card.schema.json'
           assert len(card['scores']) == 16
           print('HARNESS CI: PASS — card shape valid, 16 scores')
           "
 
       - name: CLI smoke — axes + selfcheck
         run: |
-          python3 cli/cibola.py axes >/dev/null
-          python3 cli/cibola.py selfcheck >/dev/null
+          python3 cli/dorado.py axes >/dev/null
+          python3 cli/dorado.py selfcheck >/dev/null
           echo "CLI CI: PASS"
 
       # Signing pod + stranger verifier + data exporter, all hermetic w/ an
@@ -68,8 +68,8 @@ jobs:
           sys.path.insert(0, os.path.join(os.getcwd(), 'engine'))
           from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
           from cryptography.hazmat.primitives import serialization
-          from cibola_sign import sign as sign_card
-          from cibola_verify import verify_card
+          from dorado_sign import sign as sign_card
+          from dorado_verify import verify_card
           axes = json.load(open('axes/gspc-16.json'))['axes']
           # build a synthetic axis result + card
           sys.path.insert(0, os.path.join(os.getcwd(), 'harness'))
@@ -91,10 +91,10 @@ jobs:
           assert len(d['qa'])==16 and len(d['preference_pairs'])==16
           assert all('not a certification' in json.dumps(r['provenance']) for r in d['preference_pairs'])
           # SCITT receipt (RFC 9943) roundtrip + card-bind + tamper-detect
-          from cibola_receipt import build_card_receipt
-          from cibola_receipt_verify import verify_receipt
+          from dorado_receipt import build_card_receipt
+          from dorado_receipt_verify import verify_receipt
           import hashlib as _hl
-          from cibola_sign import canonical as card_canonical
+          from dorado_sign import canonical as card_canonical
           rcp = build_card_receipt(card, private_key=key, kid='did:web:csoai.org#card-attestation-1')
           assert verify_receipt(rcp)['ok'], verify_receipt(rcp)['reason']
           assert rcp['subject_content_sha256'] == _hl.sha256(card_canonical(card)).hexdigest()
@@ -103,8 +103,8 @@ jobs:
           tr = json.loads(json.dumps(rcp)); tr['claims'][0]['detail']='altered'
           assert not verify_receipt(tr)['ok']  # tamper rejected
           # anchor shape (hermetic) + license manifest shape
-          from cibola_anchor import card_digest
-          from cibola_anchor_verify import verify_anchor
+          from dorado_anchor import card_digest
+          from dorado_anchor_verify import verify_anchor
           dig = card_digest(card)
           fa = {"schema":"csoai.card-anchor/0.1","card_content_sha256":dig,
                 "anchors":[{"kind":"tsa-rfc3161","digest_sha256":dig,"message_imprint_matches":True,"gen_time":"2026-08-23T00:00:00Z"},
@@ -150,17 +150,17 @@ jobs:
           sys.path.insert(0, _os.path.join(os.getcwd(),'agent'))
           from mcp_server import dispatch
           disp_card = signed  # already-signed card from earlier in the CI step
-          assert 'ok' in dispatch('cibola.verify', {'card': disp_card})
-          assert set(dispatch('cibola.listDomains', {})['domains']) >= set(dnames)
-          assert len(dispatch('cibola.crosswalk', {'domain':'cross-border'}))==6
-          assert 'error' in dispatch('cibola.nope', {})
+          assert 'ok' in dispatch('dorado.verify', {'card': disp_card})
+          assert set(dispatch('dorado.listDomains', {})['domains']) >= set(dnames)
+          assert len(dispatch('dorado.crosswalk', {'domain':'cross-border'}))==6
+          assert 'error' in dispatch('dorado.nope', {})
           # A2A client full-chain audit (spawns mcp_server as subprocess; hermetic)
           sys.path.insert(0, _os.path.join(os.getcwd(),'agent'))
-          from cibola_a2a_client import audit as _audit
+          from dorado_a2a_client import audit as _audit
           import tempfile as _tmp
           _td = _tmp.mkdtemp()
-          from cibola_receipt import build_card_receipt as _bcr
-          from cibola_anchor import card_digest as _cd
+          from dorado_receipt import build_card_receipt as _bcr
+          from dorado_anchor import card_digest as _cd
           _sc2 = sign_card(card, key, kid='did:web:csoai.org#card-attestation-1', allow_test_identity=True)
           _rc2 = _bcr(_sc2, private_key=key, kid='did:web:csoai.org#card-attestation-1')
           _an2 = {"schema":"csoai.card-anchor/0.1","card_content_sha256":_cd(_sc2),
@@ -174,8 +174,8 @@ jobs:
           # measurement board: content-address = digest, refuses unsigned, chain OK
           import tempfile as _tmpb
           _bd2 = _tmpb.mkdtemp()
-          _prior = _os.environ.get('CIBOLA_BOARD_DIR'); _os.environ['CIBOLA_BOARD_DIR']=_bd2
-          from harness.cibola_board import publish as _bp, rebuild_index as _bi, _card_hash as _bh
+          _prior = _os.environ.get('DORADO_BOARD_DIR'); _os.environ['DORADO_BOARD_DIR']=_bd2
+          from harness.dorado_board import publish as _bp, rebuild_index as _bi, _card_hash as _bh
           try:
               _bp(card)  # card is unsigned -> refuse
               raise SystemExit('board should refuse unsigned')
@@ -188,8 +188,8 @@ jobs:
           _ib = _bi()
           assert _ib['count'] >= 1 and _ib['chainOk']
           if _prior:
-              _os.environ['CIBOLA_BOARD_DIR']=_prior
+              _os.environ['DORADO_BOARD_DIR']=_prior
           else:
-              _os.environ.pop('CIBOLA_BOARD_DIR',None)
+              _os.environ.pop('DORADO_BOARD_DIR',None)
           print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK-MCP-A2A-CLIENT-BOARD CI: PASS')
           PYEOF

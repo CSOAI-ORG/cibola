@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cibola.dev/schemas/measurement-card.schema.json",
-  "title": "CIBOLA Measurement Card",
-  "description": "Signed measurement credential v0.1 — the CIBOLA score layer over the RFC 9943 substrate. A measurement, NOT a certification. Every number recomputable from published rows.",
+  "$id": "https://dorado.dev/schemas/measurement-card.schema.json",
+  "title": "DORADO Measurement Card",
+  "description": "Signed measurement credential v0.1 — the DORADO score layer over the RFC 9943 substrate. A measurement, NOT a certification. Every number recomputable from published rows.",
   "version": "0.1.0",
   "type": "object",
   "required": [
@@ -12,7 +12,7 @@
   "properties": {
     "schema": {
       "type": "string",
-      "const": "https://cibola.dev/schemas/measurement-card.schema.json"
+      "const": "https://dorado.dev/schemas/measurement-card.schema.json"
     },
     "card_version": { "type": "string", "const": "0.1.0" },
     "subject": {
@@ -61,7 +61,7 @@
       }
     },
     "measured_count": { "type": "integer", "description": "Number of axes actually measured (of total_count)" },
-    "total_count": { "type": "integer", "description": "Total canonical axes (CIBOLA canon = 14; '13 measured of 14' grammar)" },
+    "total_count": { "type": "integer", "description": "Total canonical axes (DORADO canon = 14; '13 measured of 14' grammar)" },
     "exclusion_manifest": {
       "type": "object",
       "description": "Which axes are excluded and why — the completeness grammar (e.g. human-baseline DPIA-gated).",

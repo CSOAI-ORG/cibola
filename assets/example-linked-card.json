@@ -1,5 +1,5 @@
 {
-  "schema": "https://cibola.dev/schemas/measurement-card.schema.json",
+  "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
   "card_version": "0.1.0",
   "subject": {
     "id": "demo",

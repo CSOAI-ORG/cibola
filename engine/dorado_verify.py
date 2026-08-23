@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cibola_verify.py — STRANGER verifier for CIBOLA measurement cards.
+"""dorado_verify.py — STRANGER verifier for DORADO measurement cards.
 
 A stranger verifies a signed card with ONLY:
   1. the card itself (embeds signature.pubkey + sig), and
@@ -9,7 +9,7 @@ No signing key, no pod, no network. Optional: pass the expected public key /
 did:web key so the kid and thumbprint must ALSO match the published identity.
 
 Usage:
-    python3 cibola_verify.py <card.json> [expected_pubkey_b64]
+    python3 dorado_verify.py <card.json> [expected_pubkey_b64]
 
 Prints VALID (exit 0) or INVALID (exit 1). Never trusts the card's self-asserted
 identity unless a reference pubkey is supplied.
@@ -20,7 +20,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from cibola_sign import canonical, rfc9679_thumbprint  # same canonical form
+from dorado_sign import canonical, rfc9679_thumbprint  # same canonical form
 
 
 def verify_card(card: dict, expected_pubkey_b64: str | None = None) -> dict:
@@ -49,7 +49,7 @@ def verify_card(card: dict, expected_pubkey_b64: str | None = None) -> dict:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        sys.exit("usage: python3 cibola_verify.py <card.json> [expected_pubkey_b64]")
+        sys.exit("usage: python3 dorado_verify.py <card.json> [expected_pubkey_b64]")
     card = json.load(open(sys.argv[1]))
     res = verify_card(card, sys.argv[2] if len(sys.argv) > 2 else None)
     print(f"{res['reason']}" + (f" (kid={res.get('kid')})" if res.get("kid") else ""))

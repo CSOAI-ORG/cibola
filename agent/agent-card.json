@@ -1,11 +1,11 @@
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "CIBOLA",
+  "name": "DORADO",
   "alternateName": "Council of AI measurement body",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web, MCP, CLI, Python",
-  "url": "https://github.com/CSOAI-ORG/cibola",
+  "url": "https://github.com/CSOAI-ORG/dorado",
   "description": "Independent AI-governance MEASUREMENT body. Signed measurement cards over the RFC 9943 substrate. A measurement credential is NOT a certification, endorsement or conformity mark.",
   "provider": {
     "@type": "Organization",
@@ -13,14 +13,14 @@
     "url": "https://councilof.ai"
   },
   "featureList": [
-    "cibola.measure (deterministic GSPC judge, no LLM judges another LLM)",
-    "cibola.verify (stranger-verify a signed card with the public key only)",
-    "cibola.verify-receipt (SCITT RFC 9943 receipt + card content-id binding)",
-    "cibola.verify-anchor (RFC 3161 external time-anchor)",
-    "cibola.crosswalk (domain -> provision citation map)",
-    "cibola.domains (bond/bank/insurance/equity/index/cross-border axis registries)",
-    "cibola.export (licensable data product; neutral, never the score)",
-    "cibola.license (signed data-license manifest, never from the scored)"
+    "dorado.measure (deterministic GSPC judge, no LLM judges another LLM)",
+    "dorado.verify (stranger-verify a signed card with the public key only)",
+    "dorado.verify-receipt (SCITT RFC 9943 receipt + card content-id binding)",
+    "dorado.verify-anchor (RFC 3161 external time-anchor)",
+    "dorado.crosswalk (domain -> provision citation map)",
+    "dorado.domains (bond/bank/insurance/equity/index/cross-border axis registries)",
+    "dorado.export (licensable data product; neutral, never the score)",
+    "dorado.license (signed data-license manifest, never from the scored)"
   ],
   "offers": [
     {"@type": "Offer", "name": "Verified-measurement subscription", "price": "0", "priceCurrency": "GBP", "description": "Public measurement verification is free; subscribe for continuous domain-specific rankings."},

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cibola_a2a_client.py — a real A2A client that performs an audit round-trip.
+"""dorado_a2a_client.py — a real A2A client that performs an audit round-trip.
 
 Speaks the same JSON-RPC 2.0 stdio protocol as agent/mcp_server.py (MCP-style
 tools/list + tools/call), spawning the server as a subprocess, and runs the full
@@ -10,7 +10,7 @@ No third-party deps. This is the machine-facing proof that an A2A agent can
 independently verify a measurement (never trust a self-reported number).
 
 Usage:
-    python3 agent/cibola_a2a_client.py \
+    python3 agent/dorado_a2a_client.py \
         --card card.json [--receipt receipt.json] [--anchor anchor.json] \
         [--pubkey <b64>] [--server agent/mcp_server.py]
 """
@@ -29,7 +29,7 @@ class A2AClient:
         self.proc = subprocess.Popen([sys.executable, server], stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         self._send({"jsonrpc": "2.0", "id": 0, "method": "initialize",
-                    "params": {"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "cibola-a2a", "version": "1.0"}}})
+                    "params": {"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "dorado-a2a", "version": "1.0"}}})
         self._recv()
 
     def _send(self, obj):
@@ -76,18 +76,18 @@ def audit(card_path: str, receipt_path: str | None = None, anchor_path: str | No
               .rsplit(" ", 1)[-1]}
     try:
         report["server_tools"] = client.list_tools()
-        v = client.call("cibola.verify", {"card": card, **({"pubkey": pubkey} if pubkey else {})})
-        report["steps"].append({"tool": "cibola.verify", "ok": bool(v.get("ok")), "detail": v.get("reason", str(v))})
+        v = client.call("dorado.verify", {"card": card, **({"pubkey": pubkey} if pubkey else {})})
+        report["steps"].append({"tool": "dorado.verify", "ok": bool(v.get("ok")), "detail": v.get("reason", str(v))})
         if receipt_path:
             receipt = json.load(open(receipt_path))
-            vr = client.call("cibola.verifyReceipt", {"receipt": receipt, "card": card})
-            report["steps"].append({"tool": "cibola.verifyReceipt", "ok": bool(vr.get("ok")), "detail": vr.get("reason", str(vr))})
+            vr = client.call("dorado.verifyReceipt", {"receipt": receipt, "card": card})
+            report["steps"].append({"tool": "dorado.verifyReceipt", "ok": bool(vr.get("ok")), "detail": vr.get("reason", str(vr))})
         if anchor_path:
             anchor = json.load(open(anchor_path))
-            va = client.call("cibola.verifyAnchor", {"anchor": anchor, "card": card})
-            report["steps"].append({"tool": "cibola.verifyAnchor", "ok": bool(va.get("ok")), "detail": va.get("reason", str(va))})
+            va = client.call("dorado.verifyAnchor", {"anchor": anchor, "card": card})
+            report["steps"].append({"tool": "dorado.verifyAnchor", "ok": bool(va.get("ok")), "detail": va.get("reason", str(va))})
         # crosswalk (informational, not a gate)
-        cw = client.call("cibola.crosswalk", {"domain": card.get("benchmark", {}).get("id", "").split("/")[1] if "/" in card.get("benchmark", {}).get("id", "") else None})
+        cw = client.call("dorado.crosswalk", {"domain": card.get("benchmark", {}).get("id", "").split("/")[1] if "/" in card.get("benchmark", {}).get("id", "") else None})
         if isinstance(cw, dict) and any(k for k in cw):
             report["crosswalk_axes"] = len(cw)
         report["ok"] = all(s["ok"] for s in report["steps"])
@@ -98,7 +98,7 @@ def audit(card_path: str, receipt_path: str | None = None, anchor_path: str | No
 
 def main() -> int:
     import argparse
-    ap = argparse.ArgumentParser(description="A2A audit round-trip against the CIBOLA MCP server.")
+    ap = argparse.ArgumentParser(description="A2A audit round-trip against the DORADO MCP server.")
     ap.add_argument("--card", required=True)
     ap.add_argument("--receipt", default=None)
     ap.add_argument("--anchor", default=None)
