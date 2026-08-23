@@ -4,3 +4,5 @@
 {"ts":"2026-08-23T16:57:55.335029+00:00","model":"qwen3:4b-8k","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":457888.2,"in_tok":41,"out_tok":64,"tok_s":0.2,"cost_usd":9.3e-05}
 {"ts":"2026-08-23T17:01:00.442278+00:00","model":"deepseek-r1:7b","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":707825.6,"in_tok":50,"out_tok":16,"tok_s":0.1,"cost_usd":3.9e-05}
 {"ts":"2026-08-23T17:12:14.216210+00:00","model":"deepseek-r1:7b","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":672833.4,"in_tok":50,"out_tok":16,"tok_s":0.1,"cost_usd":3.9e-05}
+{"ts":"2026-08-23T17:19:34.007648+00:00","model":"deepseek-r1:7b","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":438953.7,"in_tok":92,"out_tok":64,"tok_s":0.4,"cost_usd":0.000114}
+{"ts":"2026-08-23T17:28:09.410263+00:00","model":"deepseek-r1:7b","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":513081.2,"in_tok":78,"out_tok":48,"tok_s":0.2,"cost_usd":8.9e-05}
