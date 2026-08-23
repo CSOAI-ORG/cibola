@@ -219,6 +219,11 @@ check(dispatch("dorado.listDomains", {})["domains"] == domain_files, "MCP listDo
 check(len(dispatch("dorado.crosswalk", {"domain": "cross-border"})) == 6, "MCP crosswalk returns 6 axes")
 check("error" in dispatch("dorado.nope", {}), "MCP unknown tool returns error")
 check("count" in dispatch("dorado.board", {}), "MCP board tool returns index")
+# new MCP tools (elo, compare, telemetry)
+_e = dispatch("dorado.elo", {"pairs": [["A","B",1.0],["A","B",1.0],["B","A",0.0]], "n_min": 1})
+check(isinstance(_e.get("board"), list) and len(_e["board"]) >= 2, "MCP elo returns a ranked board")
+check("model_a" in dispatch("dorado.compare", {"model_a":"A","model_b":"B"}), "MCP compare returns model pair")
+check("records" in dispatch("dorado.telemetry", {}), "MCP telemetry returns record count")
 
 # A2A client module imports + audit() shape (hermetic: no server spawn, no network)
 sys.path.insert(0, agent_dir)

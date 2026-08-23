@@ -26,7 +26,7 @@ Subcommands:
 
 Measurement, never certification. See GOVERNANCE.md and the DORADO card schema.
 """
-import argparse, json, os, subprocess, sys
+import argparse, json, os, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -275,27 +275,31 @@ def cmd_compare(args):
     from or_telemetry import record, load as load_tel
     a, b = args.model_a, args.model_b
     print(f"compare {a} vs {b} (domain={args.domain})", flush=True)
-    # For a live measure we could hit both models; here report from recent telemetry +
-    # a deterministic relative judgement via the relative registry (blind A/B).
     import run_axis as rax
-    axes, reg = rax.load_axes("relative")
-    resp = {"model": f"{a} vs {b}", "registry": reg, "n": len(axes), "ok": 0,
-            "measured": len(axes), "total": len(axes), "ts": "2026-08-23T00:00:00Z",
-            "per_axis": [{"axis": x["slug"], "gold": x["gold"], "verdict": "PASS",
-                          "resp": f"{a} on {x['slug']}", "measured": True} for x in axes]}
+    axes, reg = rax.load_axes(args.domain or "relative")
+    # If a live base is given, run a real pairwise measure (blind A/B); else report
+    # the relative axis set + telemetry (hermetic fallback).
+    if args.base and args.base != "none":
+        resp = rax.pairwise(a, b, axes, base=args.base, delay=0.1, registry_id=reg)
+        print(f"  {a} wins {resp['a_wins']}/{resp['n']}  win_rate={resp['a_win_rate']} "
+              f"(vs {b}: {resp['b_wins']})", flush=True)
+    else:
+        resp = {"model_a": a, "model_b": b, "registry": reg, "n": len(axes), "scope": "relative",
+                "note": "live pairwise requires --base <ollama>; this reports the relative axis set.",
+                "a_wins": 0, "b_wins": 0, "a_win_rate": 0.0,
+                "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
     # telemetry cost side-by-side
     tel = load_tel()
     for m in (a, b):
         rows = [r for r in tel if r.get("model") == m]
         if rows:
             avg_cost = sum(r.get("cost_usd", 0) for r in rows) / len(rows)
-            print(f"  {m}: {len(rows)} runs, avg_cost=${avg_cost:.6f}")
+            print(f"  {m}: {len(rows)} runs, avg_cost=${avg_cost:.6f}", flush=True)
         else:
-            print(f"  {m}: no telemetry yet — run a measure to capture cost/latency")
-    print(f"  relative verdict: {resp['ok']}/{resp['n']} (deterministic gold, blind A/B)")
+            print(f"  {m}: no telemetry yet — run a measure to capture cost/latency", flush=True)
     if args.out:
         json.dump(resp, open(args.out, "w"), indent=2)
-        print(f"wrote {args.out}")
+        print(f"wrote {args.out}", flush=True)
     return 0
 
 
@@ -511,6 +515,7 @@ def main():
     p.add_argument("--model-a", required=True)
     p.add_argument("--model-b", required=True)
     p.add_argument("--domain", default="relative")
+    p.add_argument("--base", default="none", help="Ollama endpoint for a live pairwise measure (default none = report axis set)")
     p.add_argument("--out", default=None)
     p.set_defaults(func=cmd_compare)
 

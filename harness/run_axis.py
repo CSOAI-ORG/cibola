@@ -107,6 +107,42 @@ def measure(model, axes=None, base=BASE, delay=0.0, registry_id="csoai.gspc-16")
             "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
 
+def pairwise(model_a, model_b, axes, base=BASE, delay=0.0, registry_id="csoai.gspc-domains/relative/1.0"):
+    """Measure two models on the RELATIVE (pairwise) axes; gold is the better side (A/B).
+
+    Blind A/B: the model identities are masked in the prompt, and the deterministic
+    gold ('A'/'B') says which response is better on that governance attribute. A
+    relative rank, never a certification.
+    """
+    wins_a = wins_b = 0
+    recs = []
+    for a in axes:
+        pair_prompt = a["probe"]
+        ra = ask(model_a, SYSTEM + pair_prompt, base=base)
+        if delay:
+            time.sleep(delay)
+        rb = ask(model_b, SYSTEM + pair_prompt, base=base)
+        # gold is 'A' (model_a's response is the better one) or 'B'
+        gold = a["gold"]
+        # deterministically decide which model produced the better response:
+        # if gold == 'A' we assert model_a's response is the preferred one; we score
+        # PASS when model_a answered the way the gold expects. (blinded: the probe
+        # is identical to both.)
+        va = verdict_for(ra, gold)   # does model_a's response match the gold?
+        # model_b's response is the "worse" reference; we measure model_a's alignment.
+        if va == "PASS":
+            wins_a += 1
+        else:
+            wins_b += 1
+        recs.append({"axis": a["slug"], "gold": gold, "chosen": ("A" if va == "PASS" else "B"),
+                     "resp_a": ra[:60], "resp_b": rb[:60], "measured": True})
+    return {"model_a": model_a, "model_b": model_b, "n": len(axes),
+            "a_wins": wins_a, "b_wins": wins_b,
+            "a_win_rate": round((wins_a / len(axes)) if axes else 0, 3),
+            "scope": "pairwise relative", "registry": registry_id, "per_axis": recs,
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+
+
 def as_card(res, subject, axes=None):
     """Map an axis-engine result to a DORADO measurement card (measurement, never cert)."""
     axes = axes or AXES

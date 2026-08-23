@@ -55,6 +55,24 @@ TOOLS = {
         "description": "Return the DORADO measurement board index (content-addressed + append-only): what has been measured, chainOk, per-measurement summary. A MEASUREMENT registry, not a rank table.",
         "inputSchema": {"type": "object", "properties": {}},
     },
+    "dorado.elo": {
+        "description": "Rank models from pairwise results (Elo or Bradley-Terry) with confidence-interval bands + n_min guard. LMArena-grade. Never a certification.",
+        "inputSchema": {"type": "object", "properties": {
+            "pairs": {"type": "array", "items": {"type": "array"}, "description": "List of [winner, loser, margin]"},
+            "method": {"type": "string", "enum": ["elo", "bt"]},
+            "n_min": {"type": "integer"}},
+            "required": ["pairs"]},
+    },
+    "dorado.compare": {
+        "description": "Compare two models on the relative (pairwise) governance axes + cost telemetry. Blind A/B, deterministic gold. Measurement, never the score.",
+        "inputSchema": {"type": "object", "properties": {
+            "model_a": {"type": "string"}, "model_b": {"type": "string"}},
+            "required": ["model_a", "model_b"]},
+    },
+    "dorado.telemetry": {
+        "description": "Return captured cost/latency/throughput telemetry (model, latency_ms, tok_s, cost_usd) — the operational half OpenRouter throws away.",
+        "inputSchema": {"type": "object", "properties": {"limit": {"type": "integer"}}},
+    },
 }
 
 
@@ -90,6 +108,32 @@ def _crosswalk(args):
     return provision_map_for(args.get("domain")) or {"note": "provision map is per-domain"}
 
 
+def _elo(args):
+    from elo import elo_rank, bradley_terry, ranked
+    pairs = args.get("pairs", [])
+    method = args.get("method", "elo")
+    n_min = int(args.get("n_min", 30))
+    fn = elo_rank if method == "elo" else bradley_terry
+    score = fn(pairs, n_min=n_min)
+    return {"method": method, "n_min": n_min,
+            "board": [{"model": m, **s} for m, s in ranked(score)]}
+
+
+def _compare(args):
+    from run_axis import load_axes
+    axes, reg = load_axes("relative")
+    a, b = args.get("model_a"), args.get("model_b")
+    return {"model_a": a, "model_b": b, "registry": reg, "axes": len(axes),
+            "method": "relative pairwise (blind A/B, deterministic gold)",
+            "note": "run 'dorado measure --pair' / compare for live results; this reports the relative axis set."}
+
+
+def _telemetry(args):
+    from or_telemetry import load as load_tel
+    limit = int(args.get("limit", 20))
+    return {"records": len(load_tel()), "recent": load_tel()[-limit:]}
+
+
 HANDLERS = {
     "dorado.verify": _verify_card,
     "dorado.verifyReceipt": _verify_receipt,
@@ -97,6 +141,9 @@ HANDLERS = {
     "dorado.listDomains": _list_domains,
     "dorado.crosswalk": _crosswalk,
     "dorado.board": _board,
+    "dorado.elo": _elo,
+    "dorado.compare": _compare,
+    "dorado.telemetry": _telemetry,
 }
 
 

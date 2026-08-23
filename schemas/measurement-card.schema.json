@@ -81,6 +81,30 @@
         "replay_merkle_root": { "type": "string", "description": "Replay-committed; traces kept off-card" }
       }
     },
+    "operational": {
+      "type": "object",
+      "description": "OPTIONAL OpenRouter-style operational half: cost/latency/throughput/availability for the measured run. Keeps the trace OpenRouter (a stateless pipe) throws away; a vendor can license it, never the score.",
+      "properties": {
+        "cost_usd": { "type": "number", "description": "USD cost for the run (prompt+completion tokens x list price)" },
+        "latency_p50_ms": { "type": "number" },
+        "latency_p95_ms": { "type": "number" },
+        "throughput_tok_s": { "type": "number" },
+        "availability": { "type": "number", "description": "Fraction of probes that completed without error (0..1)" },
+        "context_window": { "type": "integer" },
+        "provider": { "type": "string", "description": "provider id that served the run (OpenRouter top_provider or pod)" }
+      }
+    },
+    "relative": {
+      "type": "object",
+      "description": "OPTIONAL LMArena-style relative rank: Elo/Bradley-Terry rating + confidence band + n for this subject against a pairwise pool. A rank, never a certification.",
+      "properties": {
+        "rating": { "type": "number" },
+        "rating_band": { "type": "array", "items": { "type": "number" } },
+        "method": { "type": "string", "enum": ["elo", "bt"] },
+        "n": { "type": "integer" },
+        "ci_ok": { "type": "boolean", "description": "n >= min for a quotable rank" }
+      }
+    },
     "issued_at": { "type": "string", "format": "date-time" },
     "credential_register": {
       "type": "string",
