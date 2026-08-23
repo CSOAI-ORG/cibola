@@ -142,6 +142,12 @@ def cmd_sign(args):
     elif args.key_file:
         os.environ["DORADO_SIGNING_KEY_FILE"] = args.key_file
         key = _load_signing_key()
+    elif args.allow_test_identity and not os.environ.get("DORADO_SIGNING_KEY_FILE"):
+        # No pod key on this surface, but the caller explicitly allowed a test identity:
+        # generate a throwaway ephemeral key (stored nowhere) so the full chain can run.
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        key = Ed25519PrivateKey.generate()
+        _test_key_seed()  # no-op marker for clarity
     else:
         key = _load_signing_key()
     if is_signed(card):
@@ -156,6 +162,11 @@ def cmd_sign(args):
     assert is_signed(signed)
     print(f"SIGNED (alg={signed['signature']['alg']}, kid={signed['signature']['kid']}, "
           f"thumb={signed['signature']['pubkey_thumbprint'][:10]}...)", flush=True)
+
+
+def _test_key_seed():
+    """Intentional no-op marker: a test-identity key is ephemeral (never persisted)."""
+    pass
 
 
 def _load_signing_key_from_pem(path):
