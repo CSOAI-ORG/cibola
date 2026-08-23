@@ -98,5 +98,20 @@ jobs:
           assert not verify_receipt(rcp, bad)['ok']  # receipt must not attest to a different card
           tr = json.loads(json.dumps(rcp)); tr['claims'][0]['detail']='altered'
           assert not verify_receipt(tr)['ok']  # tamper rejected
-          print('SIGN-VERIFY-EXPORT-RECEIPT CI: PASS — card+receipt verify, both tamper-rejected')
+          # anchor shape (hermetic) + license manifest shape
+          from cibola_anchor import card_digest
+          from cibola_anchor_verify import verify_anchor
+          dig = card_digest(card)
+          fa = {"schema":"csoai.card-anchor/0.1","card_content_sha256":dig,
+                "anchors":[{"kind":"tsa-rfc3161","digest_sha256":dig,"message_imprint_matches":True,"gen_time":"2026-08-23T00:00:00Z"},
+                           {"kind":"rekor-transparency-log","recorded":False,"optional":True}]}
+          assert verify_anchor(fa, card)['ok']
+          wl = json.loads(json.dumps(fa)); wl['card_content_sha256']='deadbeef'
+          assert not verify_anchor(wl, card)['ok']
+          lp = {"schema":"csoai.data-license/0.1","licensee":"X","dataset_id":"d","term_months":12,
+                "price_gbp":5000,"bound_card_content_sha256":dig,
+                "neutrality":"licenses the measured data, never the score",
+                "register":"This data is derived from a measurement. It is not a certification, endorsement, or conformity mark, and must not be presented as one.","signature":None}
+          assert lp['schema']=="csoai.data-license/0.1" and "never the score" in lp['neutrality']
+          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE CI: PASS — card+receipt verify, tamper-rejected, anchor/license shapes valid')
           PYEOF

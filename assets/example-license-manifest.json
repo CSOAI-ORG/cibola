@@ -1,0 +1,21 @@
+{
+  "schema": "csoai.data-license/0.1",
+  "kind": "data license \u2014 measures a dataset, never the score",
+  "licensee": "Example Enterprise GmbH",
+  "dataset_id": "csoai.bench-data/0.1:qwen2.5-3b",
+  "term_months": 12,
+  "price_gbp": 5000,
+  "scope": "single-company internal evaluation + training; citation required",
+  "bound_card_content_sha256": "580026d537d85d1482deeae6e6a9fcd4a18a86c2c1684d4a3f4d58bb49911da4",
+  "issued_at": "2026-08-23T05:19:38.575444+00:00",
+  "neutrality": "licenses the measured data, never the score. A vendor can buy the data; a vendor can never buy the score.",
+  "register": "This data is derived from a measurement. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+  "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "pubkey": "K899rUHF00bKwxc7zrO3OPLiv9w7LxDIAlTbae0EtOY=",
+    "sig": "zW90m25I7rBc18B5OjMtPo5X1Bt5qqFOQit21mIG8fat7w08Qii6bs1EsxTZ32TsCpcKZDAghq+iuzrAlp+PDA==",
+    "pubkey_thumbprint": "VEYV7ak8tLPjNC_CgWNsNiKxyAa_6_obmhKPDBF8jlU",
+    "kid": "did:web:csoai.org#card-attestation-1"
+  }
+}

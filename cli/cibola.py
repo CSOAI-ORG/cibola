@@ -8,6 +8,9 @@ Subcommands:
   receipt   Build an SCITT receipt (RFC 9943, a2a.signed-receipt/0.1) binding a card
   verify    Stranger-verify a signed card with the public key only
   verify-receipt  Stranger-verify an SCITT receipt (optionally against a card)
+  anchor    Anchor a signed card to external time (RFC 3161 TSR) + optional Rekor log
+  verify-anchor  Verify a card anchor (TSA imprint match + digest binding)
+  license   Generate a signed data-license manifest (mechanism; binding only w/ Nick)
   export    Turn an axis-engine result into the licensable data product (Q/A + pairs + incidents)
   selfcheck Run the hermetic deterministic test battery (no network)
 
@@ -171,6 +174,77 @@ def cmd_verify_receipt(args):
     return 0 if res["ok"] else 1
 
 
+def cmd_anchor(args):
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from cibola_anchor import anchor_card
+    card = json.load(open(args.card))
+    a = anchor_card(card, tsa_url=args.tsa, do_rekor=not args.no_rekor)
+    for an in a["anchors"]:
+        if an["kind"] == "tsa-rfc3161":
+            print(f"  TSA: gen_time={an['gen_time']} imprint_matches={an['message_imprint_matches']}", flush=True)
+        else:
+            print(f"  Rekor: recorded={an.get('recorded')} log_index={an.get('log_index')} err={an.get('error','')[:50]}", flush=True)
+    json.dump(a, open(args.out, "w"), indent=2)
+    print(f"wrote {args.out} (digest {a['card_content_sha256'][:12]}…)", flush=True)
+    return a
+
+
+def cmd_verify_anchor(args):
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from cibola_anchor_verify import verify_anchor
+    anchor = json.load(open(args.anchor))
+    card = json.load(open(args.card))
+    res = verify_anchor(anchor, card)
+    print(res["reason"], flush=True)
+    for r in res.get("anchors", []):
+        print(f"  {r['kind']:24s} {'OK' if r['ok'] else 'FAIL'}{' (optional)' if r.get('optional') else ''}  {r['detail']}", flush=True)
+    return 0 if res["ok"] else 1
+
+
+def cmd_license(args):
+    import hashlib as _hl
+    from datetime import datetime, timezone
+    manifest = {
+        "schema": "csoai.data-license/0.1",
+        "kind": "data license — measures a dataset, never the score",
+        "licensee": args.licensee,
+        "dataset_id": args.dataset_id,
+        "term_months": args.term_months,
+        "price_gbp": args.price_gbp,
+        "scope": args.scope,
+        "bound_card_content_sha256": args.card_digest,
+        "issued_at": datetime.now(timezone.utc).isoformat(),
+        "neutrality": "licenses the measured data, never the score. A vendor can buy the "
+                      "data; a vendor can never buy the score.",
+        "register": "This data is derived from a measurement. It is not a certification, "
+                    "endorsement, or conformity mark, and must not be presented as one.",
+        "signature": None,
+    }
+    key = None
+    if args.key_file or os.environ.get("CIBOLA_SIGNING_KEY_FILE"):
+        if args.key_file:
+            os.environ["CIBOLA_SIGNING_KEY_FILE"] = args.key_file
+        key = _load_signing_key()
+    if key:
+        # sign the canonical manifest (minus signature) like the card/board signer
+        import sys as _s
+        _s.path.insert(0, os.path.join(ROOT, "engine"))
+        from cibola_sign import canonical, rfc9679_thumbprint
+        from cryptography.hazmat.primitives import serialization as _ser
+        import base64 as _b64
+        pub = key.public_key().public_bytes(encoding=_ser.Encoding.Raw, format=_ser.PublicFormat.Raw)
+        sig = key.sign(canonical(manifest))
+        manifest["signature"] = {"kind": "ed25519", "alg": -19,
+                                 "pubkey": _b64.b64encode(pub).decode(),
+                                 "sig": _b64.b64encode(sig).decode(),
+                                 "pubkey_thumbprint": rfc9679_thumbprint(pub),
+                                 "kid": "did:web:csoai.org#card-attestation-1"}
+    json.dump(manifest, open(args.out, "w"), indent=2)
+    print(f"wrote {args.out} (signed={bool(manifest['signature'])})", flush=True)
+    print(f"  licensee={args.licensee} dataset={args.dataset_id} term={args.term_months}mo price=£{args.price_gbp}", flush=True)
+    return manifest
+
+
 def main():
     ap = argparse.ArgumentParser(description="CIBOLA measurement CLI.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -217,6 +291,29 @@ def main():
     p.add_argument("--receipt", required=True)
     p.add_argument("--card", default=None, help="Card to bind-check the receipt against")
     p.set_defaults(func=cmd_verify_receipt)
+
+    p = sub.add_parser("anchor", help="Anchor a signed card to external time (RFC 3161 TSR)")
+    p.add_argument("--card", required=True)
+    p.add_argument("--tsa", default="https://rfc3161.ai.moda")
+    p.add_argument("--no-rekor", action="store_true", help="Skip the optional Rekor log entry")
+    p.add_argument("--out", required=True)
+    p.set_defaults(func=cmd_anchor)
+
+    p = sub.add_parser("verify-anchor", help="Verify a card anchor (TSA imprint match + digest binding)")
+    p.add_argument("--anchor", required=True)
+    p.add_argument("--card", required=True)
+    p.set_defaults(func=cmd_verify_anchor)
+
+    p = sub.add_parser("license", help="Generate a signed data-license manifest (mechanism)")
+    p.add_argument("--licensee", required=True)
+    p.add_argument("--dataset-id", required=True)
+    p.add_argument("--term-months", type=int, default=12)
+    p.add_argument("--price-gbp", type=int, required=True)
+    p.add_argument("--scope", required=True)
+    p.add_argument("--card-digest", required=True, help="the measured dataset's card content_id")
+    p.add_argument("--key-file", default=None, help="Pod Ed25519 private key (repo never embeds it)")
+    p.add_argument("--out", required=True)
+    p.set_defaults(func=cmd_license)
 
     p = sub.add_parser("export", help="Turn an axis-engine result into the licensable data product")
     p.add_argument("--in", dest="inp", required=True, help="axis-engine result JSON")

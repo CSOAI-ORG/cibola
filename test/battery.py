@@ -133,6 +133,33 @@ check(not rv_mismatch["ok"], "receipt fails against a different card (card-bind)
 tampered_r = json.loads(json.dumps(receipt)); tampered_r["claims"][0]["detail"] = "altered"
 check(not verify_receipt(tampered_r)["ok"], "tampered receipt fails verification")
 
+# --- 9. anchor shape (hermetic: no network; verify TSA-anchor digest binding + manifest license) ---
+# Claim a TSA anchor as if issued, and confirm the verifier binds it to THIS card's digest.
+from engine.cibola_anchor import card_digest
+from engine.cibola_anchor_verify import verify_anchor
+dig = card_digest(card)
+fake_anchor = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": dig,
+               "anchors": [{"kind": "tsa-rfc3161", "digest_sha256": dig,
+                            "message_imprint_matches": True, "gen_time": "2026-08-23T00:00:00Z"},
+                           {"kind": "rekor-transparency-log", "recorded": False, "optional": True}]}
+av = verify_anchor(fake_anchor, card)
+check(av["ok"], f"anchor digest-binding + TSA imprint verified (reason: {av['reason']})")
+# wrong-card anchor must fail digest binding
+wrong_anchor = json.loads(json.dumps(fake_anchor)); wrong_anchor["card_content_sha256"] = "deadbeef"
+check(not verify_anchor(wrong_anchor, card)["ok"], "anchor fails against a different card")
+
+# license manifest shape (mechanism, not a binding deal)
+import hashlib as _hl1
+lp = {"schema": "csoai.data-license/0.1", "licensee": "X", "dataset_id": "d",
+      "term_months": 12, "price_gbp": 5000, "bound_card_content_sha256": dig,
+      "neutrality": "licenses the measured data, never the score",
+      "register": "This data is derived from a measurement. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+      "signature": None}
+check(lp["schema"] == "csoai.data-license/0.1", "license manifest schema")
+check(lp["neutrality"] == "licenses the measured data, never the score", "license neutrality (never the score)")
+check("not a certification" in lp["register"], "license manifest register")
+check(lp["bound_card_content_sha256"] == dig, "license manifest binds the card digest")
+
 print()
 if FAILS:
     print(f"CIBOLA TEST: FAIL ({len(FAILS)})")
