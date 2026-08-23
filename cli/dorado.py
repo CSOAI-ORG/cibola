@@ -522,6 +522,34 @@ def cmd_board(args):
               f"anchor={ (m['anchor_time'] or 'none')[:19]}", flush=True)
 
 
+def cmd_status(args):
+    """Consolidated live-endpoint payload: board + relative + operational + identity."""
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from dorado_board import rebuild_index, load_entries
+    from or_telemetry import load as load_tel
+    board = rebuild_index()
+    status = {
+        "schema": "csoai.dorado-status/0.1",
+        "kind": "measurement body status — a MEASUREMENT summary, never a certification",
+        "register": "This is a measurement credential. It is not a certification, endorsement, "
+                    "or conformity mark, and must not be presented as one.",
+        "identity": "did:web:csoai.org#card-attestation-1",
+        "board": {"count": board.get("count"), "chainOk": board.get("chainOk"),
+                  "linked": board.get("linked"), "measurements": board.get("measurements", [])},
+        "relative": json.load(open(os.path.join(ROOT, "board", "elo.json"))) if
+                    os.path.exists(os.path.join(ROOT, "board", "elo.json")) else None,
+        "operational": {"records": len(load_tel()),
+                        "recent": load_tel()[-10:]},
+    }
+    if args.out:
+        json.dump(status, open(args.out, "w"), indent=2)
+        print(f"wrote {args.out}", flush=True)
+    else:
+        print(json.dumps(status, indent=2), flush=True)
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description="DORADO measurement CLI.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -646,6 +674,10 @@ def main():
     p = sub.add_parser("board", help="Show the DORADO measurement board index")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_board)
+
+    p = sub.add_parser("status", help="Consolidated live-endpoint payload (board + relative + operational + identity)")
+    p.add_argument("--out", default=None, help="Write the status payload to a JSON file")
+    p.set_defaults(func=cmd_status)
 
     p = sub.add_parser("export", help="Turn an axis-engine result into the licensable data product")
     p.add_argument("--in", dest="inp", required=True, help="axis-engine result JSON")
