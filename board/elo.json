@@ -1,0 +1,54 @@
+{
+  "method": "elo",
+  "n_min": 30,
+  "board": [
+    {
+      "model": "qwen3:4b-8k",
+      "rating": 1663.6,
+      "rating_band": [
+        1633.6,
+        1693.6
+      ],
+      "win_rate": 0.85,
+      "win_rate_ci": [
+        0.7559,
+        0.9121
+      ],
+      "n": 80,
+      "games": 80,
+      "ci_ok": true
+    },
+    {
+      "model": "deepseek-r1:7b",
+      "rating": 1461.5,
+      "rating_band": [
+        1431.5,
+        1491.5
+      ],
+      "win_rate": 0.45,
+      "win_rate_ci": [
+        0.3458,
+        0.5588
+      ],
+      "n": 80,
+      "games": 80,
+      "ci_ok": true
+    },
+    {
+      "model": "sov33-unified",
+      "rating": 1375.0,
+      "rating_band": [
+        1345.0,
+        1405.0
+      ],
+      "win_rate": 0.2,
+      "win_rate_ci": [
+        0.127,
+        0.3005
+      ],
+      "n": 80,
+      "games": 80,
+      "ci_ok": true
+    }
+  ]
+}
