@@ -2,3 +2,5 @@
 {"ts":"2026-08-23T16:34:08.949688+00:00","model":"qwen3:4b-8k","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":721028.2,"in_tok":36,"out_tok":0,"tok_s":0.0,"cost_usd":1.4e-05}
 {"ts":"2026-08-23T16:45:12.906785+00:00","model":"qwen3:4b-8k","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":233490.4,"in_tok":43,"out_tok":96,"tok_s":0.6,"cost_usd":0.000132}
 {"ts":"2026-08-23T16:57:55.335029+00:00","model":"qwen3:4b-8k","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":457888.2,"in_tok":41,"out_tok":64,"tok_s":0.2,"cost_usd":9.3e-05}
+{"ts":"2026-08-23T17:01:00.442278+00:00","model":"deepseek-r1:7b","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":707825.6,"in_tok":50,"out_tok":16,"tok_s":0.1,"cost_usd":3.9e-05}
+{"ts":"2026-08-23T17:12:14.216210+00:00","model":"deepseek-r1:7b","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":672833.4,"in_tok":50,"out_tok":16,"tok_s":0.1,"cost_usd":3.9e-05}
