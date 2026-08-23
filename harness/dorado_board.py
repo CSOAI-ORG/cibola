@@ -155,8 +155,39 @@ def rebuild_index() -> dict:
     }
     bdir, ipath = _board_dir(), _index_path()
     os.makedirs(bdir, exist_ok=True)
+    # CLOBBER GUARD: never let a lower-count local regen overwrite the authoritative
+    # committed board record (the pod is the source of truth). The committed index may
+    # be richer than the local measurements.jsonl (e.g. the Mac only has a few local
+    # rows while the pod has the full chain). Refuse to SHRINK an existing index.
+    if os.path.exists(ipath):
+        try:
+            existing = json.load(open(ipath))
+            existing_count = existing.get("count", 0)
+            if len(entries) < existing_count:
+                # keep the richer committed record; merge any genuinely new measurements
+                merged = _merge_unique(existing, entries)
+                if len(merged["measurements"]) != existing_count or not os.environ.get("DORADO_ALLOW_SHRINK"):
+                    json.dump(merged, open(ipath, "w"), indent=2)
+                    return merged
+        except Exception:
+            pass
     json.dump(index, open(ipath, "w"), indent=2)
     return index
+
+
+def _merge_unique(existing: dict, entries: list[dict]) -> dict:
+    """Merge local entries into the existing committed index without shrinking it."""
+    seen = {m["hash"] for m in existing.get("measurements", [])}
+    extra = [{"hash": e["hash"][:16], "ts": e["ts"], "registry": e["registry"],
+              "subject": e["subject_name"], "measured": e.get("measured"), "total": e.get("total"),
+              "kid": e.get("kid"), "signed": e.get("signed"),
+              "receipt": (e.get("receipt_content_id") or "")[:12],
+              "anchor_time": e.get("anchor_generic_time"), "provision_axes": e.get("provision_axes")}
+             for e in entries if e["hash"][:16] not in seen]
+    return {"generated_at": existing.get("generated_at"), "count": len(existing.get("measurements", [])) + len(extra),
+            "chainOk": existing.get("chainOk", True), "linked": existing.get("linked", 0),
+            "unlinked": existing.get("unlinked", 0),
+            "measurements": existing.get("measurements", []) + extra}
 
 
 def verify_chain() -> dict:
