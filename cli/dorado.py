@@ -419,6 +419,30 @@ def cmd_verify_anchor(args):
     return 0 if res["ok"] else 1
 
 
+def cmd_export_relative(args):
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from export_data import export_relative, write_jsonl
+    result = json.load(open(args.inp))
+    data = export_relative(result)
+    os.makedirs(args.out_dir, exist_ok=True)
+    n = write_jsonl(os.path.join(args.out_dir, "bench-data-relative.jsonl"), data["relative"])
+    json.dump(data["meta"], open(os.path.join(args.out_dir, "bench-data-relative-meta.json"), "w"), indent=2)
+    print(f"exported {n} relative rows -> {args.out_dir} (license the data, never the score)", flush=True)
+
+
+def cmd_export_operational(args):
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from export_data import export_operational, write_jsonl
+    from or_telemetry import load as load_tel
+    rows = load_tel()[-args.limit:] if args.limit else load_tel()
+    data = export_operational(rows)
+    os.makedirs(args.out_dir, exist_ok=True)
+    n = write_jsonl(os.path.join(args.out_dir, "bench-data-operational.jsonl"), data["operational"])
+    json.dump(data["meta"], open(os.path.join(args.out_dir, "bench-data-operational-meta.json"), "w"), indent=2)
+    print(f"exported {n} operational rows -> {args.out_dir} (cost/latency data, never the score)", flush=True)
+
+
 def cmd_license(args):
     import hashlib as _hl
     from datetime import datetime, timezone
@@ -623,6 +647,16 @@ def main():
     p.add_argument("--subject-id", default=None)
     p.add_argument("--subject-name", default=None)
     p.set_defaults(func=cmd_export)
+
+    p = sub.add_parser("export-relative", help="Export a pairwise measure as the licensable relative dataset")
+    p.add_argument("--in", dest="inp", required=True, help="pairwise result JSON")
+    p.add_argument("--out-dir", default="data-relative-out")
+    p.set_defaults(func=cmd_export_relative)
+
+    p = sub.add_parser("export-operational", help="Export telemetry as the licensable operational (cost/latency) dataset")
+    p.add_argument("--limit", type=int, default=None, help="Only the last N telemetry rows")
+    p.add_argument("--out-dir", default="data-operational-out")
+    p.set_defaults(func=cmd_export_operational)
 
     a = ap.parse_args()
     code = a.func(a)

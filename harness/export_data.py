@@ -107,6 +107,52 @@ def write_jsonl(path: str, records: list[dict]) -> int:
     return len(records)
 
 
+def export_relative(result: dict) -> dict:
+    """Build the licensable RELATIVE (pairwise) dataset from a pairwise measure.
+
+    Each row: which model was chosen (A/B) on a relative governance axis, plus the
+    agreement margin. A vendor can license this data; they can never license a score.
+    """
+    rows = []
+    for r in result.get("per_axis", []):
+        rows.append({
+            "scope": "relative",
+            "axis": r.get("axis"), "gold": r.get("gold"),
+            "chosen": r.get("chosen"), "resp_a": r.get("resp_a", ""),
+            "resp_b": r.get("resp_b", ""), "measured": r.get("measured", True),
+        })
+    return {
+        "relative": rows,
+        "meta": {
+            "schema": "csoai.bench-data/relative/0.1",
+            "kind": "relative (pairwise) measurement-derived data — NOT certification",
+            "register": "This data is derived from a measurement. It is not a certification, "
+                        "endorsement, or conformity mark.",
+            "neutrality": "licenses the pairwise data, never the Elo/score",
+            "model_a": result.get("model_a"), "model_b": result.get("model_b"),
+            "a_wins": result.get("a_wins"), "b_wins": result.get("b_wins"),
+            "provenance": {"method": "relative blind A/B, deterministic gold",
+                           "n": result.get("n")},
+        },
+    }
+
+
+def export_operational(rows: list[dict]) -> dict:
+    """Build the licensable OPERATIONAL (cost/latency/throughput) dataset from telemetry."""
+    return {
+        "operational": rows,
+        "meta": {
+            "schema": "csoai.bench-data/operational/0.1",
+            "kind": "operational (cost/latency) measurement-derived data — NOT certification",
+            "register": "This data is derived from a measurement. It is not a certification, "
+                        "endorsement, or conformity mark.",
+            "neutrality": "licenses the operational data, never the score",
+            "note": "the half OpenRouter (a stateless pipe) throws away; we keep + license it",
+            "provenance": {"source": "dorado telemetry"},
+        },
+    }
+
+
 def main() -> int:
     import argparse
     ap = argparse.ArgumentParser(description="Export a DORADO axis result as licensable data.")
