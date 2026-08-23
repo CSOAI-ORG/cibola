@@ -65,6 +65,31 @@ check(default_reg == "csoai.gspc-16", f"default registry is gspc-16 (got {defaul
 _, bond_reg = load_axes("bond")
 check(bond_reg == "csoai.gspc-domains/bond/1.0", f"bond registry id (got {bond_reg})")
 
+# --- 3c. crosswalk: provision_map integrity (east-west bridge) ---
+from harness.run_axis import provision_map_for
+pm = provision_map_for("bond")
+check(pm is not None and len(pm) == 6, f"bond provision map has 6 axes (got {len(pm) if pm else 0})")
+for domain in domain_files:
+    dp = provision_map_for(domain)
+    daxes = json.load(open(os.path.join(ddir, domain + ".json")))["axes"]
+    dslugs = {a["slug"] for a in daxes}
+    check(dp is not None, f"domain {domain} has a provision map")
+    if dp:
+        check(set(dp.keys()) == dslugs, f"domain {domain} provision map keys match its axes")
+        check(all(isinstance(v, list) and v and all(isinstance(p, str) and p for p in v) for v in dp.values()),
+              f"domain {domain} provisions are non-empty string lists")
+# generic (non-domain) registry has no provision map
+check(provision_map_for(None) is None, "generic registry has no domain provision map")
+# a domain card carries provision_map + it is not a compliance assertion
+from harness.run_axis import as_card as _as_card
+axes_b, reg_b = load_axes("bond")
+fake_b = {"model": "d", "registry": reg_b, "n": len(axes_b), "ok": 3, "accuracy": 0.5,
+          "measured": len(axes_b), "total": len(axes_b), "ts": "2026-08-23T00:00:00Z",
+          "per_axis": [{"axis": a["slug"], "gold": a["gold"], "verdict": "PASS" if i < 3 else "FAIL",
+                        "resp": "x", "measured": True} for i, a in enumerate(axes_b)]}
+card_b = _as_card(fake_b, {"id": "d", "name": "d", "digest": "x"}, axes=axes_b)
+check("provision_map" in card_b and len(card_b["provision_map"]) == 6, "domain card carries provision_map (6 axes)")
+
 # --- 4. harness -> card shape ---
 sys.path.insert(0, os.path.join(ROOT, "harness"))
 import run_axis as rax

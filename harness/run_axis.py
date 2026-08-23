@@ -44,6 +44,25 @@ def _domain_label(registry: str, naxes: int) -> str:
     tokens = registry.split("/")
     name = tokens[1].title() if len(tokens) > 1 else "Domain"
     return f"GSPC {naxes}-Axis {name}"
+
+
+def provision_map_for(domain: str | None) -> dict | None:
+    """Jurisdiction-keyed obligation references for a domain registry (east-west bridge).
+
+    Reads axes/compliance/provision-map.json. Returns {axis_slug: [provision, ...]}
+    or None for the generic (non-domain) registry. Cites provisions a score orbits;
+    it does not assert legal compliance (measurement, never certification).
+    """
+    if domain is None:
+        return None
+    path = os.path.join(ROOT, "axes", "compliance", "provision-map.json")
+    if not os.path.exists(path):
+        return None
+    try:
+        cm = json.load(open(path))
+        return cm["domains"].get(domain)
+    except Exception:
+        return None
 CARD_SCHEMA = "https://cibola.dev/schemas/measurement-card.schema.json"
 REGISTER = ("This is a measurement credential. It is not a certification, endorsement, "
             "or conformity mark, and must not be presented as one.")
@@ -96,7 +115,7 @@ def as_card(res, subject, axes=None):
                           (0.0 if r["verdict"] == "FAIL" else None),
                           "n": 1 if r["measured"] else 0}
               for r in res["per_axis"]}
-    return {
+    card = {
         "schema": CARD_SCHEMA,
         "card_version": "0.1.0",
         "subject": subject,
@@ -115,6 +134,22 @@ def as_card(res, subject, axes=None):
         "credential_register": REGISTER,
         "run_manifest": {"harness_hash": "run_axis.py" + ":" + res["ts"]},
     }
+    # east-west bridge: cite the provisions a domain registry's axes orbit (never
+    # asserts legal compliance). Only for domain registries.
+    if "/" in registry:
+        dom = registry.split("/")[1]
+        pm = provision_map_for(dom)
+        if pm:
+            card["provision_map"] = pm
+    return card
+    # east-west bridge: cite the provisions a domain registry's axes orbit (never
+    # asserts legal compliance). Only for domain registries.
+    if "/" in registry:
+        dom = registry.split("/")[1]
+        pm = provision_map_for(dom)
+        if pm:
+            card["provision_map"] = pm
+    return card
 
 
 def main():

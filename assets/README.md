@@ -44,6 +44,32 @@ The example anchor was verified at runtime: `ANCHOR VALID (external TSA time-bin
 verified)`, `messageImprint matches=True`, digest binding `dig_ok=True`,
 `gen_time 2026-08-23 05:18:17Z`.
 
+## Production-signing (drop-in, one command once the pod key is present)
+
+The real CIBOLA signing key is `did:web:csoai.org#card-attestation-1` (THE BRICK,
+estate key `d4cb0eaa`), Mac/keystone-held. The moment the pod key is available,
+produce a **production-signed, externally-anchored** card — no code changes, just
+the real key:
+
+```bash
+# measure a DOMAIN registry (e.g. bond) and emit its card
+cibola measure --model <model> --domain bond --card card.json --out axis.json
+
+# sign with the real #card-attestation-1 key
+CIBOLA_SIGNING_KEY_FILE=<pod key> cibola sign       --card card.json
+CIBOLA_SIGNING_KEY_FILE=<pod key> cibola receipt    --card card.json --out receipt.json
+CIBOLA_SIGNING_KEY_FILE=<pod key> cibola anchor     --card card.json --out anchor.json   # RFC 3161 TSA
+```
+
+The card carries a `provision_map` (east-west bridge) — jurisdiction-keyed
+provision citations per axis — which cites the law/standards a score orbits but
+**never** asserts legal compliance (measurement, never certification).
+
+A stranger verifies every leg with only the published key + `cryptography`
+(anchor also needs `pip install asn1crypto`):
+`cibola verify` · `cibola verify-receipt --receipt receipt.json --card card.json` ·
+`cibola verify-anchor --anchor anchor.json --card card.json`.
+
 ## Doctrine (binding)
 
 - **Measurement, never certification.** The register verbatim appears on the card,

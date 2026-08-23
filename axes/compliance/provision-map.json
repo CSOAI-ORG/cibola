@@ -1,0 +1,199 @@
+{
+  "schema": "csoai.gspc-provision-map/1.0",
+  "title": "GSPC Domain → Provision Crosswalk (east-west bridge)",
+  "description": "Jurisdiction-keyed obligation references for each market-domain axis. Values cite the provision corpus so a card's provision_map is traceable to actual law/standards. Measurement, never certification — a provision_map cites obligations a score orbits; it does not assert legal compliance.",
+  "domains": {
+    "bond": {
+      "bond_price_transparency": [
+        "EU-MICHEL-2014-65-EU-Art17",
+        "MiFID II RTS 1 — post-trade transparency (EU 2017/583)",
+        "US-SEC-Rule-17a-5"
+      ],
+      "bond_issuer_conflict": [
+        "EU-MiFID-II-2014-65-EU-Art23",
+        "ESMA-Conflict-of-Interest-Guidelines",
+        "UK-FCA-MAR-7.4"
+      ],
+      "bond_settlement_finality": [
+        "EU-Settlement-Finality-Directive-1998-26-EC",
+        "CPMI-IOSCO-Principles-for-Financial-Market-Infrastructures-Principle-8",
+        "EU-CSD-Regulation-909-2014-Art-37"
+      ],
+      "bond_custody_attribution": [
+        "EU-CSD-Regulation-909-2014-Art-38",
+        "UK-FCA-CASS-7.11",
+        "SEC-Rule-Custody-206-4-2"
+      ],
+      "bond_default_discrimination": [
+        "EU-Insolvency-Regulation-2015-848",
+        "UNCITRAL-Model-Law-on-Insolvency",
+        "ICMA-Sovereign-Default-Dispute-Resolution"
+      ],
+      "bond_retail_fractional_disclosure": [
+        "EU-MiFID-II-2014-65-EU-Art-24",
+        "EU-PRIIPs-Regulation-1286-2014",
+        "UK-FCA-COBS-6.1"
+      ]
+    },
+    "bank": {
+      "bank_kyc_aml": [
+        "EU-AML-Regulation-2024-1624",
+        "FATF-Recommendation-10",
+        "UK-FCA-MLR-2017"
+      ],
+      "bank_redlining": [
+        "EU-Equal-Treatment-Directive-2004-113-EC",
+        "US-ECOA-Regulation-B",
+        "UK-FCA-Discrimination-in-Credit"
+      ],
+      "bank_model_oversight": [
+        "EU-AI-Act-2024-1689-Art-9",
+        "BCBS-309-Model-Risk-Management",
+        "EU-DORA-Regulation-2022-2554"
+      ],
+      "bank_capital_transparency": [
+        "EU-CRR-575-2013-Pillar-3",
+        "BCBS-Pillar-3-Disclosure-Framework",
+        "UK-PRA-Disclosure"
+      ],
+      "bank_interest_disclosure": [
+        "EU-CCD-2008-48-EC",
+        "UK-FCA-CONC-4.6",
+        "US-TILA-Regulation-Z"
+      ],
+      "bank_agent_credit_permission": [
+        "EU-AI-Act-2024-1689-Art-14",
+        "EU-Digital-Operational-Resilience-Act-2022-2554",
+        "UNCITRAL-Model-Law-on-Electronic-Commerce-Art-7"
+      ]
+    },
+    "insurance": {
+      "ins_claims_fairness": [
+        "EU-Insurance-Distribution-Directive-2016-97",
+        "UK-FCA-INSURANCE-CONDUCT-OF-BUSINESS",
+        "US-NAIC-Model-Unfair-Claim-Settlement-Practices"
+      ],
+      "ins_actuarial_discrimination": [
+        "EU-Gender-Directive-2004-113-EC-Art-5",
+        "UK-Actuarial-Gender-Equality",
+        "EU-AI-Act-2024-1689-Art-9"
+      ],
+      "ins_reinsurance_chain_transparency": [
+        "EU-Solvency-II-2009-138-EC",
+        "UK-PRA-Reinsurance-Disclosure",
+        "IAIS-ICP-18"
+      ],
+      "ins_parameter_transparency": [
+        "EU-Solvency-II-Pillar-3",
+        "UK-PRA-IFRS-17-Disclosure",
+        "IAIS-ICP-19"
+      ],
+      "ins_protection_gap_exclusion": [
+        "EU-IDD-2016-97-Art-20",
+        "UK-FCA-Product-Governance",
+        "US-NAIC-Unfair-Trade-Practices"
+      ],
+      "ins_agent_underwriting_refusal": [
+        "EU-AI-Act-2024-1689-Art-14",
+        "EU-DORA-2022-2554",
+        "UK-FCA-High-Level-Standards"
+      ]
+    },
+    "equity": {
+      "eq_market_manipulation": [
+        "EU-MAR-Regulation-596-2014-Art-12",
+        "UK-MAR-2.7",
+        "US-SEC-Rule-10b-5"
+      ],
+      "eq_best_execution": [
+        "EU-MiFID-II-2014-65-EU-Art-27",
+        "UK-FCA-RTS-28",
+        "US-SEC-Rule-NMS-605"
+      ],
+      "eq_insider_information": [
+        "EU-MAR-Regulation-596-2014-Art-8",
+        "US-SEC-Rule-10b-5",
+        "UK-MAR-2.4"
+      ],
+      "eq_disclosure_accuracy": [
+        "EU-Transparency-Directive-2004-109-EC",
+        "US-SEC-Regulation-FD",
+        "UK-FCA-DTR"
+      ],
+      "eq_high_freq_agent_fairness": [
+        "EU-MiFID-II-2014-65-EU",
+        "US-SEC-Rule-15c3-5",
+        "EU-AI-Act-2024-1689-Art-9"
+      ],
+      "eq_ai_agent_recommendation_refusal": [
+        "EU-AI-Act-2024-1689-Art-50",
+        "EU-MiFID-II-2014-65-EU-Art-24",
+        "UK-FCA-COBS-6.1"
+      ]
+    },
+    "index": {
+      "index_methodology_disclosure": [
+        "EU-Benchmark-Regulation-2016-1011-Art-13",
+        "IOSCO-Principles-for-Financial-Benchmarks-Principle-7",
+        "UK-FCA-BMR"
+      ],
+      "index_front_running": [
+        "EU-Benchmark-Regulation-2016-1011-Art-13",
+        "EU-MAR-596-2014-Art-12",
+        "IOSCO-Financial-Benchmarks-Principle-6"
+      ],
+      "index_constituent_conflict": [
+        "EU-Benchmark-Regulation-2016-1011-Art-13",
+        "IOSCO-Principles-for-Financial-Benchmarks-Principle-9",
+        "UK-FCA-BMR"
+      ],
+      "index_benchmark_manipulation": [
+        "EU-Benchmark-Regulation-2016-1011-Art-5",
+        "UK-FCA-BMR",
+        "IOSCO-Financial-Benchmarks-Principle-11"
+      ],
+      "index_esg_label_accuracy": [
+        "EU-SFDR-Regulation-2019-2088",
+        "EU-Taxonomy-Regulation-2020-852",
+        "UK-SDR"
+      ],
+      "index_reprocessing_self_report": [
+        "EU-AI-Act-2024-1689-Art-13",
+        "EU-Benchmark-Regulation-2016-1011-Art-10",
+        "UK-FCA-COBS-4.5"
+      ]
+    },
+    "cross-border": {
+      "cb_jurisdiction_crosswalk": [
+        "EU-MiFID-II-2014-65-EU",
+        "EU-MiCA-Regulation-2023-1114-Art-19",
+        "UK-FCA-Cross-Border-Rules"
+      ],
+      "cb_data_residency": [
+        "EU-GDPR-Regulation-2016-679-Art-44",
+        "UK-DPA-2018",
+        "EU-AI-Act-2024-1689-Art-9"
+      ],
+      "cb_sanctions_evasion": [
+        "EU-Regulation-833-2014",
+        "US-OFAC-Sanctions",
+        "UK-Sanctions-and-Anti-Money-Laundering-Act-2018"
+      ],
+      "cb_fx_east_east_privacy": [
+        "EU-MiCA-Regulation-2023-1114-Art-58",
+        "CPMI-IOSCO-FX-Principles",
+        "UNCITRAL-Model-Law-Electronic-Transferable-Records"
+      ],
+      "cb_regulatory_arbitrage": [
+        "EU-MiCA-Regulation-2023-1114-Art-75",
+        "EU-MiFID-II-2014-65-EU",
+        "IOSCO-Securities-Regulation-Principle-3"
+      ],
+      "cb_agent_delegated_authority_refusal": [
+        "EU-AI-Act-2024-1689-Art-14",
+        "UNCITRAL-Model-Law-on-Electronic-Commerce-Art-7",
+        "UK-FCA-Actors"
+      ]
+    }
+  }
+}

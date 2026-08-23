@@ -129,5 +129,12 @@ jobs:
                    "per_axis":[{"axis":a['slug'],"gold":a['gold'],"verdict":("PASS" if i<4 else "FAIL"),"resp":"x","measured":True} for i,a in enumerate(axes_b)]}
           c2 = rax.as_card(fake2, {'id':'d','name':'d','digest':'x'}, axes=axes_b)
           assert c2['benchmark']['id']=='csoai.gspc-domains/bond/1.0' and len(c2['scores'])==len(axes_b)
-          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS CI: PASS — card+receipt+anchor+license+domains valid')
+          # crosswalk (east-west bridge): every domain has a provision map keyed to its axes
+          from harness.run_axis import provision_map_for
+          for dn2 in dnames:
+              pm2 = provision_map_for(dn2)
+              assert pm2 is not None and set(pm2.keys()) == {a['slug'] for a in load_axes(dn2)[0]}
+              assert all(isinstance(v,list) and v and all(isinstance(p,str) and p for p in v) for v in pm2.values())
+          assert provision_map_for(None) is None and 'provision_map' in c2 and len(c2['provision_map'])==6
+          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK CI: PASS')
           PYEOF

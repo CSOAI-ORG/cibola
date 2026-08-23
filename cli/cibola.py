@@ -4,6 +4,7 @@
 Subcommands:
   axes      List the 16 GSPC axes (+probe/gold), --json for machine-readable
   domains   List the domain axis registries (bond/bank/insurance/equity/index/cross-border)
+  crosswalk Show the domain->provision crosswalk (east-west bridge), cite provisions per axis
   measure   Measure a model on all axes (Ollama), emit axis-engine record + optional card
   sign      Sign a CIBOLA measurement card (Ed25519, COSE_Sign1, one-signer doctrine)
   receipt   Build an SCITT receipt (RFC 9943, a2a.signed-receipt/0.1) binding a card
@@ -69,6 +70,30 @@ def cmd_domains(args):
     for l in lines:
         print(f"  {l['domain']:14s} {l['axes']:2d} axes  {l['schema']}")
     print(f"\n{len(lines)} domains")
+
+
+def cmd_crosswalk(args):
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from run_axis import provision_map_for
+    if args.domain:
+        pm = provision_map_for(args.domain)
+        if not pm:
+            print(f"no provision map for domain '{args.domain}'")
+            return 1
+        for axis, provisions in pm.items():
+            print(f"  {axis}:")
+            for p in provisions:
+                print(f"      - {p}")
+        print(f"\n{len(pm)} axes citable for {args.domain}")
+        return 0
+    # all domains
+    import os as _os
+    import json as _json
+    cm = _json.load(open(os.path.join(ROOT, "axes", "compliance", "provision-map.json")))
+    for dom, axes in cm["domains"].items():
+        total = sum(len(v) for v in axes.values())
+        print(f"  {dom:14s} {len(axes):2d} axes  {total:3d} provisions")
+    print(f"\n{len(cm['domains'])} domains in crosswalk")
 
 
 def cmd_selfcheck(args):
@@ -286,6 +311,10 @@ def main():
     p = sub.add_parser("domains", help="List the domain axis registries")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_domains)
+
+    p = sub.add_parser("crosswalk", help="Show the domain->provision crosswalk (east-west bridge)")
+    p.add_argument("--domain", default=None, help="Show provisions for one domain only")
+    p.set_defaults(func=cmd_crosswalk)
 
     p = sub.add_parser("selfcheck", help="Run hermetic deterministic tests")
     p.set_defaults(func=cmd_selfcheck)
