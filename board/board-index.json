@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-23T13:40:15.605109+00:00",
-  "count": 20,
+  "generated_at": "2026-08-23T16:45:22.822029+00:00",
+  "count": 21,
   "chainOk": true,
-  "linked": 20,
+  "linked": 21,
   "unlinked": 0,
   "measurements": [
     {
@@ -263,6 +263,19 @@
       "signed": true,
       "receipt": "0e0a5d4188c2",
       "anchor_time": "2026-08-23 13:40:14+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "add6b78140f7c8d2",
+      "ts": "2026-08-23T16:45:12Z",
+      "registry": "csoai.gspc-domains/bond/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 6,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "4c845333ffd8",
+      "anchor_time": "2026-08-23 16:45:22+00:00",
       "provision_axes": 6
     }
   ]
