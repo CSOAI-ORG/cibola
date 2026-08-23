@@ -258,12 +258,18 @@ def cmd_anchor(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
     from cibola_anchor import anchor_card
     card = json.load(open(args.card))
-    a = anchor_card(card, tsa_url=args.tsa, do_rekor=not args.no_rekor)
+    # if a pod key is available, sign the rekor entry request (else honest dependency report)
+    rekor_key = None
+    if args.key_file or os.environ.get("CIBOLA_SIGNING_KEY_FILE"):
+        if args.key_file:
+            os.environ["CIBOLA_SIGNING_KEY_FILE"] = args.key_file
+        rekor_key = _load_signing_key()
+    a = anchor_card(card, tsa_url=args.tsa, do_rekor=not args.no_rekor, rekor_key=rekor_key)
     for an in a["anchors"]:
         if an["kind"] == "tsa-rfc3161":
             print(f"  TSA: gen_time={an['gen_time']} imprint_matches={an['message_imprint_matches']}", flush=True)
         else:
-            print(f"  Rekor: recorded={an.get('recorded')} log_index={an.get('log_index')} err={an.get('error','')[:50]}", flush=True)
+            print(f"  Rekor: recorded={an.get('recorded')} schema={an.get('schema')} log_index={an.get('log_index')} err={an.get('error','')[:45]}", flush=True)
     json.dump(a, open(args.out, "w"), indent=2)
     print(f"wrote {args.out} (digest {a['card_content_sha256'][:12]}…)", flush=True)
     return a
@@ -415,6 +421,7 @@ def main():
     p.add_argument("--card", required=True)
     p.add_argument("--tsa", default="https://rfc3161.ai.moda")
     p.add_argument("--no-rekor", action="store_true", help="Skip the optional Rekor log entry")
+    p.add_argument("--key-file", default=None, help="Pod Ed25519 private key to sign the rekor entry (else honest dependency report)")
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_anchor)
 

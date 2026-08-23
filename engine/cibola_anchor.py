@@ -75,52 +75,66 @@ def tsa_timestamp(digest_hex: str, tsa_url: str = TSA_DEFAULT) -> dict:
     }
 
 
-def rekor_entry(digest_hex: str, rekor_url: str = REKOR_DEFAULT) -> dict:
-    """Attempt a Rekor / transparency-log entry for a digest. Honest about schema drift.
+def rekor_entry(digest_hex: str, *, public_key_bytes: bytes | None = None,
+                signature: bytes | None = None, rekor_url: str = REKOR_DEFAULT) -> dict:
+    """Attempt a Rekor transparency-log entry for a digest (corrected Rekor v1 schema).
 
-    Tries the current hashedrekord shape (flat signature) and then the body-wrapped
-    shape. The public Rekor v2 API has changed its wire format; if neither is accepted
-    we report schema-drift rather than pretend an entry exists."""
+    The public rekor.sigstore.dev is Rekor v1 and expects the entry as a TOP-LEVEL
+    request: {"kind":"hashedrekord","apiVersion":"0.0.1","spec":{data.hash, signature}}.
+    It requires SHA-512, a PEM Ed25519 public key, and a signature that Rekor's
+    internal verifier accepts over the submitted content (the sigstore/certificate
+    signing flow). We submit the fully-formed entry when a key+signature are supplied;
+    otherwise we report the exact dependency honestly rather than fake inclusion.
+    """
     import hashlib as _h
-    entry_spec = {"data": {"hash": {"algorithm": "sha256", "value": digest_hex}},
-                  "signature": {"content": "Y2FyZA==", "publicKey": {"content": "Y2FyZA=="}}}
-    rec = {"apiVersion": "0.0.1", "kind": "hashedrekord", "spec": entry_spec}
-    body_b64 = base64.b64encode(json.dumps(rec, separators=(",", ":")).encode()).decode()
-    variants = [
-        {"proposedEntry": {"kind": "hashedrekord", "apiVersion": "0.0.1", "spec": entry_spec}},
-        {"proposedEntry": {"kind": "hashedrekord", "apiVersion": "0.0.1", "spec": entry_spec, "body": body_b64}},
-        {"proposedEntry": {"kind": "hashedrekord", "body": body_b64}},
-    ]
-    for proposed in variants:
-        r = urllib.request.Request(rekor_url, data=json.dumps(proposed).encode(),
-                                   headers={'Content-Type': 'application/json'}, method='POST')
-        try:
-            resp = urllib.request.urlopen(r, timeout=30).read()
-            data = json.loads(resp.decode())
-            k = list(data.keys())[0]
-            return {"kind": "rekor-transparency-log", "rekor_url": REKOR_DEFAULT,
-                    "entry_uuid": k, "log_index": data[k].get('logIndex'),
-                    "integrated_time": data[k].get('integratedTime'),
-                    "signed_entry_timestamp": bool(data[k].get('signedEntryTimestamp')), "recorded": True}
-        except urllib.error.HTTPError as e:
-            last_err = f"HTTP {e.code}: {e.read().decode()[:120]}"
-            continue  # try next shape
-        except Exception as e:
-            last_err = f"{type(e).__name__}: {e}"
-            continue
-    return {"kind": "rekor-transparency-log", "rekor_url": REKOR_DEFAULT,
-            "recorded": False, "schema_drift": True,
-            "error": "public Rekor v2 API rejected the hashedrekord entry (schema drift); "
-                     "the RFC 3161 TSA anchor remains the authoritative external time-binding. "
-                     f"({last_err})"}
+    import base64 as _b64
+    if public_key_bytes is None or signature is None:
+        return {"kind": "rekor-transparency-log", "rekor_url": rekor_url, "recorded": False,
+                "schema": "rekor-v1", "note": "rekor v1 needs a PEM Ed25519 public key + a verified "
+                "sigstore-signature; not available here — see the RFC 3161 TSA anchor for the "
+                "authoritative external time-binding."}
+    pem_pub = public_key_bytes.public_bytes(
+        encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.PEM,
+        format=__import__("cryptography").hazmat.primitives.serialization.PublicFormat.SubjectPublicKeyInfo)
+    pem_pub_b64 = _b64.b64encode(pem_pub).decode()
+    sig_b64 = _b64.b64encode(signature).decode()
+    # Rekor v1 hashedrekord: sha512 hash + Ed25519 signature + PEM public key.
+    body = {"kind": "hashedrekord", "apiVersion": "0.0.1", "spec": {
+        "data": {"hash": {"algorithm": "sha512", "value": _h.sha512(bytes.fromhex(digest_hex)).hexdigest()}},
+        "signature": {"content": sig_b64, "format": "x509", "publicKey": {"content": pem_pub_b64}}}}
+    r = urllib.request.Request(rekor_url, data=json.dumps(body).encode(),
+                               headers={'Content-Type': 'application/json'}, method='POST')
+    try:
+        resp = urllib.request.urlopen(r, timeout=30).read()
+        data = json.loads(resp.decode())
+        k = list(data.keys())[0]
+        return {"kind": "rekor-transparency-log", "rekor_url": rekor_url,
+                "entry_uuid": k, "log_index": data[k].get('logIndex'),
+                "integrated_time": data[k].get('integratedTime'),
+                "signed_entry_timestamp": bool(data[k].get('signedEntryTimestamp')), "recorded": True}
+    except urllib.error.HTTPError as e:
+        return {"kind": "rekor-transparency-log", "rekor_url": rekor_url, "recorded": False,
+                "schema": "rekor-v1", "error": f"HTTP {e.code}: {e.read().decode()[:140]}"}
+    except Exception as e:
+        return {"kind": "rekor-transparency-log", "rekor_url": rekor_url, "recorded": False,
+                "schema": "rekor-v1", "error": f"{type(e).__name__}: {e}"}
 
 
-def anchor_card(card: dict, *, tsa_url: str = TSA_DEFAULT, do_rekor: bool = True) -> dict:
-    """Anchor a card: RFC 3161 TSA (required) + optional Rekor. Honest about each."""
+def anchor_card(card: dict, *, tsa_url: str = TSA_DEFAULT, do_rekor: bool = True,
+                rekor_key=None) -> dict:
+    """Anchor a card: RFC 3161 TSA (required) + optional Rekor. Honest about each.
+
+    rekor_key: optional Ed25519 private key used to sign the rekor entry request.
+    If absent, rekor_entry reports the exact sigstore-signing dependency honestly."""
     digest_hex = card_digest(card)
     anchors = [tsa_timestamp(digest_hex, tsa_url)]
     if do_rekor:
-        anchors.append(rekor_entry(digest_hex))
+        sig, pub = None, None
+        if rekor_key is not None:
+            from cibola_sign import canonical
+            pub = rekor_key.public_key()
+            sig = rekor_key.sign(canonical(card))
+        anchors.append(rekor_entry(digest_hex, public_key_bytes=pub, signature=sig))
     return {
         "schema": "csoai.card-anchor/0.1",
         "kind": "measurement-card anchor — a TIME binding, not a certification",

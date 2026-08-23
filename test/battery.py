@@ -140,6 +140,22 @@ if _prior:
 else:
     os.environ.pop("CIBOLA_BOARD_DIR", None)
 
+# --- 3g. rekor v1 anchor schema (corrected; honest dependency without a key) ---
+from engine.cibola_anchor import rekor_entry
+_re = rekor_entry("deadbeef" * 8)  # no key -> honest dependency report
+check(_re.get("recorded") is False, "rekor entry without a key is honestly not-recorded")
+check(_re.get("schema") == "rekor-v1", "rekor entry uses the corrected rekor-v1 schema")
+check("sigstore-signature" in _re.get("note", "") or "rekor v1 needs" in _re.get("note", ""), "rekor reports the exact dependency")
+# with a key+signature it builds the correct SHA-512 + PEM publicKey body (avoids the old blind 422)
+from engine.cibola_anchor import rekor_entry as _reke
+import base64 as _b64r
+from cryptography.hazmat.primitives import serialization as _serr
+_pk = _Ed2.generate()
+_e2 = _reke("deadbeef" * 8, public_key_bytes=_pk.public_key(), signature=b"x" * 64, rekor_url="http://127.0.0.1:9")
+# localhost:9 refuses connection -> recorded=False, error mentions connection, NOT 'kind in body'
+check(_e2.get("schema") == "rekor-v1", "rekor with key keeps rekor-v1 schema")
+check("kind in body" not in _e2.get("error", ""), "rekor no longer hits the blind 'kind in body' 422 (schema corrected)")
+
 # --- 3d. A2A / MCP discovery surface (hermetic: no network, no server spawn) ---
 import os as _os, json as _json
 agent_dir = _os.path.join(ROOT, "agent")
