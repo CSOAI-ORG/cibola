@@ -1,0 +1,51 @@
+name: CIBOLA CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Hermetic deterministic test battery — NO network, NO Ollama required.
+      - name: Deterministic test battery
+        run: python3 test/battery.py
+
+      # CI BOLA schema re-validation (structural, no jsonschema dependency).
+      - name: Schema CI (example card)
+        run: python3 test/schema-test.py
+
+      # The axis engine harness must import cleanly and emit a valid card shape
+      # under Python 3.11/3.12 (metadata check; actual measurement requires Ollama).
+      - name: Harness import + card shape
+        run: |
+          python3 -c "
+          import sys, json, os
+          sys.path.insert(0, os.path.join(os.getcwd(), 'harness'))
+          import run_axis as rax
+          axes = json.load(open('axes/gspc-16.json'))['axes']
+          fake = {'model':'t','n':16,'ok':9,'accuracy':0.562,'measured':16,'total':16,'ts':'2026-08-23T00:00:00Z',
+                  'per_axis':[{'axis':a['slug'],'gold':a['gold'],'verdict':'PASS' if i<9 else 'FAIL','resp':'x','measured':True} for i,a in enumerate(axes)]}
+          card = rax.as_card(fake, {'id':'t','name':'T','digest':'x'})
+          assert card['schema'] == 'https://cibola.dev/schemas/measurement-card.schema.json'
+          assert len(card['scores']) == 16
+          print('HARNESS CI: PASS — card shape valid, 16 scores')
+          "
+
+      - name: CLI smoke — axes + selfcheck
+        run: |
+          python3 cli/cibola.py axes >/dev/null
+          python3 cli/cibola.py selfcheck >/dev/null
+          echo "CLI CI: PASS"
