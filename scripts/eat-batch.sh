@@ -21,7 +21,7 @@ work_one() {
       --out eat/axis-${c}.json --card eat/card-${c}.unsigned.json \
       --card-subject-id "pod-3090/$MODEL" --card-subject-name "$MODEL" --delay 0.2
     python3 cli/dorado.py sign --allow-test-identity --card eat/card-${c}.unsigned.json --out eat/card-${c}.json
-    python3 cli/dorado.py receipt --card eat/card-${c}.json --out eat/receipt-${c}.json
+    python3 cli/dorado.py receipt --allow-test-identity --card eat/card-${c}.json --out eat/receipt-${c}.json
     python3 cli/dorado.py anchor --card eat/card-${c}.json --out eat/anchor-${c}.json
     python3 cli/dorado.py publish --card eat/card-${c}.json --receipt eat/receipt-${c}.json --anchor eat/anchor-${c}.json
     echo "[$(date -u +%FT%TZ)] === $dom COMPLETE ==="

@@ -1,5 +1,21 @@
 # DORADO — Next 100 Steps (reality-grounded roadmap)
 
+> ⠀
+> ## ✅ SHIPPED (this round) — now production on the pods, Mac terminal-only
+> - **DORADO rename** (cibola→dorado across the monorepo; CI literally says "DORADO CI").
+> - **Monorepo hosted** on RunPod 3090 (`sov-brain-2`) at `/workspace/dorado`; deployed via rsync.
+> - **Full e2e EAT chain proven on the pod**: measure→sign→SCITT receipt→**real RFC 3161 anchor**→publish→board, all stranger-verifiable.
+> - **Parallel batch runner** (`scripts/eat-batch.sh`) across all 6 domains; board grew to 14+ measurements, `chainOk=True`.
+> - **Backup procedure** (`scripts/dorado-backup.sh`) working on the pod; rotated snapshots + Oracle target.
+> - **Pod Ollama model server fixed + serving** (the `0/6` unblock): verified `qwen3:4b-8k` returns real gold labels.
+> - **No-key sign fix**: `--allow-test-identity` generates an ephemeral key (was fataling); cards mint `kid=test` honestly.
+> - **Research/synthesis**: the LMArena + OpenRouter methodology is folded into this plan (Elo/BR, CI, bias control, cost/latency).
+>
+> ## PREREQ (still owner/infra-gated)
+> - Provision the real `#card-attestation-1` pod key at the pod keystone → production-signed cards.
+> - A quiet/less-contended GPU window → faster real-score batches.
+> ⠀
+
 Plan to (a) learn how OpenRouter + LM Arena actually measure models, and (b) fold those
 lessons into DORADO so our measurement is as rigorous as the best public leaderboards —
 and is a *measurement body*, not a data pipe.

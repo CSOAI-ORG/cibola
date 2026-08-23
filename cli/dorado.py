@@ -243,6 +243,11 @@ def cmd_receipt(args):
         if args.key_file:
             os.environ["DORADO_SIGNING_KEY_FILE"] = args.key_file
         key = _load_signing_key()
+    elif getattr(args, "allow_test_identity", False) and not os.environ.get("DORADO_SIGNING_KEY_FILE"):
+        # No pod key but the caller allowed a test identity: ephemeral key so the
+        # receipt is signed (kid=test) in the no-key EAT flow, never mislabelled.
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        key = Ed25519PrivateKey.generate()
     receipt = build_card_receipt(card, private_key=key, kid=args.kid)
     dest = args.out or args.receipt_out
     if dest:
@@ -419,6 +424,7 @@ def main():
     p.add_argument("--card", required=True)
     p.add_argument("--kid", default=None, help="kid (default did:web:csoai.org#card-attestation-1)")
     p.add_argument("--key-file", default=None, help="Pod Ed25519 private key (repo never embeds it)")
+    p.add_argument("--allow-test-identity", action="store_true", help="Allow a NON-published key (stamps kid=test) so no-key EAT receipts are signed (one-signer doctrine)")
     p.add_argument("--out", default=None, help="Write receipt here")
     p.add_argument("--receipt-out", default=None, help="Alias for --out")
     p.set_defaults(func=cmd_receipt)
