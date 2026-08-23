@@ -90,6 +90,30 @@ fake_b = {"model": "d", "registry": reg_b, "n": len(axes_b), "ok": 3, "accuracy"
 card_b = _as_card(fake_b, {"id": "d", "name": "d", "digest": "x"}, axes=axes_b)
 check("provision_map" in card_b and len(card_b["provision_map"]) == 6, "domain card carries provision_map (6 axes)")
 
+# --- 3d. A2A / MCP discovery surface (hermetic: no network, no server spawn) ---
+import os as _os, json as _json
+agent_dir = _os.path.join(ROOT, "agent")
+check(_os.path.exists(_os.path.join(agent_dir, "agent.json")), "A2A agent.json exists")
+check(_os.path.exists(_os.path.join(agent_dir, "agent-card.json")), "schema.org agent-card.json exists")
+check(_os.path.exists(_os.path.join(agent_dir, "mcp_server.py")), "mcp_server.py exists")
+a2a = _json.load(open(_os.path.join(agent_dir, "agent.json")))
+check("capabilities" in a2a and "verify" in a2a["capabilities"], "agent card declares verify capability")
+check("did:web:csoai.org#card-attestation-1" in _json.dumps(a2a), "agent card binds card-attestation-1")
+check("not a certification" in _json.dumps(a2a), "agent card register (not a certification)")
+check(_os.path.exists(_os.path.join(ROOT, "llms.txt")), "llms.txt exists")
+check(_os.path.exists(_os.path.join(ROOT, "a2a.md")), "a2a.md contract exists")
+# MCP dispatch (in-process, no stdio): verify + listDomains + crosswalk
+sys.path.insert(0, agent_dir)
+sys.path.insert(0, os.path.join(ROOT, "engine"))
+from mcp_server import dispatch
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as _Ed
+from cibola_sign import sign as _sign
+_signed_card = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1")
+check("ok" in dispatch("cibola.verify", {"card": _signed_card}), "MCP verify dispatches")
+check(dispatch("cibola.listDomains", {})["domains"] == domain_files, "MCP listDomains returns all domains")
+check(len(dispatch("cibola.crosswalk", {"domain": "cross-border"})) == 6, "MCP crosswalk returns 6 axes")
+check("error" in dispatch("cibola.nope", {}), "MCP unknown tool returns error")
+
 # --- 4. harness -> card shape ---
 sys.path.insert(0, os.path.join(ROOT, "harness"))
 import run_axis as rax

@@ -1,0 +1,62 @@
+# CIBOLA (CSOAI Ltd, Council of AI)
+
+Independent AI-governance **measurement** body. A signed score layer over the RFC 9943 substrate (RFC 9942 receipts). **Measurement, never certification** — a measurement card is NOT a certification, endorsement, or conformity mark.
+
+- Legal: CSOAI Ltd, UK Companies House 16939677. did:web:csoai.org.
+- Neutrality: the scored entity never pays for its measurement; a vendor can buy the data, never the score.
+- Code: Apache-2.0 · Spec text: CSL-1.0.
+
+## What this produces
+
+A **signed measurement card** + **SCITT receipt (RFC 9943)** + **RFC 3161 external time-anchor** over a deterministic GSPC measurement. One engine, many domain axis-registries.
+
+## Domains (axis registries)
+
+- Generic governance: `csoai.gspc-16` (16 axes)
+- Bond: `csoai.gspc-domains/bond/1.0` (6 axes)
+- Bank: `csoai.gspc-domains/bank/1.0` (6 axes)
+- Insurance: `csoai.gspc-domains/insurance/1.0` (6 axes)
+- Equity: `csoai.gspc-domains/equity/1.0` (6 axes)
+- Index: `csoai.gspc-domains/index/1.0` (6 axes)
+- Cross-border / east-to-east: `csoai.gspc-domains/cross-border/1.0` (6 axes)
+
+## CLI usage (humans)
+
+```bash
+cibola domains                          # list registries
+cibola measure  --model X --domain bond --card card.json --out axis.json
+cibola sign     --card card.json                         # Ed25519 COSE_Sign1
+cibola receipt  --card card.json --out receipt.json      # SCITT RFC 9943
+cibola anchor   --card card.json --out anchor.json       # RFC 3161 TSA
+cibola verify   --card card.json --pubkey <b64>          # stranger-verify
+cibola verify-receipt   --receipt receipt.json --card card.json
+cibola verify-anchor    --anchor anchor.json  --card card.json
+cibola verify-all       --card card.json [--receipt r.json] [--anchor a.json]
+cibola export   --in axis.json --out-dir data-out        # licensable data product
+cibola crosswalk [--domain bond]                         # provision citations
+cibola selfcheck                                         # hermetic tests
+cibola license  --licensee X --dataset-id D --price-gbp 5000 --out manifest.json
+```
+
+A stranger verifies with only the published Ed25519 key + `cryptography` (anchor also needs `pip install asn1crypto`).
+
+## Verification (free, public)
+
+- `cibola verify` → checks the Ed25519 signature (tamper-detect) + optional identity pinning.
+- `cibola verify-receipt` → checks content_id + binds the receipt to a specific card.
+- `cibola verify-anchor` → checks the RFC 3161 TSA MessageImprint matches this card's digest (external time-binding).
+
+## A2A agents
+
+See `agent/agent.json` (A2A agent card) and `a2a.md` for the exact contract. An agent calls `cibola.verify*` tools to independently check a measurement — it never has to trust a self-reported number.
+
+## Files
+
+- `schemas/measurement-card.schema.json` — the card schema.
+- `draft/draft-csoai-scitt-measurement-card-00.md` — the RFC draft.
+- `engine/`, `harness/`, `cli/`, `axes/`, `test/` — implementation.
+- `GOVERNANCE.md` — doctrine (two heads one SOVOS, neutrality, anti-capture).
+
+## Register (verbatim)
+
+> "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one."

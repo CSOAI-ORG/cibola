@@ -10,6 +10,8 @@ Subcommands:
   receipt   Build an SCITT receipt (RFC 9943, a2a.signed-receipt/0.1) binding a card
   verify    Stranger-verify a signed card with the public key only
   verify-receipt  Stranger-verify an SCITT receipt (optionally against a card)
+  verify-anchor  Verify a card anchor (TSA imprint match + digest binding)
+  verify-all   One-command verify: card + optional receipt + anchor
   anchor    Anchor a signed card to external time (RFC 3161 TSR) + optional Rekor log
   verify-anchor  Verify a card anchor (TSA imprint match + digest binding)
   license   Generate a signed data-license manifest (mechanism; binding only w/ Nick)
@@ -169,6 +171,38 @@ def cmd_verify(args):
         print("  note: identity NOT pinned to a reference key — signature is valid, "
               "identity is self-asserted (did:web:csoai.org#card-attestation-1)", flush=True)
     return 0 if res["ok"] else 1
+
+
+def cmd_verify_all(args):
+    """One-command human/agent verification: card + optional receipt + optional anchor."""
+    n_ok = 0
+    card = json.load(open(args.card))
+    # card
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from cibola_verify import verify_card
+    r = verify_card(card, args.pubkey)
+    print(f"[1/3 card          ] {r['reason']}" + (f" (kid={r.get('kid')})" if r.get("kid") else "") + ("" if r["ok"] else "  ✗"), flush=True)
+    if r["ok"]: n_ok += 1
+    if args.receipt:
+        from cibola_receipt_verify import verify_receipt
+        receipt = json.load(open(args.receipt))
+        r2 = verify_receipt(receipt, card)
+        print(f"[2/3 receipt       ] {r2['reason']}" + ("" if r2["ok"] else "  ✗"), flush=True)
+        if r2["ok"]: n_ok += 1
+    if args.anchor:
+        from cibola_anchor_verify import verify_anchor
+        anchor = json.load(open(args.anchor))
+        r3 = verify_anchor(anchor, card)
+        print(f"[3/3 anchor        ] {r3['reason']}" + ("" if r3["ok"] else "  ✗"), flush=True)
+        if r3["ok"]: n_ok += 1
+    # register + provision_map
+    print(f"      register      : {card.get('credential_register','')[:52]}", flush=True)
+    if "provision_map" in card:
+        print(f"      provision_map : {len(card['provision_map'])} axes cited (regulation refs)", flush=True)
+    total = 1 + bool(args.receipt) + bool(args.anchor)
+    ok = n_ok == total
+    print(f"\n      VERIFY-ALL: {'PASS' if ok else f'FAIL ({n_ok}/{total})'} — measurement, never certification", flush=True)
+    return 0 if ok else 1
 
 
 def cmd_export(args):
@@ -356,6 +390,13 @@ def main():
     p.add_argument("--anchor", required=True)
     p.add_argument("--card", required=True)
     p.set_defaults(func=cmd_verify_anchor)
+
+    p = sub.add_parser("verify-all", help="One-command verify: card (+ optional receipt + anchor)")
+    p.add_argument("--card", required=True)
+    p.add_argument("--receipt", default=None)
+    p.add_argument("--anchor", default=None)
+    p.add_argument("--pubkey", default=None)
+    p.set_defaults(func=cmd_verify_all)
 
     p = sub.add_parser("license", help="Generate a signed data-license manifest (mechanism)")
     p.add_argument("--licensee", required=True)

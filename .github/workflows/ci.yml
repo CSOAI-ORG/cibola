@@ -136,5 +136,19 @@ jobs:
               assert pm2 is not None and set(pm2.keys()) == {a['slug'] for a in load_axes(dn2)[0]}
               assert all(isinstance(v,list) and v and all(isinstance(p,str) and p for p in v) for v in pm2.values())
           assert provision_map_for(None) is None and 'provision_map' in c2 and len(c2['provision_map'])==6
-          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK CI: PASS')
+          # A2A / MCP discovery surface (hermetic, in-process dispatch)
+          import os as _os
+          assert _os.path.exists(_os.path.join(os.getcwd(),'agent','agent.json'))
+          assert _os.path.exists(_os.path.join(os.getcwd(),'agent','agent-card.json'))
+          assert _os.path.exists(_os.path.join(os.getcwd(),'agent','mcp_server.py'))
+          assert _os.path.exists(_os.path.join(os.getcwd(),'llms.txt'))
+          assert _os.path.exists(_os.path.join(os.getcwd(),'a2a.md'))
+          sys.path.insert(0, _os.path.join(os.getcwd(),'agent'))
+          from mcp_server import dispatch
+          disp_card = signed  # already-signed card from earlier in the CI step
+          assert 'ok' in dispatch('cibola.verify', {'card': disp_card})
+          assert set(dispatch('cibola.listDomains', {})['domains']) >= set(dnames)
+          assert len(dispatch('cibola.crosswalk', {'domain':'cross-border'}))==6
+          assert 'error' in dispatch('cibola.nope', {})
+          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK-MCP CI: PASS')
           PYEOF

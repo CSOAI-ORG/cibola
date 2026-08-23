@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.a2a-protocol.org/agent-card.json",
+  "name": "CIBOLA Measurement & Verification Agent",
+  "description": "A neutral AI-governance MEASUREMENT body. Produces and verifies signed measurement cards, SCITT receipts and RFC 3161 time-anchors over the RFC 9943 substrate. A measurement credential is NOT a certification, endorsement or conformity mark. This agent measures; it certifies nothing.",
+  "url": "https://github.com/CSOAI-ORG/cibola",
+  "version": "0.1.0",
+  "protocolVersion": "https://schema.a2a-protocol.org/latest/",
+  "capabilities": {
+    "measure": {
+      "description": "Measure a model/system on a GSPC axis registry (16-axis generic or domain: bond/bank/insurance/equity/index/cross-border) using a deterministic gold-label judge (no LLM judges another LLM). Emits a measurement card.",
+      "domains": ["bond", "bank", "insurance", "equity", "index", "cross-border"]
+    },
+    "verify": {
+      "description": "Stranger-verify a signed CIBOLA measurement card offline using only the published Ed25519 public key. Detects tampering and pinning to a reference identity.",
+      "publicKey": "did:web:csoai.org#card-attestation-1"
+    },
+    "verifyReceipt": {
+      "description": "Verify an a2a.signed-receipt/0.1 SCITT receipt and confirm it attests to a specific card (content-id binding)."
+    },
+    "verifyAnchor": {
+      "description": "Verify an RFC 3161 external time-anchor (TSA MessageImprint matches the card digest) plus optional Rekor transparency-log entry."
+    },
+    "crosswalk": {
+      "description": "Return the domain->provision crosswalk (jurisdiction-keyed legal/standard citations a score orbits). Cites provisions; never asserts legal compliance."
+    }
+  },
+  "extends": [{"url": "https://cibola.dev/schemas/measurement-card.schema.json", "description": "The measurement-card payload this agent produces/verifies."}],
+  "skills": [
+    {"name": "measure", "id": "cibola.measure", "tool": "cibola.measure", "description": "Run a deterministic GSPC measurement and emit a signed card."},
+    {"name": "verify", "id": "cibola.verify", "tool": "cibola.verify", "description": "Stranger-verify a signed card with the public key only."},
+    {"name": "verify-receipt", "id": "cibola.verify-receipt", "tool": "cibola.verify-receipt", "description": "Verify an SCITT receipt and bind it to a card."},
+    {"name": "verify-anchor", "id": "cibola.verify-anchor", "tool": "cibola.verify-anchor", "description": "Verify an RFC 3161 external time-anchor."},
+    {"name": "crosswalk", "id": "cibola.crosswalk", "tool": "cibola.crosswalk", "description": "Return the domain->provision crosswalk."}
+  ],
+  "provider": {
+    "name": "CSOAI Ltd (Council of AI)",
+    "url": "https://councilof.ai",
+    "did": "did:web:csoai.org"
+  },
+  "register": "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one."
+}
