@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-23T16:45:22.822029+00:00",
-  "count": 21,
+  "generated_at": "2026-08-23T16:57:56.732449+00:00",
+  "count": 22,
   "chainOk": true,
-  "linked": 21,
+  "linked": 22,
   "unlinked": 0,
   "measurements": [
     {
@@ -276,6 +276,19 @@
       "signed": true,
       "receipt": "4c845333ffd8",
       "anchor_time": "2026-08-23 16:45:22+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "45e31c45bff20066",
+      "ts": "2026-08-23T16:57:55Z",
+      "registry": "csoai.gspc-domains/bank/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 4,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "28aff93c05ba",
+      "anchor_time": "2026-08-23 16:57:56+00:00",
       "provision_axes": 6
     }
   ]
