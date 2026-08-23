@@ -1,0 +1,21 @@
+{
+  "@context": ["https://www.w3.org/ns/did/v1", "https://schema.a2a-protocol.org/agent-card.json"],
+  "id": "did:web:csoai.org",
+  "name": "DORADO — Measurement & Verification Agent",
+  "description": "Independent AI-governance MEASUREMENT body. Produces and verifies signed measurement cards, SCITT receipts and RFC 3161 time-anchors. A measurement credential is NOT a certification, endorsement or conformity mark.",
+  "url": "https://csoai-org.github.io/dorado/agent/agent.json",
+  "protocol": "A2A",
+  "capabilities": {
+    "measure": {"description": "Deterministic GSPC measurement (no LLM judges another LLM); emits a signed card."},
+    "verify": {"description": "Stranger-verify a signed card with only the published Ed25519 key."},
+    "verifyReceipt": {"description": "Verify an SCITT (RFC 9943) receipt and bind it to a card."},
+    "verifyAnchor": {"description": "Verify an RFC 3161 external time-anchor (TSA imprint-match)."},
+    "elo": {"description": "Rank models from pairwise results (Elo/Bradley-Terry + CI)."},
+    "compare": {"description": "Compare two models on the relative (pairwise) governance axes + cost."},
+    "telemetry": {"description": "Return cost/latency/throughput telemetry."}
+  },
+  "mcpEndpoint": "https://csoai-org.github.io/dorado/agent/mcp_server.py",
+  "skills": ["dorado.measure", "dorado.verify", "dorado.verifyReceipt", "dorado.verifyAnchor",
+             "dorado.elo", "dorado.compare", "dorado.telemetry"],
+  "register": "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one."
+}

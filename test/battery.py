@@ -251,6 +251,8 @@ check(os.path.exists(os.path.join(ROOT, "verify.html")), "verify.html exists")
 check("verify.html" in open(os.path.join(ROOT, "index.html")).read(), "index.html links verify.html")
 check(os.path.exists(os.path.join(ROOT, "leaderboard.html")), "leaderboard.html exists")
 check("leaderboard.html" in open(os.path.join(ROOT, "index.html")).read(), "index.html links leaderboard.html")
+check(os.path.exists(os.path.join(ROOT, ".well-known", "agent.json")), ".well-known/agent.json (A2A discovery) exists")
+check(os.path.exists(os.path.join(ROOT, ".well-known", "mcp.json")), ".well-known/mcp.json (MCP discovery) exists")
 check(os.path.exists(os.path.join(ROOT, "assets", "example-linked-anchor.json")), "linked anchor artifact published")
 
 # --- 4. harness -> card shape ---
