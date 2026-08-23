@@ -57,7 +57,7 @@ res = {"model": "fixture", "registry": reg, "n": len(axes), "ok": 4, "accuracy":
        "per_axis": [{"axis": a["slug"], "gold": a["gold"], "verdict": "PASS" if i < 4 else "FAIL",
                      "resp": "x", "measured": True} for i, a in enumerate(axes)]}
 card = _as_card(res, {"id": "fixture", "name": "fixture", "digest": "x"}, axes=axes)
-signed = sign_card(card, key, kid="did:web:csoai.org#card-attestation-1")
+signed = sign_card(card, key, kid="did:web:csoai.org#card-attestation-1", allow_test_identity=True)
 receipt = build_card_receipt(signed, private_key=key, kid="did:web:csoai.org#card-attestation-1")
 anchor = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": card_digest(signed),
           "anchors": [{"kind": "tsa-rfc3161", "digest_sha256": card_digest(signed),

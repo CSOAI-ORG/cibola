@@ -76,27 +76,43 @@ def tsa_timestamp(digest_hex: str, tsa_url: str = TSA_DEFAULT) -> dict:
 
 
 def rekor_entry(digest_hex: str, rekor_url: str = REKOR_DEFAULT) -> dict:
-    """Best-effort Rekor / transparency-log entry for a digest. Schema may drift."""
-    entry = {"kind": "hashedrekord", "apiVersion": "0.0.1", "spec": {
-        "data": {"hash": {"algorithm": "sha256", "value": digest_hex}},
-        "signature": {"content": "Y2FyZA==", "publicKey": {"content": "Y2FyZA=="}}}}
-    body = json.dumps({"proposedEntry": entry}).encode()
-    r = urllib.request.Request(rekor_url, data=body,
-                               headers={'Content-Type': 'application/json'}, method='POST')
-    try:
-        resp = urllib.request.urlopen(r, timeout=30).read()
-        data = json.loads(resp.decode())
-        k = list(data.keys())[0]
-        return {"kind": "rekor-transparency-log", "rekor_url": REKOR_DEFAULT,
-                "entry_uuid": k, "log_index": data[k].get('logIndex'),
-                "integrated_time": data[k].get('integratedTime'),
-                "signed_entry_timestamp": bool(data[k].get('signedEntryTimestamp')), "recorded": True}
-    except urllib.error.HTTPError as e:
-        return {"kind": "rekor-transparency-log", "rekor_url": REKOR_DEFAULT,
-                "recorded": False, "error": f"HTTP {e.code}: {e.read().decode()[:160]}"}
-    except Exception as e:
-        return {"kind": "rekor-transparency-log", "rekor_url": REKOR_DEFAULT,
-                "recorded": False, "error": f"{type(e).__name__}: {e}"}
+    """Attempt a Rekor / transparency-log entry for a digest. Honest about schema drift.
+
+    Tries the current hashedrekord shape (flat signature) and then the body-wrapped
+    shape. The public Rekor v2 API has changed its wire format; if neither is accepted
+    we report schema-drift rather than pretend an entry exists."""
+    import hashlib as _h
+    entry_spec = {"data": {"hash": {"algorithm": "sha256", "value": digest_hex}},
+                  "signature": {"content": "Y2FyZA==", "publicKey": {"content": "Y2FyZA=="}}}
+    rec = {"apiVersion": "0.0.1", "kind": "hashedrekord", "spec": entry_spec}
+    body_b64 = base64.b64encode(json.dumps(rec, separators=(",", ":")).encode()).decode()
+    variants = [
+        {"proposedEntry": {"kind": "hashedrekord", "apiVersion": "0.0.1", "spec": entry_spec}},
+        {"proposedEntry": {"kind": "hashedrekord", "apiVersion": "0.0.1", "spec": entry_spec, "body": body_b64}},
+        {"proposedEntry": {"kind": "hashedrekord", "body": body_b64}},
+    ]
+    for proposed in variants:
+        r = urllib.request.Request(rekor_url, data=json.dumps(proposed).encode(),
+                                   headers={'Content-Type': 'application/json'}, method='POST')
+        try:
+            resp = urllib.request.urlopen(r, timeout=30).read()
+            data = json.loads(resp.decode())
+            k = list(data.keys())[0]
+            return {"kind": "rekor-transparency-log", "rekor_url": REKOR_DEFAULT,
+                    "entry_uuid": k, "log_index": data[k].get('logIndex'),
+                    "integrated_time": data[k].get('integratedTime'),
+                    "signed_entry_timestamp": bool(data[k].get('signedEntryTimestamp')), "recorded": True}
+        except urllib.error.HTTPError as e:
+            last_err = f"HTTP {e.code}: {e.read().decode()[:120]}"
+            continue  # try next shape
+        except Exception as e:
+            last_err = f"{type(e).__name__}: {e}"
+            continue
+    return {"kind": "rekor-transparency-log", "rekor_url": REKOR_DEFAULT,
+            "recorded": False, "schema_drift": True,
+            "error": "public Rekor v2 API rejected the hashedrekord entry (schema drift); "
+                     "the RFC 3161 TSA anchor remains the authoritative external time-binding. "
+                     f"({last_err})"}
 
 
 def anchor_card(card: dict, *, tsa_url: str = TSA_DEFAULT, do_rekor: bool = True) -> dict:

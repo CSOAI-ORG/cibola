@@ -11,15 +11,15 @@
       "evidence_sha256": "4f49f1a308e82a029cc8e8ac73ce41483d723a1315c2995bbd0c863e9d4b5092"
     }
   ],
-  "issued_at": "2026-08-23T05:47:45.753759+00:00",
+  "issued_at": "2026-08-23T08:47:48.514554+00:00",
   "kid": "did:web:csoai.org#card-attestation-1",
-  "content_id": "f0a70541df3778a2bcdfe05ad7813312762a8a59aaf1a5b73e0f46fe3d48a246",
+  "content_id": "df3fa7e848c8d16a9fba685b17e71fdcf174a3c8ee4121359c38202e44077885",
   "signature": {
     "alg": "Ed25519",
     "kid": "did:web:csoai.org#card-attestation-1",
-    "pubkey": "KKsJtul/P/9O+KuGQn+VcvyvH7AlqA/BXfVm3gw3E90=",
-    "sig": "jtpepk8tlTX/EHRDyyZ9p4xv5gu0URC+ptHnTazsr1PQzxKi2BZAf8pLufT4/O3oAIlAA4xJilYbgfe10zy0Bg==",
-    "pubkey_thumbprint": "SiNvEt0I1z9GrIa-nG2KQ89Azunb_ZEcCxbAq9jPgvg",
+    "pubkey": "nr22j7ZrNZ6Ive9BHCuhQxhBaCyISxx14CEoKfy5qMM=",
+    "sig": "HFCiTFLb/kSCb46nEFudJK9xUqgSV7yrxRJ4xR4RcGdh9iu4/Pj83Eh/u8kF0HZ+jVdBkOdj8ZHv6XT5JtayDw==",
+    "pubkey_thumbprint": "kKXWqk1biibRCf2ssrYQHLmLupGMm22k7B8omh9X6WU",
     "sig_input": "ed25519(canonical receipt minus content_id/signature)"
   }
 }

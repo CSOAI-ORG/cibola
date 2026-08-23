@@ -144,7 +144,7 @@ def cmd_sign(args):
         key = _load_signing_key()
     if is_signed(card):
         print(f"{args.card} already signed (signature present); re-signing over canonical form", flush=True)
-    signed = sign(card, key, kid=args.kid)
+    signed = sign(card, key, kid=args.kid, allow_test_identity=args.allow_test_identity)
     if args.out:
         json.dump(signed, open(args.out, "w"), indent=2)
         print(f"signed -> {args.out}", flush=True)
@@ -358,6 +358,7 @@ def main():
     p.add_argument("--key-file", default=None, help="Raw/PEM Ed25519 private key (pod-held; NOT in repo)")
     p.add_argument("--pem-file", default=None, help="PEM Ed25519 private key")
     p.add_argument("--kid", default=None, help="kid (default did:web:csoai.org#card-attestation-1)")
+    p.add_argument("--allow-test-identity", action="store_true", help="Allow a NON-published key (stamps kid=test); required for demo/test keys (one-signer doctrine)")
     p.add_argument("--out", default=None)
     p.set_defaults(func=cmd_sign)
 

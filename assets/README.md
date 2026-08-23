@@ -9,14 +9,24 @@ full pipeline —
 ## ⚠️ Signing-key note (read first)
 
 These examples were signed with a **throwaway development key** to demonstrate the
-pipeline, NOT the production `did:web:csoai.org#card-attestation-1` key (THE BRICK,
-estate key `d4cb0eaa`). The production private half is Mac/keystone-held and must
-never be committed. To produce a **production-signed** card:
+pipeline, NOT the production `did:web:csoai.org#card-attestation-1` key. The CIBOLA
+signing path now **enforces the one-signer doctrine** (`engine/cibola_sign.py`): a
+card can only be stamped with a **published** did:web identity's kid. A
+non-published key (like those used in these examples) is only allowed with
+`--allow-test-identity` and is stamped `kid=did:web:csoai.org#test-identity` — so a
+test/dev card is never mistaken for a production one.
+
+The **real `#card-attestation-1` private half is held on the estate Mac only and is
+not reachable from this repo** (it must never be committed). The keystone key at
+`~/.sovos/city_ed25519` is a DIFFERENT identity and is correctly **rejected** from
+claiming `card-attestation-1` by the identity gate. To produce a genuinely
+production-signed card, provision the real `#card-attestation-1` key at the pod
+(keystone) path, then:
 
 ```bash
-CIBOLA_SIGNING_KEY_FILE=<pod key> cibola sign  --card card.json
+CIBOLA_SIGNING_KEY_FILE=<pod key> cibola sign  --card card.json           # gate auto-recognizes card-attestation-1
 CIBOLA_SIGNING_KEY_FILE=<pod key> cibola receipt --card card.json --out receipt.json
-cibola anchor --card card.json --out anchor.json     # external RFC 3161 time-binding
+CIBOLA_SIGNING_KEY_FILE=<pod key> cibola anchor --card card.json --out anchor.json   # RFC 3161 TSA
 ```
 
 A stranger verifies each leg with only the published key + `cryptography`

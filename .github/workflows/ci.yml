@@ -78,7 +78,7 @@ jobs:
                   'per_axis':[{'axis':a['slug'],'gold':a['gold'],'verdict':'PASS' if i<9 else 'FAIL','resp':'x','measured':True} for i,a in enumerate(axes)]}
           card = rax.as_card(fake, {'id':'t','name':'T','digest':'x'})
           key = Ed25519PrivateKey.generate()
-          signed = sign_card(card, key, kid='did:web:csoai.org#card-attestation-1')
+          signed = sign_card(card, key, kid='did:web:csoai.org#card-attestation-1', allow_test_identity=True)
           # stranger-verify
           v = verify_card(signed)
           assert v['ok'], v['reason']
@@ -161,7 +161,7 @@ jobs:
           _td = _tmp.mkdtemp()
           from cibola_receipt import build_card_receipt as _bcr
           from cibola_anchor import card_digest as _cd
-          _sc2 = sign_card(card, key, kid='did:web:csoai.org#card-attestation-1')
+          _sc2 = sign_card(card, key, kid='did:web:csoai.org#card-attestation-1', allow_test_identity=True)
           _rc2 = _bcr(_sc2, private_key=key, kid='did:web:csoai.org#card-attestation-1')
           _an2 = {"schema":"csoai.card-anchor/0.1","card_content_sha256":_cd(_sc2),
                   "anchors":[{"kind":"tsa-rfc3161","digest_sha256":_cd(_sc2),"message_imprint_matches":True,"gen_time":"2026-08-23T00:00:00Z"}]}

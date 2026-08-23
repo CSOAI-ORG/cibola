@@ -81,10 +81,10 @@
   "signature": {
     "kind": "ed25519",
     "alg": -19,
-    "kid": "did:web:csoai.org#card-attestation-1",
-    "pubkey": "KKsJtul/P/9O+KuGQn+VcvyvH7AlqA/BXfVm3gw3E90=",
-    "sig": "K9qgDzwZUtfPmYJMe0aKQLEvSbkntJPMmN8BZoz01lH/ax9Ycp7aRvwNkipWM58a+D/9rsvgsTwXRo86k0nmDg==",
-    "pubkey_thumbprint": "SiNvEt0I1z9GrIa-nG2KQ89Azunb_ZEcCxbAq9jPgvg",
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "nr22j7ZrNZ6Ive9BHCuhQxhBaCyISxx14CEoKfy5qMM=",
+    "sig": "8vpFa0A6zZ7ZmQBhzyk0FDGBG2u0xYD5zab+QdYLInNRheBjfD/YzHwqG23RgCgV7Aq0Ec0uLJ/oYMHDjnb+BQ==",
+    "pubkey_thumbprint": "kKXWqk1biibRCf2ssrYQHLmLupGMm22k7B8omh9X6WU",
     "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
   }
 }

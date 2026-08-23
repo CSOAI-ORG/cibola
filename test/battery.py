@@ -90,6 +90,24 @@ fake_b = {"model": "d", "registry": reg_b, "n": len(axes_b), "ok": 3, "accuracy"
 card_b = _as_card(fake_b, {"id": "d", "name": "d", "digest": "x"}, axes=axes_b)
 check("provision_map" in card_b and len(card_b["provision_map"]) == 6, "domain card carries provision_map (6 axes)")
 
+# --- 3e. one-signer identity gate (a non-published key must not claim a production kid) ---
+from engine.cibola_sign import resolve_kid, signing_identity, PUBLISHED_IDENTITIES, TEST_KID
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as _Ed2
+from cryptography.hazmat.primitives import serialization as _ser2
+_tk = _Ed2.generate()
+_tr = _tk.public_key().public_bytes(encoding=_ser2.Encoding.Raw, format=_ser2.PublicFormat.Raw)
+try:
+    resolve_kid(_tr, "did:web:csoai.org#card-attestation-1", allow_test_identity=False)
+    check(False, "identity gate rejects a non-published key claiming production kid")
+except ValueError:
+    check(True, "identity gate rejects a non-published key claiming production kid")
+check(signing_identity(_tr)[1] is False, "non-published key is not a published identity")
+check(resolve_kid(_tr, None, allow_test_identity=True) == TEST_KID, "non-published key -> test kid (one-signer)")
+_pk = _Ed2.generate().public_key()
+from cryptography.hazmat.primitives import serialization as _ser2
+_pubraw = _pk.public_bytes(encoding=_ser2.Encoding.Raw, format=_ser2.PublicFormat.Raw)
+check(signing_identity(_pubraw)[1] is False, "random/other key is not a published identity")
+
 # --- 3d. A2A / MCP discovery surface (hermetic: no network, no server spawn) ---
 import os as _os, json as _json
 agent_dir = _os.path.join(ROOT, "agent")
@@ -108,7 +126,7 @@ sys.path.insert(0, os.path.join(ROOT, "engine"))
 from mcp_server import dispatch
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as _Ed
 from cibola_sign import sign as _sign
-_signed_card = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1")
+_signed_card = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1", allow_test_identity=True)
 check("ok" in dispatch("cibola.verify", {"card": _signed_card}), "MCP verify dispatches")
 check(dispatch("cibola.listDomains", {})["domains"] == domain_files, "MCP listDomains returns all domains")
 check(len(dispatch("cibola.crosswalk", {"domain": "cross-border"})) == 6, "MCP crosswalk returns 6 axes")
@@ -124,7 +142,7 @@ import base64 as _b64
 sys.path.insert(0, os.path.join(ROOT, "engine"))
 from cibola_receipt import build_card_receipt as _bcr
 _tmpd = _temp.mkdtemp()
-_sc = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1")
+_sc = _sign(card_b, _Ed.generate(), kid="did:web:csoai.org#card-attestation-1", allow_test_identity=True)
 _r = _bcr(_sc, private_key=_Ed.generate(), kid="did:web:csoai.org#card-attestation-1")
 from cibola_anchor import card_digest as _cd
 _fa = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": _cd(_sc),
@@ -167,10 +185,25 @@ from cryptography.hazmat.primitives import serialization
 from engine.cibola_sign import sign as sign_card, rfc9679_thumbprint, canonical
 from engine.cibola_verify import verify_card
 key = Ed25519PrivateKey.generate()
-signed = sign_card(card, key)
+signed = sign_card(card, key, allow_test_identity=True)
 check(signed["signature"]["kind"] == "ed25519", "signature kind ed25519")
 check(signed["signature"]["alg"] == -19, "signature alg -19 (Ed25519)")
-check(signed["signature"]["kid"].startswith("did:web:csoai.org#"), "signature kid did:web")
+check(signed["signature"]["kid"] == "did:web:csoai.org#test-identity", "non-published key stamped kid=test (one-signer)")
+# identity gate: a non-published key MUST be rejected if it claims a production kid
+from engine.cibola_sign import resolve_kid, PUBLISHED_IDENTITIES
+raw = key.public_key().public_bytes(encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw)
+try:
+    resolve_kid(raw, "did:web:csoai.org#card-attestation-1", allow_test_identity=False)
+    check(False, "identity gate rejects non-published key claiming production kid")
+except ValueError:
+    check(True, "identity gate rejects non-published key claiming production kid")
+# a published identity resolves to its real kid
+import base64 as _b64
+pub_x_b64url = "1MsOqhbV9Qv3Yzo2qjT-CaVeEkuTFt7Sq9sSK7nDfjg"
+pub_x = _b64.urlsafe_b64decode(pub_x_b64url + "==")
+from engine.cibola_sign import signing_identity
+k, published = signing_identity(pub_x)
+check(published and k == "did:web:csoai.org#card-attestation-1", "published card-attestation-1 identity recognized")
 check(signed["signature"]["pubkey_thumbprint"] == rfc9679_thumbprint(key.public_key().public_bytes(
     encoding=serialization.Encoding.Raw,
     format=serialization.PublicFormat.Raw)), "thumbprint matches pubkey")
