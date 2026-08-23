@@ -7,8 +7,8 @@
   "protocolVersion": "https://schema.a2a-protocol.org/latest/",
   "capabilities": {
     "measure": {
-      "description": "Measure a model/system on a GSPC axis registry (16-axis generic or domain: bond/bank/insurance/equity/index/cross-border) using a deterministic gold-label judge (no LLM judges another LLM). Emits a measurement card.",
-      "domains": ["bond", "bank", "insurance", "equity", "index", "cross-border"]
+      "description": "Measure a model/system on a GSPC axis registry (16-axis generic or domain: bond/bank/insurance/equity/index/cross-border/relative/operational) using a deterministic gold-label judge (no LLM judges another LLM). Emits a measurement card.",
+      "domains": ["bond", "bank", "insurance", "equity", "index", "cross-border", "relative", "operational"]
     },
     "verify": {
       "description": "Stranger-verify a signed DORADO measurement card offline using only the published Ed25519 public key. Detects tampering and pinning to a reference identity.",
@@ -22,11 +22,27 @@
     },
     "crosswalk": {
       "description": "Return the domain->provision crosswalk (jurisdiction-keyed legal/standard citations a score orbits). Cites provisions; never asserts legal compliance."
+    },
+    "elo": {
+      "description": "Rank models from pairwise results (Elo or Bradley-Terry) with confidence-interval bands + n_min guard. LMArena-grade; never a certification."
+    },
+    "compare": {
+      "description": "Compare two models on the relative (pairwise) governance axes + cost telemetry. Blind A/B, deterministic gold. Measurement, never the score."
+    },
+    "telemetry": {
+      "description": "Return captured cost/latency/throughput telemetry (model, latency_ms, tok_s, cost_usd) — the operational half OpenRouter throws away."
+    },
+    "openrouter": {
+      "description": "Probe the live OpenRouter model universe (cost/context/provider) — the operational reference for the operational axis."
     }
   },
   "extends": [{"url": "https://dorado.dev/schemas/measurement-card.schema.json", "description": "The measurement-card payload this agent produces/verifies."}],
   "skills": [
     {"name": "measure", "id": "dorado.measure", "tool": "dorado.measure", "description": "Run a deterministic GSPC measurement and emit a signed card."},
+    {"name": "elo", "id": "dorado.elo", "tool": "dorado.elo", "description": "Rank models pairwise (Elo/BT + CI)."},
+    {"name": "compare", "id": "dorado.compare", "tool": "dorado.compare", "description": "Compare two models on relative axes + cost telemetry."},
+    {"name": "telemetry", "id": "dorado.telemetry", "tool": "dorado.telemetry", "description": "Return cost/latency/throughput telemetry."},
+    {"name": "openrouter", "id": "dorado.openrouter", "tool": "dorado.openrouter", "description": "Probe the OpenRouter model universe."},
     {"name": "verify", "id": "dorado.verify", "tool": "dorado.verify", "description": "Stranger-verify a signed card with the public key only."},
     {"name": "verify-receipt", "id": "dorado.verify-receipt", "tool": "dorado.verify-receipt", "description": "Verify an SCITT receipt and bind it to a card."},
     {"name": "verify-anchor", "id": "dorado.verify-anchor", "tool": "dorado.verify-anchor", "description": "Verify an RFC 3161 external time-anchor."},
