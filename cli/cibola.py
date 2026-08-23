@@ -15,6 +15,8 @@ Subcommands:
   anchor    Anchor a signed card to external time (RFC 3161 TSR) + optional Rekor log
   verify-anchor  Verify a card anchor (TSA imprint match + digest binding)
   license   Generate a signed data-license manifest (mechanism; binding only w/ Nick)
+  publish   Publish a (signed) measurement card to the CIBOLA measurement board
+  board     Show the measurement board index (what's been measured, chainOk)
   export    Turn an axis-engine result into the licensable data product (Q/A + pairs + incidents)
   selfcheck Run the hermetic deterministic test battery (no network)
 
@@ -323,6 +325,35 @@ def cmd_license(args):
     return manifest
 
 
+def cmd_publish(args):
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from cibola_board import publish
+    card = json.load(open(args.card))
+    receipt = json.load(open(args.receipt)) if args.receipt else None
+    anchor = json.load(open(args.anchor)) if args.anchor else None
+    ent = publish(card, receipt, anchor)
+    status = "deduped (already on board)" if ent.get("deduped") else "published"
+    print(f"{status}: {ent['hash'][:16]}… {ent['registry']} {ent.get('measured')}/{ent.get('total')} "
+          f"kid={ent['kid']} provision_axes={ent.get('provision_axes')}", flush=True)
+    print(f"  receipt={ (ent.get('receipt_content_id') or '')[:12]}… anchor_time={ent.get('anchor_generic_time')}", flush=True)
+    return ent
+
+
+def cmd_board(args):
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from cibola_board import rebuild_index
+    idx = rebuild_index()
+    if args.json:
+        print(json.dumps(idx, indent=2))
+        return
+    print(f"CIBOLA measurement board — {idx['count']} measurements, chainOk={idx['chainOk']} "
+          f"(linked {idx['linked']}/{idx['count']})", flush=True)
+    for m in idx["measurements"]:
+        print(f"  {m['hash']} {m['registry']:38s} {m['measured']}/{m['total']} "
+              f"signed={m['signed']} kid={m['kid'].split('#')[-1] if m['kid'] else '?'} "
+              f"anchor={ (m['anchor_time'] or 'none')[:19]}", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser(description="CIBOLA measurement CLI.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -409,6 +440,16 @@ def main():
     p.add_argument("--key-file", default=None, help="Pod Ed25519 private key (repo never embeds it)")
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_license)
+
+    p = sub.add_parser("publish", help="Publish a signed measurement card to the CIBOLA board")
+    p.add_argument("--card", required=True)
+    p.add_argument("--receipt", default=None)
+    p.add_argument("--anchor", default=None)
+    p.set_defaults(func=cmd_publish)
+
+    p = sub.add_parser("board", help="Show the CIBOLA measurement board index")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_board)
 
     p = sub.add_parser("export", help="Turn an axis-engine result into the licensable data product")
     p.add_argument("--in", dest="inp", required=True, help="axis-engine result JSON")

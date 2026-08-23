@@ -171,5 +171,25 @@ jobs:
           assert _rep['ok'] and all(s['ok'] for s in _rep['steps'])
           assert _os.path.exists(_os.path.join(os.getcwd(),'verify.html'))
           assert 'verify.html' in open(_os.path.join(os.getcwd(),'index.html')).read()
-          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK-MCP-A2A-CLIENT CI: PASS')
+          # measurement board: content-address = digest, refuses unsigned, chain OK
+          import tempfile as _tmpb
+          _bd2 = _tmpb.mkdtemp()
+          _prior = _os.environ.get('CIBOLA_BOARD_DIR'); _os.environ['CIBOLA_BOARD_DIR']=_bd2
+          from harness.cibola_board import publish as _bp, rebuild_index as _bi, _card_hash as _bh
+          try:
+              _bp(card)  # card is unsigned -> refuse
+              raise SystemExit('board should refuse unsigned')
+          except ValueError:
+              pass
+          _sb2 = _sc2  # already-signed card from earlier in the step
+          _eb = _bp(_sb2, _rc2)
+          assert _eb.get('signed') is True and _eb['hash'] == _bh(_sb2)
+          assert _bp(_sb2, _rc2).get('deduped', False)
+          _ib = _bi()
+          assert _ib['count'] >= 1 and _ib['chainOk']
+          if _prior:
+              _os.environ['CIBOLA_BOARD_DIR']=_prior
+          else:
+              _os.environ.pop('CIBOLA_BOARD_DIR',None)
+          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS-CROSSWALK-MCP-A2A-CLIENT-BOARD CI: PASS')
           PYEOF

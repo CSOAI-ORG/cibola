@@ -108,6 +108,38 @@ from cryptography.hazmat.primitives import serialization as _ser2
 _pubraw = _pk.public_bytes(encoding=_ser2.Encoding.Raw, format=_ser2.PublicFormat.Raw)
 check(signing_identity(_pubraw)[1] is False, "random/other key is not a published identity")
 
+# --- 3f. measurement board (content-addressed, append-only, refuses unsigned) ---
+import tempfile as _tmpb
+from harness.cibola_board import publish as _bpublish, rebuild_index as _bidx, _card_hash
+from harness.cibola_board import _card_hash as _board_hash
+import hashlib as _hlb
+from engine.cibola_sign import canonical as _cardcanonical, sign as _boardsign
+from engine.cibola_receipt import build_card_receipt as _boardreceipt
+_bd = _tmpb.mkdtemp()
+_prior = os.environ.get("CIBOLA_BOARD_DIR")
+os.environ["CIBOLA_BOARD_DIR"] = _bd
+_bk = _Ed2.generate()
+_check_hash = _board_hash(card_b)
+check(_check_hash == _hlb.sha256(_cardcanonical(card_b)).hexdigest(), "board content-address = card digest")
+try:
+    _bpublish(card_b)  # card_b is UNSIGNED -> must refuse
+    check(False, "board refuses an unsigned card")
+except ValueError:
+    check(True, "board refuses an unsigned card")
+_sc_b = _boardsign(card_b, _bk, allow_test_identity=True)
+_r_b = _boardreceipt(_sc_b, private_key=_bk)
+_e = _bpublish(_sc_b, _r_b)
+check(_e["hash"] == _card_hash(_sc_b), "board entry hash = signed card digest")
+check(_e.get("signed") is True, "board entry marks signed")
+_e2 = _bpublish(_sc_b, _r_b)
+check(_e2.get("deduped", False), "board dedupes on republish")
+_idx = _bidx()
+check(_idx["count"] >= 1 and _idx["chainOk"], f"board index chainOk (count={_idx['count']})")
+if _prior:
+    os.environ["CIBOLA_BOARD_DIR"] = _prior
+else:
+    os.environ.pop("CIBOLA_BOARD_DIR", None)
+
 # --- 3d. A2A / MCP discovery surface (hermetic: no network, no server spawn) ---
 import os as _os, json as _json
 agent_dir = _os.path.join(ROOT, "agent")
@@ -131,6 +163,7 @@ check("ok" in dispatch("cibola.verify", {"card": _signed_card}), "MCP verify dis
 check(dispatch("cibola.listDomains", {})["domains"] == domain_files, "MCP listDomains returns all domains")
 check(len(dispatch("cibola.crosswalk", {"domain": "cross-border"})) == 6, "MCP crosswalk returns 6 axes")
 check("error" in dispatch("cibola.nope", {}), "MCP unknown tool returns error")
+check("count" in dispatch("cibola.board", {}), "MCP board tool returns index")
 
 # A2A client module imports + audit() shape (hermetic: no server spawn, no network)
 sys.path.insert(0, agent_dir)

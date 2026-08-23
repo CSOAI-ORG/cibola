@@ -51,7 +51,17 @@ TOOLS = {
             "domain": {"type": "string", "description": "Optional: one domain (bond/bank/insurance/equity/index/cross-border)"}},
             "required": []},
     },
+    "cibola.board": {
+        "description": "Return the CIBOLA measurement board index (content-addressed + append-only): what has been measured, chainOk, per-measurement summary. A MEASUREMENT registry, not a rank table.",
+        "inputSchema": {"type": "object", "properties": {}},
+    },
 }
+
+
+def _board(args):
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from cibola_board import rebuild_index
+    return rebuild_index()
 
 
 def _verify_card(args):
@@ -86,6 +96,7 @@ HANDLERS = {
     "cibola.verifyAnchor": _verify_anchor,
     "cibola.listDomains": _list_domains,
     "cibola.crosswalk": _crosswalk,
+    "cibola.board": _board,
 }
 
 

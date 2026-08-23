@@ -40,6 +40,20 @@ cibola license  --licensee X --dataset-id D --price-gbp 5000 --out manifest.json
 
 A stranger verifies with only the published Ed25519 key + `cryptography` (anchor also needs `pip install asn1crypto`).
 
+## The measurement board
+
+The CIBOLA measurement **board** (the body's record of what it measured) is a
+content-addressed, append-only registry at `board/board-index.json` — fetch it as
+`https://csoai-org.github.io/cibola/board/board-index.json`. It is a MEASUREMENT
+registry, not a rank table. Each entry records a signed card's content hash,
+registry, subject, measured/total, kid, receipt content_id, anchor time, and
+provision-axis count, with `chainOk` / `linked` diagnostics.
+
+```bash
+cibola publish --card card.json [--receipt r.json] [--anchor a.json]   # append (dedupe)
+cibola board [--json]                                                 # show the index
+```
+
 ## Verification (free, public)
 
 - `cibola verify` → checks the Ed25519 signature (tamper-detect) + optional identity pinning.
