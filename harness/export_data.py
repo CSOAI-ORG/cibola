@@ -34,9 +34,11 @@ def export(result: dict, subject: dict) -> dict:
     """
     bench_digest = sha256(json.dumps(json.load(open(os.path.join(ROOT, "axes", "gspc-16.json")))["axes"], sort_keys=True))
     ts = result.get("ts", "")
+    register = ("This data is derived from a measurement. It is not a certification, "
+                "endorsement, or conformity mark.")
     provenance = {"benchmark": "csoai.gspc-16", "benchmark_digest": bench_digest,
                   "subject_id": subject.get("id"), "subject_name": subject.get("name"),
-                  "issued_at": ts}
+                  "issued_at": ts, "register": register}
 
     qa = []            # the core Q/A data product (match estate sim_cards.jsonl)
     preference_pairs = []  # adversarial A/B per axis (measured, not synthetic)
@@ -53,6 +55,7 @@ def export(result: dict, subject: dict) -> dict:
             "ts": ts, "axis": axis, "q": probe, "a": resp,
             "ah": _ah(resp), "gold": gold, "verdict": verdict,
             "measured": r.get("measured", True),
+            "provenance": provenance,
         }
         qa.append(qa_rec)
         records.append(qa_rec)

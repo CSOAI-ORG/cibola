@@ -85,6 +85,6 @@ jobs:
           from export_data import export, write_jsonl
           d = export(fake, {'id':'t','name':'T'})
           assert len(d['qa'])==16 and len(d['preference_pairs'])==16
-          assert all('not a certification' in r['provenance'] for r in d['preference_pairs'])
+          assert all('not a certification' in json.dumps(r['provenance']) for r in d['preference_pairs'])
           print('SIGN-VERIFY-EXPORT CI: PASS — signed card verifies, tamper rejected, 16/16 data rows')
           PYEOF
