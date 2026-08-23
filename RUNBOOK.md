@@ -37,6 +37,24 @@ DORADO_SIGNING_KEY_FILE=/path/to/pod-key bash scripts/dorado-eat.sh
 `CYCLES` is the number of EAT rotations. The loop is fail-open (one cycle's error
 is logged and the next runs).
 
+### Parallel EAT batch (`scripts/eat-batch.sh`)
+
+Fan out a full MINE→MINT→CHAIN→PUBLISH cycle per domain, in parallel (default
+concurrency 3), entirely on the pod:
+
+```bash
+ssh sov-brain-2 && cd /workspace/dorado
+MODEL=sov33-unified:latest CONC=3 bash scripts/eat-batch.sh   # all 6 domains
+```
+
+Verified e2e on the pod: board grew to 14 measurements (all 6 domains), `chainOk=True`,
+`linked=14`, every entry has a real RFC 3161 anchor time. All batch cards stranger-verify
+VALID. **If a measure returns `measured=0/6`, that is the harness honestly reporting the
+pod's Ollama inference is degraded/contended OR not serving — NOT a wiring bug.** Check
+`ss -tlnp | grep 11434` + `ollama list` on the pod; if `ollama list` says "could not
+connect", the model server is down and must be started/restarted before scores appear.
+The harness never fakes a score.
+
 ## Backup (`scripts/dorado-backup.sh`)
 
 Snapshot the worktree + board to a durable off-Mac location, rotated to the last
