@@ -3,6 +3,7 @@
 
 Subcommands:
   axes      List the 16 GSPC axes (+probe/gold), --json for machine-readable
+  domains   List the domain axis registries (bond/bank/insurance/equity/index/cross-border)
   measure   Measure a model on all axes (Ollama), emit axis-engine record + optional card
   sign      Sign a CIBOLA measurement card (Ed25519, COSE_Sign1, one-signer doctrine)
   receipt   Build an SCITT receipt (RFC 9943, a2a.signed-receipt/0.1) binding a card
@@ -35,21 +36,39 @@ def cmd_axes(args):
 
 def cmd_measure(args):
     sys.path.insert(0, os.path.join(ROOT, "harness"))
-    from run_axis import measure, as_card, sha256, BASE
+    from run_axis import measure, as_card, sha256, BASE, load_axes
     base = args.base or BASE
-    print(f"Measuring {args.model} on 16 GSPC axes via {base} ...", flush=True)
-    res = measure(args.model, base=base, delay=args.delay)
-    rec = {"schema": "csoai.axis-engine-16/0.2", "axes": 16, **res}
+    axes, registry_id = load_axes(args.domain)
+    print(f"Measuring {args.model} on {len(axes)} {registry_id or 'GSPC-16'} axes via {base} ...", flush=True)
+    res = measure(args.model, axes=axes, base=base, delay=args.delay, registry_id=registry_id)
+    rec = {"schema": "csoai.axis-engine/0.3", "axes": len(axes), "registry": registry_id, **res}
     if args.out:
         json.dump(rec, open(args.out, "w"), indent=2)
         print(f"wrote {args.out}", flush=True)
     if args.card:
         subject = {"id": args.card_subject_id, "name": args.card_subject_name or args.model,
                    "digest": sha256("local:" + args.model)}
-        json.dump(as_card(res, subject), open(args.card, "w"), indent=2)
+        json.dump(as_card(res, subject, axes=axes), open(args.card, "w"), indent=2)
         print(f"wrote {args.card}", flush=True)
     print(f"[{args.model}] {res['ok']}/{res['n']} pass  {res['accuracy']}  "
-          f"measured={res['measured']}/{res['total']}", flush=True)
+          f"measured={res['measured']}/{res['total']}  registry={registry_id}", flush=True)
+
+
+def cmd_domains(args):
+    import os as _os
+    ddir = _os.path.join(ROOT, "axes", "domains")
+    regs = sorted(f[:-5] for f in _os.listdir(ddir) if f.endswith(".json"))
+    lines = []
+    for d in regs:
+        reg = json.load(open(_os.path.join(ddir, d + ".json")))
+        lines.append({"domain": d, "schema": reg["schema"], "axes": len(reg["axes"]),
+                      "title": reg.get("title", "")})
+    if args.json:
+        print(json.dumps(lines, indent=2))
+        return
+    for l in lines:
+        print(f"  {l['domain']:14s} {l['axes']:2d} axes  {l['schema']}")
+    print(f"\n{len(lines)} domains")
 
 
 def cmd_selfcheck(args):
@@ -256,12 +275,17 @@ def main():
     p = sub.add_parser("measure", help="Measure a model on all axes")
     p.add_argument("--model", required=True)
     p.add_argument("--base", default=None, help="Ollama endpoint (default localhost:11434)")
+    p.add_argument("--domain", default=None, help="Domain registry: bond/bank/insurance/equity/index/cross-border (default 16-axis)")
     p.add_argument("--out", default=None, help="Write axis-engine record here")
     p.add_argument("--card", default=None, help="Write CIBOLA measurement card here")
     p.add_argument("--card-subject-id", default="local")
     p.add_argument("--card-subject-name", default=None)
     p.add_argument("--delay", type=float, default=0.0)
     p.set_defaults(func=cmd_measure)
+
+    p = sub.add_parser("domains", help="List the domain axis registries")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_domains)
 
     p = sub.add_parser("selfcheck", help="Run hermetic deterministic tests")
     p.set_defaults(func=cmd_selfcheck)

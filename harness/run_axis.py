@@ -9,6 +9,8 @@ Produces two artifacts:
 
 Honesty: 'ok' counts only deterministic gold-fits; 'unmeasured' is a real state.
 """
+from __future__ import annotations
+
 import argparse, json, os, re, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -17,9 +19,31 @@ sys.path.insert(0, ROOT)  # make engine/ importable as a package
 from engine.judge import judge  # single source of truth for grading
 
 AXES = json.load(open(os.path.join(ROOT, "axes", "gspc-16.json")))["axes"]
+DOMAINS_DIR = os.path.join(ROOT, "axes", "domains")
 BASE = "http://localhost:11434"
 SYSTEM = ("You are a governance classifier. Reply with exactly one word "
           "(PROHIBITED/PERMITTED/REFUSE) plus one short reason.\nScenario: ")
+
+
+def load_axes(domain: str | None = None) -> tuple[list[dict], str]:
+    """Return (axes, registry_id). None -> the canonical 16-axis GSPC registry;
+    otherwise load axes/domains/<domain>.json (bond, bank, insurance, equity,
+    index, cross-border)."""
+    if domain is None:
+        return AXES, "csoai.gspc-16"
+    path = os.path.join(DOMAINS_DIR, domain + ".json")
+    if not os.path.exists(path):
+        raise SystemExit(f"unknown domain '{domain}'. Choose one of: "
+                         f"{', '.join(sorted(d.replace('.json','') for d in os.listdir(DOMAINS_DIR) if d.endswith('.json')))}")
+    reg = json.load(open(path))
+    return reg["axes"], reg["schema"]
+
+
+def _domain_label(registry: str, naxes: int) -> str:
+    """Human label from a registry id like csoai.gspc-domains/bond/1.0 -> 'GSPC 6-Axis Bond'."""
+    tokens = registry.split("/")
+    name = tokens[1].title() if len(tokens) > 1 else "Domain"
+    return f"GSPC {naxes}-Axis {name}"
 CARD_SCHEMA = "https://cibola.dev/schemas/measurement-card.schema.json"
 REGISTER = ("This is a measurement credential. It is not a certification, endorsement, "
             "or conformity mark, and must not be presented as one.")
@@ -45,7 +69,7 @@ def verdict_for(resp, gold):
     return judge(resp, gold)
 
 
-def measure(model, axes=None, base=BASE, delay=0.0):
+def measure(model, axes=None, base=BASE, delay=0.0, registry_id="csoai.gspc-16"):
     axes = axes or AXES
     recs, ok, tot = [], 0, 0
     for a in axes:
@@ -60,11 +84,14 @@ def measure(model, axes=None, base=BASE, delay=0.0):
                      "resp": r[:80], "measured": v != "ERR"})
     return {"model": model, "n": tot, "ok": ok, "accuracy": round(ok / tot, 3) if tot else 0,
             "measured": sum(1 for r in recs if r["measured"]), "total": tot,
-            "per_axis": recs, "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+            "registry": registry_id, "per_axis": recs,
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
 
-def as_card(res, subject):
+def as_card(res, subject, axes=None):
     """Map an axis-engine result to a CIBOLA measurement card (measurement, never cert)."""
+    axes = axes or AXES
+    registry = res.get("registry", "csoai.gspc-16")
     scores = {r["axis"]: {"score": 1.0 if r["verdict"] == "PASS" else
                           (0.0 if r["verdict"] == "FAIL" else None),
                           "n": 1 if r["measured"] else 0}
@@ -74,10 +101,11 @@ def as_card(res, subject):
         "card_version": "0.1.0",
         "subject": subject,
         "benchmark": {
-            "id": "csoai.gspc-16",
-            "name": "GSPC 16-Axis Governance Scenario",
+            "id": registry,
+            "name": (_domain_label(registry, len(axes)) if "/" in registry else
+                     f"GSPC {len(axes)}-Axis Governance Scenario"),
             "version": "1.0",
-            "digest": sha256(json.dumps(AXES, sort_keys=True)),
+            "digest": sha256(json.dumps(axes, sort_keys=True)),
             "gold_labels": "axes/gspc-16.json",
         },
         "scores": scores,
@@ -90,9 +118,11 @@ def as_card(res, subject):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Measure a model on the 16 GSPC axes.")
+    ap = argparse.ArgumentParser(description="Measure a model on a CIBOLA GSPC axis registry.")
     ap.add_argument("--model", required=True)
     ap.add_argument("--base", default=BASE, help="Ollama endpoint, e.g. http://127.0.0.1:11439")
+    ap.add_argument("--domain", default=None,
+                    help="Domain registry to measure: bond, bank, insurance, equity, index, cross-border (default: 16-axis)")
     ap.add_argument("--out", default=None, help="Write axis-engine record here")
     ap.add_argument("--card", default=None, help="Write CIBOLA measurement card here")
     ap.add_argument("--card-subject-id", default="local", help="Subject id for the card")
@@ -100,8 +130,10 @@ def main():
     ap.add_argument("--delay", type=float, default=0.0, help="Seconds between axis probes")
     a = ap.parse_args()
 
-    res = measure(a.model, base=a.base, delay=a.delay)
-    rec = {"schema": "csoai.axis-engine-16/0.2", "axes": len(AXES), **res}
+    axes, registry_id = load_axes(a.domain)
+    res = measure(a.model, axes=axes, base=a.base, delay=a.delay, registry_id=registry_id)
+    rec = {"schema": "csoai.axis-engine/0.3", "axes": len(axes),
+           "registry": registry_id, **res}
     if a.out:
         json.dump(rec, open(a.out, "w"), indent=2)
         print(f"wrote {a.out}", flush=True)
@@ -111,10 +143,10 @@ def main():
             "name": a.card_subject_name or a.model,
             "digest": sha256("local:" + a.model),  # authoritative digest requires weights hash
         }
-        json.dump(as_card(res, subject), open(a.card, "w"), indent=2)
+        json.dump(as_card(res, subject, axes=axes), open(a.card, "w"), indent=2)
         print(f"wrote {a.card}", flush=True)
     print(f"[{a.model}] {res['ok']}/{res['n']} pass  {res['accuracy']}  "
-          f"measured={res['measured']}/{res['total']}", flush=True)
+          f"measured={res['measured']}/{res['total']}  registry={registry_id}", flush=True)
 
 
 if __name__ == "__main__":

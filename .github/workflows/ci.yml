@@ -113,5 +113,21 @@ jobs:
                 "neutrality":"licenses the measured data, never the score",
                 "register":"This data is derived from a measurement. It is not a certification, endorsement, or conformity mark, and must not be presented as one.","signature":None}
           assert lp['schema']=="csoai.data-license/0.1" and "never the score" in lp['neutrality']
-          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE CI: PASS — card+receipt verify, tamper-rejected, anchor/license shapes valid')
+          # domain registries (the horizontal set the vertical verifies)
+          import os as _os
+          from harness.run_axis import load_axes
+          ddir = _os.path.join(os.getcwd(),'axes','domains')
+          dnames = sorted(f[:-5] for f in _os.listdir(ddir) if f.endswith('.json'))
+          assert len(dnames) >= 6, dnames
+          for dn in dnames:
+              daxes, _reg = load_axes(dn)
+              assert len(daxes) >= 5 and all(a['gold'] in {'PROHIBITED','PERMITTED','REFUSE'} for a in daxes) and all(a['probe'].strip() for a in daxes)
+          # domain-scoped card shape
+          axes_b,_ = load_axes('bond')
+          fake2 = {"model":"d","registry":"csoai.gspc-domains/bond/1.0","n":len(axes_b),"ok":4,"accuracy":0.6,
+                   "measured":len(axes_b),"total":len(axes_b),"ts":"2026-08-23T00:00:00Z",
+                   "per_axis":[{"axis":a['slug'],"gold":a['gold'],"verdict":("PASS" if i<4 else "FAIL"),"resp":"x","measured":True} for i,a in enumerate(axes_b)]}
+          c2 = rax.as_card(fake2, {'id':'d','name':'d','digest':'x'}, axes=axes_b)
+          assert c2['benchmark']['id']=='csoai.gspc-domains/bond/1.0' and len(c2['scores'])==len(axes_b)
+          print('SIGN-VERIFY-EXPORT-RECEIPT-ANCHOR-LICENSE-DOMAINS CI: PASS — card+receipt+anchor+license+domains valid')
           PYEOF

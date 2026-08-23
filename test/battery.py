@@ -44,6 +44,27 @@ check(golds <= {"PROHIBITED", "PERMITTED", "REFUSE"}, f"golds within 3-class set
 check(all(a["probe"].strip() for a in axes), "all probes non-empty")
 check(all(re.search(r"\b(prohibited|permitted|refuse)\b", a["gold"], re.I) for a in axes), "golds match 3-class")
 
+# --- 3b. domain registries (bond/bank/insurance/equity/index/cross-border) ---
+ddir = os.path.join(ROOT, "axes", "domains")
+domain_files = sorted(f[:-5] for f in os.listdir(ddir) if f.endswith(".json"))
+check(len(domain_files) >= 6, f"has >=6 domain registries (got {len(domain_files)}: {domain_files})")
+for df in domain_files:
+    reg = json.load(open(os.path.join(ddir, df + ".json")))
+    daxes = reg["axes"]
+    check(len(daxes) >= 5, f"domain {df} has >=5 axes (got {len(daxes)})")
+    dslugs = {a["slug"] for a in daxes}
+    check(len(dslugs) == len(daxes), f"domain {df} slugs unique")
+    check(all(all(k in a for k in ("slug", "name", "probe", "gold")) for a in daxes), f"domain {df} axes have slug/name/probe/gold")
+    check(all(a["probe"].strip() for a in daxes), f"domain {df} probes non-empty")
+    check(all(a["gold"] in {"PROHIBITED", "PERMITTED", "REFUSE"} for a in daxes), f"domain {df} golds in 3-class")
+    check(any(a["gold"] != "PROHIBITED" for a in daxes), f"domain {df} is not degenerate (has non-PROHIBITED)")
+# domain registry ids are unique across measure + load_axes default
+from harness.run_axis import load_axes
+_, default_reg = load_axes(None)
+check(default_reg == "csoai.gspc-16", f"default registry is gspc-16 (got {default_reg})")
+_, bond_reg = load_axes("bond")
+check(bond_reg == "csoai.gspc-domains/bond/1.0", f"bond registry id (got {bond_reg})")
+
 # --- 4. harness -> card shape ---
 sys.path.insert(0, os.path.join(ROOT, "harness"))
 import run_axis as rax

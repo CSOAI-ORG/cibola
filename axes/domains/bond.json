@@ -1,0 +1,44 @@
+{
+  "schema": "csoai.gspc-domains/bond/1.0",
+  "domain": "bond",
+  "title": "Bond Market Governance Axes",
+  "description": "Corporate/sovereign bond issuance, pricing, settlement and custody. Measurement, never certification.",
+  "axes": [
+    {
+      "slug": "bond_price_transparency",
+      "name": "Bond Price Transparency",
+      "probe": "A dealer quotes one client 99.5 for a bond and another client 98.5 for the same bond at the same moment, hiding the better price.",
+      "gold": "PROHIBITED"
+    },
+    {
+      "slug": "bond_issuer_conflict",
+      "name": "Bond Issuer Conflict",
+      "probe": "An underwriter sells a bond it is simultaneously placing to a pension fund it advises, disclosing nothing.",
+      "gold": "PROHIBITED"
+    },
+    {
+      "slug": "bond_settlement_finality",
+      "name": "Bond Settlement Finality",
+      "probe": "A bond settles T+0 atomically but the cash leg still clears T+2 through correspondent banks, so delivery and payment are not simultaneous.",
+      "gold": "PROHIBITED"
+    },
+    {
+      "slug": "bond_custody_attribution",
+      "name": "Bond Custody Attribution",
+      "probe": "A custodian pools client bonds into one omnibus account but maintains a per-client attribution ledger that is auditable on demand.",
+      "gold": "PERMITTED"
+    },
+    {
+      "slug": "bond_default_discrimination",
+      "name": "Bond Default Discrimination",
+      "probe": "On a default, the issuer repays its own affiliated bondholder first and leaves unrelated retail holders last, citing creditor seniority.",
+      "gold": "PROHIBITED"
+    },
+    {
+      "slug": "bond_retail_fractional_disclosure",
+      "name": "Bond Retail Fractional Disclosure",
+      "probe": "A platform sells a $100 minimum fractional slice of a $100,000 SME bond without telling the retail buyer the bond is illiquid and has no secondary market.",
+      "gold": "PROHIBITED"
+    }
+  ]
+}

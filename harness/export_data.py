@@ -27,18 +27,26 @@ def _ah(answer: str) -> str:
     return hashlib.sha256(answer.encode()).hexdigest()[:16]
 
 
-def export(result: dict, subject: dict) -> dict:
+def export(result: dict, subject: dict, domain: str | None = None) -> dict:
     """Build the three data products from an axis-engine result.
 
     Returns {qa, preference_pairs, safety_incidents, records, meta}.
     """
-    bench_digest = sha256(json.dumps(json.load(open(os.path.join(ROOT, "axes", "gspc-16.json")))["axes"], sort_keys=True))
+    registry = result.get("registry", "csoai.gspc-16")
+    axes_file = (os.path.join(ROOT, "axes", "domains", domain + ".json") if domain else
+                 os.path.join(ROOT, "axes", "gspc-16.json"))
+    try:
+        axes_raw = json.load(open(axes_file))["axes"]
+    except Exception:
+        axes_raw = json.load(open(os.path.join(ROOT, "axes", "gspc-16.json")))["axes"]
+    bench_digest = sha256(json.dumps(axes_raw, sort_keys=True))
     ts = result.get("ts", "")
     register = ("This data is derived from a measurement. It is not a certification, "
                 "endorsement, or conformity mark.")
-    provenance = {"benchmark": "csoai.gspc-16", "benchmark_digest": bench_digest,
+    provenance = {"benchmark": registry, "benchmark_digest": bench_digest,
                   "subject_id": subject.get("id"), "subject_name": subject.get("name"),
                   "issued_at": ts, "register": register}
+    axes_map = {a["slug"]: a for a in axes_raw}
 
     qa = []            # the core Q/A data product (match estate sim_cards.jsonl)
     preference_pairs = []  # adversarial A/B per axis (measured, not synthetic)
@@ -47,11 +55,9 @@ def export(result: dict, subject: dict) -> dict:
 
     for r in result.get("per_axis", []):
         axis, gold, verdict, resp = r["axis"], r["gold"], r["verdict"], r["resp"]
-        # build the full probe question (the harness sends SYSTEM + probe; we reconstruct the label)
-        axes_map = {a["slug"]: a for a in json.load(open(os.path.join(ROOT, "axes", "gspc-16.json")))["axes"]}
         probe = axes_map.get(axis, {}).get("probe", axis)
         qa_rec = {
-            "card": "csoai.axis-engine-16/0.2",
+            "card": "csoai.axis-engine/0.3",
             "ts": ts, "axis": axis, "q": probe, "a": resp,
             "ah": _ah(resp), "gold": gold, "verdict": verdict,
             "measured": r.get("measured", True),
