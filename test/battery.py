@@ -44,10 +44,12 @@ check(golds <= {"PROHIBITED", "PERMITTED", "REFUSE"}, f"golds within 3-class set
 check(all(a["probe"].strip() for a in axes), "all probes non-empty")
 check(all(re.search(r"\b(prohibited|permitted|refuse)\b", a["gold"], re.I) for a in axes), "golds match 3-class")
 
-# --- 3b. domain registries (bond/bank/insurance/equity/index/cross-border) ---
+# --- 3b. domain registries (bond/bank/insurance/equity/index/cross-border + relative/operational) ---
 ddir = os.path.join(ROOT, "axes", "domains")
 domain_files = sorted(f[:-5] for f in os.listdir(ddir) if f.endswith(".json"))
 check(len(domain_files) >= 6, f"has >=6 domain registries (got {len(domain_files)}: {domain_files})")
+# the governance registries use 3-class golds; operational (LOW/HIGH) and relative (A/B) differ by kind
+GOV_DOMAINS = {"bond", "bank", "insurance", "equity", "index", "cross-border", "generic", "gspc-16"}
 for df in domain_files:
     reg = json.load(open(os.path.join(ddir, df + ".json")))
     daxes = reg["axes"]
@@ -56,8 +58,13 @@ for df in domain_files:
     check(len(dslugs) == len(daxes), f"domain {df} slugs unique")
     check(all(all(k in a for k in ("slug", "name", "probe", "gold")) for a in daxes), f"domain {df} axes have slug/name/probe/gold")
     check(all(a["probe"].strip() for a in daxes), f"domain {df} probes non-empty")
-    check(all(a["gold"] in {"PROHIBITED", "PERMITTED", "REFUSE"} for a in daxes), f"domain {df} golds in 3-class")
-    check(any(a["gold"] != "PROHIBITED" for a in daxes), f"domain {df} is not degenerate (has non-PROHIBITED)")
+    if df in GOV_DOMAINS:
+        check(all(a["gold"] in {"PROHIBITED", "PERMITTED", "REFUSE"} for a in daxes), f"domain {df} golds in 3-class")
+        check(any(a["gold"] != "PROHIBITED" for a in daxes), f"domain {df} is not degenerate (has non-PROHIBITED)")
+    elif df == "operational":
+        check(all(a["gold"] in {"LOW", "HIGH"} for a in daxes), "operational golds are LOW/HIGH (cost/latency)")
+    elif df == "relative":
+        check(all(a["gold"] in {"A", "B"} for a in daxes), "relative golds are A/B (pairwise)")
 # domain registry ids are unique across measure + load_axes default
 from harness.run_axis import load_axes
 _, default_reg = load_axes(None)
@@ -73,11 +80,14 @@ for domain in domain_files:
     dp = provision_map_for(domain)
     daxes = json.load(open(os.path.join(ddir, domain + ".json")))["axes"]
     dslugs = {a["slug"] for a in daxes}
-    check(dp is not None, f"domain {domain} has a provision map")
-    if dp:
-        check(set(dp.keys()) == dslugs, f"domain {domain} provision map keys match its axes")
-        check(all(isinstance(v, list) and v and all(isinstance(p, str) and p for p in v) for v in dp.values()),
-              f"domain {domain} provisions are non-empty string lists")
+    if domain in GOV_DOMAINS:
+        check(dp is not None, f"domain {domain} has a provision map")
+        if dp:
+            check(set(dp.keys()) == dslugs, f"domain {domain} provision map keys match its axes")
+            check(all(isinstance(v, list) and v and all(isinstance(p, str) and p for p in v) for v in dp.values()),
+                  f"domain {domain} provisions are non-empty string lists")
+    else:
+        check(dp is None, f"domain {domain} has no legal provision map (operational/relative are not provision-mapped)")
 # generic (non-domain) registry has no provision map
 check(provision_map_for(None) is None, "generic registry has no domain provision map")
 # a domain card carries provision_map + it is not a compliance assertion
@@ -155,6 +165,35 @@ _e2 = _reke("deadbeef" * 8, public_key_bytes=_pk.public_key(), signature=b"x" * 
 # localhost:9 refuses connection -> recorded=False, error mentions connection, NOT 'kind in body'
 check(_e2.get("schema") == "rekor-v1", "rekor with key keeps rekor-v1 schema")
 check("kind in body" not in _e2.get("error", ""), "rekor no longer hits the blind 'kind in body' 422 (schema corrected)")
+
+# --- 3h. Elo/Bradley-Terry ranking engine (hermetic: known-transitive oracle) ---
+from engine.elo import elo_rank, bradley_terry, ranked
+_oracle = []
+for i in range(60):
+    _oracle.append(("A", "B", 1.0 if i < 42 else 0.0))
+    _oracle.append(("B", "C", 1.0 if i < 45 else 0.0))
+    _oracle.append(("A", "C", 1.0 if i < 50 else 0.0))
+for _method, _fn in (("elo", elo_rank), ("bt", bradley_terry)):
+    _r = _fn(_oracle, n_min=1)
+    _order = [m for m, _ in ranked(_r)]
+    check(_order == ["A", "B", "C"], f"{_method} recovers transitive order A>B>C (got {_order})")
+    check(_r["A"]["ci_ok"], f"{_method} A ci_ok")
+_r = bradley_terry([("X", "Y", 1.0)], n_min=30)
+check(_r["X"]["ci_ok"] is False, "bt below n_min -> not quotable")
+check(0.0 <= elo_rank(_oracle, n_min=1)["A"]["win_rate"] <= 1.0, "elo win_rate in [0,1]")
+
+# --- 3i. new registries present (operational + relative) + telemetry module ---
+from engine.or_telemetry import cost_usd, record as _trec
+_odir = os.path.join(ROOT, "axes", "domains")
+check(os.path.exists(os.path.join(_odir, "operational.json")), "operational (cost/latency) registry exists")
+check(os.path.exists(os.path.join(_odir, "relative.json")), "relative (pairwise) registry exists")
+import hashlib as _hl2
+_pairs = json.load(open(os.path.join(ROOT, "axes", "domains", "relative.json")))["axes"]
+check(len(_pairs) == 6, f"relative registry has 6 axes (got {len(_pairs)})")
+check(all(a["gold"] in {"A", "B"} for a in _pairs), "relative golds are A/B (pairwise)")
+# cost_usd: known pricing
+_cur = cost_usd(1000, 500, {"prompt": 0.000001, "completion": 0.000002})
+check(abs(_cur - (0.000001 * 1000 + 0.000002 * 500)) < 1e-9, f"cost_usd computed (got {_cur})")
 
 # --- 3d. A2A / MCP discovery surface (hermetic: no network, no server spawn) ---
 import os as _os, json as _json

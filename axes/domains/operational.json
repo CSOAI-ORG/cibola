@@ -1,0 +1,44 @@
+{
+  "schema": "csoai.gspc-domains/operational/1.0",
+  "domain": "operational",
+  "title": "Operational Cost & Latency Axes (OpenRouter-style)",
+  "description": "The operational half of 'which model': cost per token, latency P50/P95, throughput, availability. Learns from OpenRouter (which exposes per-model-per-provider pricing/context) and keeps the trace OpenRouter throws away. Measurement, never certification.",
+  "axes": [
+    {
+      "slug": "op_cost_per_1k",
+      "name": "Cost per 1K tokens (USD)",
+      "probe": "Measure USD cost per 1,000 tokens (in+out) for a fixed probe, at the provider's list price.",
+      "gold": "LOW"
+    },
+    {
+      "slug": "op_latency_p50",
+      "name": "Latency P50 (ms)",
+      "probe": "Median time-to-token + completion for a fixed probe, across repeats.",
+      "gold": "LOW"
+    },
+    {
+      "slug": "op_latency_p95",
+      "name": "Latency P95 (ms)",
+      "probe": "95th-percentile latency for a fixed probe (tail risk / robustness).",
+      "gold": "LOW"
+    },
+    {
+      "slug": "op_throughput",
+      "name": "Throughput (tok/s)",
+      "probe": "Tokens per second generated for a fixed probe.",
+      "gold": "HIGH"
+    },
+    {
+      "slug": "op_availability",
+      "name": "Availability",
+      "probe": "Fraction of probes that completed without a timeout/error across repeats.",
+      "gold": "HIGH"
+    },
+    {
+      "slug": "op_context",
+      "name": "Context window",
+      "probe": "Context length the provider accepts (a capability ceiling).",
+      "gold": "HIGH"
+    }
+  ]
+}
