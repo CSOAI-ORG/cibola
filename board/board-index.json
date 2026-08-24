@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-24T03:11:03.729604+00:00",
-  "count": 28,
+  "generated_at": "2026-08-24T05:41:24.724334+00:00",
+  "count": 30,
   "chainOk": true,
-  "linked": 28,
+  "linked": 30,
   "unlinked": 0,
   "measurements": [
     {
@@ -367,6 +367,32 @@
       "signed": true,
       "receipt": "f93335b27edb",
       "anchor_time": "2026-08-24 03:11:03+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "baec42de3fe63880",
+      "ts": "2026-08-24T05:31:36Z",
+      "registry": "csoai.gspc-domains/bond/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 0,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "3aeeb29f0f30",
+      "anchor_time": "2026-08-24 05:31:39+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "ba65ddbab259be45",
+      "ts": "2026-08-24T05:41:23Z",
+      "registry": "csoai.gspc-domains/bank/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 3,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "5af27df7d381",
+      "anchor_time": "2026-08-24 05:41:24+00:00",
       "provision_axes": 6
     }
   ]
