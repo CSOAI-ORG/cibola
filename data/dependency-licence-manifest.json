@@ -36,6 +36,15 @@
       "where": "engine/dorado_anchor.py, dorado_anchor_verify.py (conditional, RFC 3161 TSA + ASN.1)",
       "verdict": "OK",
       "note": "Conditionally imported for timestamp-authority verification. MIT, permissive. Not installed on the dev box (pod-side); declared so CI/audit knows its licence rather than treating an optional import as a gate."
+    },
+    {
+      "name": "cbor2",
+      "provider": "CBOR encoding/decoding (agronholm / brianjarrett)",
+      "spdx": "MIT",
+      "family": "permissive",
+      "where": "harness/scitt_verify.py (SCITT COSE_Sign1 CBOR decode + Sig_structure re-encode, RFC 9052/RFC 9943)",
+      "verdict": "OK",
+      "note": "The move-31 SCITT COSE_Sign1 verifier needs a CBOR decoder to turn a counted statement into a cryptographically verified one. MIT, permissive. Installed explicitly in CI (pip install cbor2)."
     }
   ],
   "internal_packages": [
@@ -48,9 +57,9 @@
   ],
   "sweep": {
     "result": "CLEAN",
-    "detected": ["cryptography", "asn1crypto"],
+    "detected": ["cryptography", "asn1crypto", "cbor2"],
     "internal_detected": ["csoai_city"],
     "excluded_family_hits_in_assets": 0,
-    "summary": "Only PyCA permissive deps (cryptography cross-license, asn1crypto MIT). No hard-excluded family appears in any code/data asset. The only repo mentions of the excluded families are in docs/NEXT-100-v3 where the rule itself is enumerated."
+    "summary": "Only permissive deps (cryptography cross-license, asn1crypto MIT, cbor2 MIT). No hard-excluded family appears in any code/data asset. The only repo mentions of the excluded families are in docs/NEXT-100-v3 where the rule itself is enumerated."
   }
 }

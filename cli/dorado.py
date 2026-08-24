@@ -496,6 +496,141 @@ def cmd_sb315(args):
     return 0
 
 
+def cmd_scitt(args):
+    """SCITT COSE_Sign1 cryptographic verify (move 31) — count is not verify.
+
+    Verifies ONE COSE_Sign1 envelope (RFC 9052 / RFC 9943, alg -19 Ed25519) or a whole
+    directory of them, decoding the CBOR envelope and checking the Ed25519 signature over
+    the Sig_structure with `cryptography`. Stranger-only: no signing key, no pod, no network.
+
+    Honest register: a verified signature proves the signing key signed THIS content. It is
+    a measurement, never a certification. A statement whose key is not pinned (to a caller
+    pubkey or a published did:web identity) is reported 'self-consistent but NOT pinned',
+    never verified-authentic.
+
+    --fixture uses the deterministic hermetic fixture (test identity) for a CI/selfcheck smoke.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from scitt_verify import build_cose_sign1, verify_cose_sign1, verify_batch
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    def fixture():
+        # fixed seed -> deterministic envelope across runs (no network, test identity)
+        key = Ed25519PrivateKey.from_private_bytes(b"scitt-verify-fixture-v1-2026-08-24"[:32].ljust(32, b"!"))
+        raw = key.public_key().public_bytes(
+            encoding=__import__("cryptography.hazmat.primitives.serialization", fromlist=["Encoding"]).Encoding.Raw,
+            format=__import__("cryptography.hazmat.primitives.serialization", fromlist=["PublicFormat"]).PublicFormat.Raw)
+        env = build_cose_sign1(b'{"schema":"csoai.measurement/0.1","subject":"fixture"}',
+                               key, "did:web:csoai.org#test-identity")
+        v = verify_cose_sign1(env, expected_pubkey=raw, expected_kid="did:web:csoai.org#test-identity")
+        print(f"fixture COSE_Sign1 verify: ok={v['ok']} reason='{v['reason']}'", flush=True)
+        return 0 if v["ok"] else 1
+
+    if args.fixture:
+        return fixture()
+    if args.dir:
+        items = []
+        for name in sorted(os.listdir(args.dir)):
+            p = os.path.join(args.dir, name)
+            if not os.path.isfile(p):
+                continue
+            data = open(p, "rb").read()
+            items.append({"cose": __import__("base64").b64encode(data).decode(), "_file": name})
+        batch = verify_batch(items, expected_kid=args.kid, expected_pubkey=args.pubkey)
+        if args.json:
+            print(json.dumps(batch, indent=2), flush=True)
+        else:
+            print(f"scitt verify --dir {args.dir}: {batch['verified']}/{batch['n']} verified, "
+                  f"{batch['failed']} failed, {batch['unverifiable']} unverifiable", flush=True)
+            for r, it in zip(batch["results"], items):
+                print(f"  {it['_file']}: {r['verdict']} — {r['reason'][:70]}", flush=True)
+        return 0 if batch["failed"] == 0 and batch["unverifiable"] == 0 else 1
+    data = open(args.file, "rb").read()
+    v = verify_cose_sign1(data, expected_kid=args.kid, expected_pubkey=args.pubkey)
+    if args.json:
+        print(json.dumps(v, indent=2), flush=True)
+    else:
+        print(v["reason"], flush=True)
+    return 0 if v["ok"] else 1
+
+
+def cmd_verify_kit(args):
+    """Offline stranger verify-kit bundle + verification counter (move 17).
+
+    Builds a single deterministic verify-kit (card + payload + receipts + keys + walkthrough),
+    verifies a kit ENTIRELY OFFLINE (no network, no pod, only cryptography), or reports the
+    append-only verification counter — a provenance ledger of usage, never a claim of validity.
+
+    --fixture uses the deterministic hermetic fixture (test identity) for a CI/selfcheck smoke.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from verify_kit import (build_verify_kit, verify_verify_kit, verification_counter,
+                            record_verification)
+    import engine.dorado_sign as dsig
+    from engine.dorado_receipt import build_card_receipt
+    from engine.dorado_anchor import card_digest
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    PIN = "2026-08-24T00:00:00+00:00"
+
+    if args.counter:
+        c = verification_counter()
+        print(json.dumps(c, indent=2) if args.json else
+              f"verification counter: {c['total']} total, {c['verified']} verified, "
+              f"{c['failed']} failed, {c['digest_ok']} digest_ok, {c['kitted']} kitted", flush=True)
+        return 0
+
+    if args.fixture:
+        key = Ed25519PrivateKey.from_private_bytes(b"verify-kit-fixture-v1-2026-08-24"[:32].ljust(32, b"!"))
+        card = {"schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+                "kind": "measurement", "subject": {"id": "fixture", "digest": "x"},
+                "benchmark": {"id": "csoai.gspc-16", "digest": "b", "gold_labels": "g"},
+                "scores": {"governance": {"score": 0.5, "n": 30}},
+                "measured_count": 1, "total_count": 16,
+                "credential_register": "measurement, never certification",
+                "issued_at": PIN}
+        signed = dsig.sign(card, key, kid="did:web:csoai.org#card-attestation-1", allow_test_identity=True)
+        receipt = build_card_receipt(signed, private_key=key,
+                                     kid="did:web:csoai.org#card-attestation-1", issued_at=PIN)
+        anchor = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": card_digest(signed),
+                  "anchors": [{"kind": "tsa-rfc3161", "digest_sha256": card_digest(signed),
+                               "message_imprint_matches": True, "gen_time": "2026-08-24T00:00:00Z"}]}
+        kit = build_verify_kit(signed, receipts=[receipt], anchor=anchor, generated_at=PIN)
+        v = verify_verify_kit(kit, trusted_keys={
+            signed["signature"]["kid"]: {"x": __import__("base64").urlsafe_b64encode(
+                __import__("base64").b64decode(signed["signature"]["pubkey"])).rstrip(b"=").decode(),
+                "thumbprint": dsig.rfc9679_thumbprint(
+                    __import__("base64").b64decode(signed["signature"]["pubkey"]))}})
+        print(f"fixture verify-kit: ok={v['ok']} reason='{v['reason']}'", flush=True)
+        return 0 if v["ok"] else 1
+
+    if args.inp:
+        kit = json.load(open(args.inp))
+        v = verify_verify_kit(kit, trusted_keys=args.pubkey and json.load(open(args.pubkey)))
+        if args.json:
+            print(json.dumps(v, indent=2), flush=True)
+        else:
+            print(v["reason"], flush=True)
+            for p in v["parts"]:
+                print(f"  {p['name']:24s} {'OK' if p['ok'] else 'FAIL'}  {p['reason'][:60]}", flush=True)
+        return 0 if v["ok"] else 1
+
+    card = json.load(open(args.card))
+    receipt = json.load(open(args.receipt)) if args.receipt else None
+    anchor = json.load(open(args.anchor)) if args.anchor else None
+    kit = build_verify_kit(card, receipts=receipt, anchor=anchor,
+                           generated_at=args.ts or None)
+    if args.log:
+        record_verification({"kit_id": kit["kit_id"], "verified": True, "digest_ok": True})
+    if args.out:
+        json.dump(kit, open(args.out, "w"), indent=2)
+        print(f"wrote verify-kit to {args.out} (kit_id={kit['kit_id']}, digest={kit['digest'][:16]}…)", flush=True)
+    else:
+        print(json.dumps(kit, indent=2), flush=True)
+    return 0
+
+
 def cmd_license(args):
     import hashlib as _hl
     from datetime import datetime, timezone
@@ -981,6 +1116,29 @@ def main():
     p.add_argument("--out", default=None, help="Write the transparency summary JSON here")
     p.add_argument("--audit-template-out", default=None, help="Write the auditor-card template JSON here")
     p.set_defaults(func=cmd_sb315)
+
+    p = sub.add_parser("scitt", help="SCITT COSE_Sign1 cryptographic verify (RFC 9052/RFC 9943, alg -19 Ed25519) — count is not verify (stranger-only, no network)")
+    p.add_argument("file", nargs="?", default=None, help="A COSE_Sign1 envelope file (raw bytes or base64)")
+    p.add_argument("--dir", default=None, help="Verify every file in this directory as a COSE_Sign1 envelope")
+    p.add_argument("--pubkey", default=None, help="Pin the signing key to this base64url/base64 x (identity pinning)")
+    p.add_argument("--kid", default=None, help="Expected kid (default none; pins only with --pubkey or a published identity)")
+    p.add_argument("--fixture", action="store_true", help="Deterministic hermetic fixture smoke (test identity, CI/selfcheck)")
+    p.add_argument("--json", action="store_true", help="Emit machine-readable verdict JSON")
+    p.set_defaults(func=cmd_scitt)
+
+    p = sub.add_parser("verify-kit", help="Offline stranger verify-kit (card+receipts+keys, deterministic) + verification counter (move 17)")
+    p.add_argument("--card", default=None, help="Signed measurement card JSON to bundle")
+    p.add_argument("--receipt", default=None, help="Receipt JSON to bundle (optional)")
+    p.add_argument("--anchor", default=None, help="Anchor JSON to bundle (optional)")
+    p.add_argument("--in", dest="inp", default=None, help="A verify-kit JSON to verify (offline)")
+    p.add_argument("--pubkey", default=None, help="JSON of caller-trusted identity keys {kid:{x,thumbprint}} for authentication")
+    p.add_argument("--out", default=None, help="Write the built verify-kit JSON here")
+    p.add_argument("--ts", default=None, help="Pin generated_at (RFC 3339) for deterministic builds")
+    p.add_argument("--log", action="store_true", help="Record this build+verify in the append-only verification counter")
+    p.add_argument("--counter", action="store_true", help="Report the append-only verification counter (data/verify-log.jsonl)")
+    p.add_argument("--fixture", action="store_true", help="Deterministic hermetic fixture smoke (test identity, CI/selfcheck)")
+    p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    p.set_defaults(func=cmd_verify_kit)
 
     a = ap.parse_args()
     code = a.func(a)

@@ -21,8 +21,10 @@ jobs:
 
       # cryptography is REQUIRED for the signing pod (Ed25519). The deterministic
       # battery itself has no third-party deps, but the signer/verifier do.
-      - name: Install cryptography
-        run: pip install cryptography
+      # cbor2 is REQUIRED for the SCITT COSE_Sign1 verifier (RFC 9052 CBOR decode) —
+      # the move-31 cryptographic verifier counts nothing it cannot decode + verify.
+      - name: Install cryptography + cbor2
+        run: pip install cryptography cbor2
 
       # Hermetic deterministic test battery — NO network, NO Ollama required.
       - name: Deterministic test battery
@@ -130,6 +132,29 @@ jobs:
       # reported honestly; measurement-credential register carried. Deterministic + hermetic.
       - name: SB 315 transparency-summary emitter (move 12)
         run: python3 test/sb315.py
+
+      # SCITT COSE_Sign1 CRYPTOGRAPHIC verify (move 31): count is not verify. Decodes a
+      # real COSE_Sign1 CBOR envelope (RFC 9052/RFC 9943, alg -19 Ed25519) and checks the
+      # Ed25519 signature over the Sig_structure with cryptography. Tamper (payload/sig/
+      # protected header) rejected; wrong caller-pinned key rejected; non-published kid is
+      # honestly 'self-consistent but NOT pinned' (never verified-authentic); batch counts
+      # verified/failed/unverifiable separately. Deterministic (seeded test key), no network.
+      - name: SCITT COSE_Sign1 cryptographic verify (move 31)
+        run: |
+          python3 test/scitt-verify.py
+          python3 cli/dorado.py scitt --fixture
+
+      # OFFLINE STRANGER VERIFY-KIT (move 17): builds ONE deterministic offline bundle
+      # (card + payload + receipt + anchor + did:web keys + walkthrough), verifies the WHOLE
+      # kit offline (no network, no pod, only cryptography), and exercises the append-only
+      # verification counter (usage/provenance ledger, never a validity claim). Tampered
+      # card / swapped subject / missing receipt all handled honestly; identity pin is
+      # labelled caller-trusted vs kit-bundled so self-bundled keys are never mistaken for
+      # an independently-fetched did:web authentication. Deterministic, no network.
+      - name: Offline stranger verify-kit + counter (move 17)
+        run: |
+          python3 test/verify-kit.py
+          python3 cli/dorado.py verify-kit --fixture
 
       # GAME seed→replay→receipt→stranger-verify determinism (moves 45/44/36): the 5
       # games (connect4/ttt/rps/connectx/halite) run as deterministic replay records,

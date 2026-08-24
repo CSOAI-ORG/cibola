@@ -35,7 +35,7 @@ INTERNAL_MODULES = {
     "agent", "csoai_city", "dorado_a2a_client", "dorado_anchor", "dorado_anchor_verify",
     "dorado_board", "dorado_receipt", "dorado_receipt_verify", "dorado_sign",
     "dorado_verify", "elo", "engine", "export_data", "gbt_gates", "game_replay", "harness",
-    "mcp_server", "or_telemetry", "run_axis", "sb315",
+    "mcp_server", "or_telemetry", "run_axis", "sb315", "scitt_verify", "verify_kit",
 }
 # top-level modules that are stdlib (never a licence surface).
 STDLIB_OK = set(sys.stdlib_module_names)
@@ -126,7 +126,8 @@ def main() -> int:
     assert not excluded_hits, f"hard-excluded landmine present: {excluded_hits}"
 
     print(f"LICENCE-SWEEP: PASS — {len(external)} third-party module(s) detected, all "
-          f"declared + permissive (cryptography dual Apache/BSD, asn1crypto MIT); "
+          f"declared + permissive (cryptography dual Apache/BSD, asn1crypto MIT, "
+          f"cbor2 MIT); "
           f"estate-internal csoai_city marked INTERNAL; 0 hard-excluded family names in "
           f"{len(SCAN_ROOTS)} code/asset roots; manifest declares the allowlist + excluded "
           f"families. Landmine-free.")
