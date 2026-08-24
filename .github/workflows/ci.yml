@@ -50,9 +50,13 @@ jobs:
         run: python3 test/banned-strings.py
 
       # Binding-canongrammar CI guard (moves 39/65): public + staged week-1 external text
-      # must use "measurement credential" grammar, never a positive certification claim.
-      - name: Grammar lint (measurement-credential canon)
-        run: python3 test/grammar-lint.py
+      # must use "measurement credential" grammar, never a positive certification claim,
+      # and must never over-claim "14 of 14" / "all 14" (canon = "13 measured of 14").
+      # --selfcheck also regression-tests both guards against inline fixtures.
+      - name: Grammar lint (measurement-credential canon + completeness)
+        run: |
+          python3 test/grammar-lint.py
+          python3 test/grammar-lint.py --selfcheck
 
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
       - name: Schema CI (example card)

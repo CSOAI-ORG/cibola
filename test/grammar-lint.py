@@ -15,6 +15,12 @@ as a POSITIVE assertion — i.e. in a sentence that contains NO negation word. T
 negation and are allowed, as is the legitimate third-party reference to "regulators and
 accredited bodies decide" (we are not a notified body / not claiming accreditation).
 
+Likewise, "13 measured of 14" completeness grammar (move 65) is guarded: a POSITIVE
+claim that ALL 14 axes are measured over-claims it (the 14th canonical axis is the
+DPIA-gated human baseline, honest-unknown). "13 of 14" and a smaller domain registry's
+"N measured of M" are allowed; "14 of 14" / "all 14" / "all fourteen" as a positive
+claim is flagged. Pass `--selfcheck` to run the inline fixture self-test for both guards.
+
 Detection is SENTENCE-aware over the whole document (lines are joined first so a register
 that wraps across lines is still one sentence), so a line wrap can never turn a negation
 into a phantom positive claim.
@@ -39,6 +45,14 @@ STAGED = ["docs/outreach/PACK-METR-V2-2026-08-24.md",
 # The words that, used POSITIVELY, over-claim what a measurement grant is.
 FORBIDDEN = re.compile(r"\b(certification|certified|certify|accredited|accreditation|"
                        r"conformity\smark|compliant|approved)\b", re.IGNORECASE)
+# "13 measured of 14" completeness grammar (GOVERNANCE.md). The 14th canonical axis is
+# the DPIA-gated human baseline — honest-unknown — so the honest completion is "13 of 14".
+# A POSITIVE claim that ALL 14 are measured over-claims it. We flag the canonical
+# over-claim forms; "13 of 14" / "N measured of M" for a smaller domain registry is fine.
+OVERCLAIM = re.compile(
+    r"\b14\s*(?:of|/)\s*14\b|"                    # "14 of 14", "14/14"
+    r"\b(?:all|every)\s+(?:the\s+)?(?:14|fourteen)\b",  # "all 14", "all fourteen"
+    re.IGNORECASE)
 # A negation in the SAME sentence means the forbidden word is part of a register /
 # disclaimer (allowed), not a positive claim.
 NEGATION = re.compile(r"\b(not|never|no|without|cannot|isn't|is\s*not|does\s*not|"
@@ -70,19 +84,66 @@ def lint() -> list[str]:
             for m in FORBIDDEN.finditer(sent):
                 bad.append(f"{rel}: forbidden grammar '{m.group(0)}' used as a positive "
                            f"claim -> ...{sent.strip()[:90]}")
+            for m in OVERCLAIM.finditer(sent):
+                bad.append(f"{rel}: completeness over-claim '{m.group(0)}' (canon is "
+                           f"'13 measured of 14' — the 14th axis is the DPIA-gated human "
+                           f"baseline, honest-unknown) -> ...{sent.strip()[:90]}")
     return bad
 
 
+def _selfcheck() -> int:
+    """Self-verify the two guards against inline fixtures (moves 39/65).
+
+    Exit 0 if the guards catch a positive certification/over-claim and let the register
+    + the honest '13 of 14' grammar through; non-zero otherwise."""
+    ok = True
+    # (text, must_flag) — must_flag True means the guard SHOULD report a violation.
+    fixtures = [
+        # positive certification claim (forbidden, no negation) -> FLAG
+        ("This model was certified compliant by our independent auditors.", True),
+        # the register is a NEGATION -> ALLOW
+        ("It is not a certification, endorsement, or conformity mark.", False),
+        # completeness over-claim -> FLAG
+        ("We publish 14 of 14 measured axes across every domain.", True),
+        ("All 14 axes are fully measured.", True),
+        # honest canonical grammar (13 of 14) -> ALLOW
+        ("We report 13 measured of 14 axes (the 14th is the DPIA-gated human baseline).",
+         False),
+        # normative register describing the rule (contains 'never') -> ALLOW
+        ("Never claim '14 of 14' unless all 14 are genuinely measured.", False),
+        # a smaller domain registry legally says N measured of M -> ALLOW
+        ("The bond domain registry reports 6 measured of 7 axes.", False),
+    ]
+    for text, must_flag in fixtures:
+        hit = any(
+            (FORBIDDEN.search(s) or OVERCLAIM.search(s))
+            for s in _sentences(text) if not (_ALLOWED.search(s) or NEGATION.search(s))
+        )
+        if bool(hit) != must_flag:
+            print(f"  SELFMISMATCH: {'FLAG' if must_flag else 'ALLOW'} expected but got "
+                  f"{'FLAG' if hit else 'ALLOW'} for: {text[:70]}")
+            ok = False
+    if not ok:
+        print("GRAMMAR-LINT SELFCCHECK: FAIL — a fixture was mis-classified")
+        return 1
+    print("GRAMMAR-LINT SELFCCHECK: PASS — certification guard + '13 of 14' completeness "
+          "over-claim guard classify all fixtures correctly")
+    return 0
+
+
 def main() -> int:
+    if "--selfcheck" in sys.argv:
+        return _selfcheck()
     bad = lint()
     if bad:
         print("GRAMMAR-LINT: FAIL — public/staged text uses certification grammar as a "
-              "positive claim (must use 'measurement credential'):")
+              "positive claim or over-claims completeness (canon = '13 measured of 14'):")
         for b in bad:
             print("  " + b)
         return 1
-    print("GRAMMAR-LINT: PASS — 'measurement credential' grammar honored everywhere; "
-          "no positive certification/accreditation claim")
+    print("GRAMMAR-LINT: PASS — 'measurement credential' grammar + '13 measured of 14' "
+          "completeness honored everywhere; no positive certification/accreditation claim "
+          "and no over-claim that all 14 are measured")
     return 0
 
 

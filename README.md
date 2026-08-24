@@ -74,6 +74,9 @@ COST_BUDGET_USD=1.0 bash scripts/eat-batch.sh   # fail-open cost cap
 - `dorado elo --pairs pairs.json` — rank models (Elo/Bradley-Terry + CI).
 - `dorado board`, `dorado telemetry`, `dorado export-relative`, `dorado export-operational`.
 - A2A/MCP: `agent/mcp_server.py` + `.well-known/agent.json` + `.well-known/mcp.json`.
+- Registry of record (append-only, hash-chained measurement register) + did:web-signed
+  update flow: `REGISTRY.md`. Production 308-canonical all-target map:
+  `docs/production-308-canonical-map-2026-08-24.md`.
 
 ## Register (verbatim)
 
