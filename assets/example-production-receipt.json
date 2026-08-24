@@ -1,0 +1,25 @@
+{
+  "schema": "a2a.signed-receipt/0.1",
+  "issuer": "did:web:csoai.org",
+  "kind": "measurement-card",
+  "subject": "pod-3090/qwen3:4b-8k",
+  "subject_content_sha256": "ba65ddbab259be454efe12a6238404c73febf54aa174a2c26deb5df7d5408b1f",
+  "claims": [
+    {
+      "type": "measurement",
+      "detail": "measured card ba65ddbab259be45\u2026 bound to issuer",
+      "evidence_sha256": "ba65ddbab259be454efe12a6238404c73febf54aa174a2c26deb5df7d5408b1f"
+    }
+  ],
+  "issued_at": "2026-08-24T09:00:59.305229+00:00",
+  "kid": "did:web:csoai.org#card-attestation-1",
+  "content_id": "5e91471f884cf282fd92bfb2e730e42e348559128fbf5c07fbf97310c6752503",
+  "signature": {
+    "alg": "Ed25519",
+    "kid": "did:web:csoai.org#card-attestation-1",
+    "pubkey": "1MsOqhbV9Qv3Yzo2qjT+CaVeEkuTFt7Sq9sSK7nDfjg=",
+    "sig": "wbzqCjtWUihauI3LC9ME7yUHU3jJJQy+wkXloGhSYNK4v8j8wrcvM0Ip2GudNluQrQMl5djX+cVPp0dbvbPABA==",
+    "pubkey_thumbprint": "Lb1uFDySKuWC1gE69NISK4BVV-fantDeisG1Mh8DjQc",
+    "sig_input": "ed25519(canonical receipt minus content_id/signature)"
+  }
+}
