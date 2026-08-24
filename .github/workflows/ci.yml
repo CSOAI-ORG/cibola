@@ -115,6 +115,22 @@ jobs:
       - name: Scenario receipt / JCS payload-binding (move 43)
         run: python3 test/scenario-receipt.py
 
+      # GB/T 45654-STYLE credibility gates self-check (move 52): the four quotability gates
+      # (calibration >= 90% / over-refusal <= 5% / per-axis n >= 2k / total n >= 10k) are
+      # encoded deterministically. A below-floor value is reported honestly (never a
+      # fabricated pass), and a single-gate failure marks the run NOT QUOTABLE — a datum,
+      # not a finding. Hermetic, no LLM-judge.
+      - name: GB/T 45654 credibility gates self-check (move 52)
+        run: python3 test/gbt-gates.py
+
+      # SB 315-style machine-readable transparency-summary emitter (move 12): a signed
+      # measurement card becomes a machine-readable transparency summary + a stranger/
+      # auditor walkthrough template, both bound to the card by its canonical digest
+      # (content_sha256 + signed/kid). Honest "N of M" completeness grammar; excluded axes
+      # reported honestly; measurement-credential register carried. Deterministic + hermetic.
+      - name: SB 315 transparency-summary emitter (move 12)
+        run: python3 test/sb315.py
+
       # GAME seed→replay→receipt→stranger-verify determinism (moves 45/44/36): the 5
       # games (connect4/ttt/rps/connectx/halite) run as deterministic replay records,
       # each JCS-bound to an issuer in a kind:"scenario" receipt and stranger-verified.
