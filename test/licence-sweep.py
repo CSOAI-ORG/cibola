@@ -34,7 +34,7 @@ MANIFEST = os.path.join(ROOT, "data", "dependency-licence-manifest.json")
 INTERNAL_MODULES = {
     "agent", "csoai_city", "dorado_a2a_client", "dorado_anchor", "dorado_anchor_verify",
     "dorado_board", "dorado_receipt", "dorado_receipt_verify", "dorado_sign",
-    "dorado_verify", "elo", "engine", "export_data", "harness", "mcp_server",
+    "dorado_verify", "elo", "engine", "export_data", "game_replay", "harness", "mcp_server",
     "or_telemetry", "run_axis",
 }
 # top-level modules that are stdlib (never a licence surface).

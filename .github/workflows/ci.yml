@@ -115,6 +115,16 @@ jobs:
       - name: Scenario receipt / JCS payload-binding (move 43)
         run: python3 test/scenario-receipt.py
 
+      # GAME seed→replay→receipt→stranger-verify determinism (moves 45/44/36): the 5
+      # games (connect4/ttt/rps/connectx/halite) run as deterministic replay records,
+      # each JCS-bound to an issuer in a kind:"scenario" receipt and stranger-verified.
+      # Asserts seed->replay determinism, double-run determinism (identical receipt
+      # content_id/digest), a different-seed/altered transcript NOT bound, and the
+      # measurement-credential register. Pure-Python deterministic engines — no network,
+      # no LLM-judge, no external game runtime.
+      - name: Game replay -> receipt -> stranger-verify determinism (moves 45/44/36)
+        run: python3 test/game-replay.py
+
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
       - name: Schema CI (example card)
         run: python3 test/schema-test.py
