@@ -54,6 +54,10 @@ registry, subject, measured/total, kid, receipt content_id, anchor time, and
 provision-axis count, with `chainOk` / `linked` diagnostics. It is production-signed
 with `did:web:csoai.org#card-attestation-1` and RFC 3161-anchored (`chainOk: true`).
 
+The consolidated body **status** (board + relative + operational + live binds) is
+`status.json`:
+`https://csoai-org.github.io/cibola/status.json` (schema `csoai.dorado-status/0.1`).
+
 ```bash
 dorado publish --card card.json [--receipt r.json] [--anchor a.json]   # append (dedupe)
 dorado board [--json]                                                 # show the index
