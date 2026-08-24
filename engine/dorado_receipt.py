@@ -38,12 +38,18 @@ def content_id(receipt: dict) -> str:
     return hashlib.sha256(canonical(receipt)).hexdigest()
 
 
-def build_card_receipt(card: dict, private_key=None, pubkey_raw=None, kid=None) -> dict:
+def build_card_receipt(card: dict, private_key=None, pubkey_raw=None, kid=None,
+                       issued_at: str | None = None) -> dict:
     """Build an a2a.signed-receipt/0.1 binding the measurement card's content_id.
 
     Uses the same canonical form the signature envelope uses (dorado_sign.canonical)
     so the card's content_id is reproducible. Signing with the pod key attaches a
     proof the issuer (did:web:csoai.org) bound this card's fingerprint at this time.
+
+    issued_at: optional RFC 3339 timestamp string. The receipt is a TIME anchor, so
+    by default it uses wall-clock now (correct for a live receipt); the hermetic
+    determinism gate passes a fixed value to prove the rest of the receipt
+    construction is deterministic (the time field is the sole wall-clock input).
     """
     from dorado_sign import canonical as card_canonical, rfc9679_thumbprint, KID_DEFAULT as CARD_KID
 
@@ -60,7 +66,7 @@ def build_card_receipt(card: dict, private_key=None, pubkey_raw=None, kid=None) 
             "detail": f"measured card {card_digest[:16]}… bound to issuer",
             "evidence_sha256": card_digest,
         }],
-        "issued_at": datetime.now(timezone.utc).isoformat(),
+        "issued_at": issued_at or datetime.now(timezone.utc).isoformat(),
         "kid": kid or KID_DEFAULT,
     }
     cid = content_id(receipt)
