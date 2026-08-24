@@ -47,3 +47,7 @@ PROBED: (deltas vs state anchors — chain/registers/SCITT/board/pods)
 BLOCKED: (exact blocker per unfinished move)
 NEXT ROUND: (5 highest-value remaining client moves)
 ```
+**ALSO (mandatory):** append the same COMPLETED/PROBED/BLOCKED block to `docs/ralph-round-log.md` (append-only, one section per round, `git commit -m "dorado: ralph round N log"` + push) BEFORE ending the round — the log is the durable progress record if the round report is lost.
+
+## DUPLICATE-WORK GUARD
+Before starting, run `git log --oneline -15` + `tail -40 docs/ralph-round-log.md` (if present) and diff against the moves list. Any move already logged/shipped = skip. Never redo; never revert another round's work.
