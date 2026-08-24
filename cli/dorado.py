@@ -550,6 +550,218 @@ def cmd_status(args):
     return 0
 
 
+def cmd_e2e(args):
+    """One-command end-to-end smoke (move 54): measure(fixture)->card->sign->verify->
+    receipt->verify-receipt->anchor->verify-anchor->publish->board.
+
+    Emits a JSON report with per-section ids, per-section + whole-run time budgets,
+    and FAIL-FAST on the first hard error. Runs the WHOLE strand with an EPHEMERAL
+    test key (kid=test, one-signer doctrine stamped test) into a TEMP board dir, so it
+    never touches the committed board or the real pod signing key. A live measure
+    requires --base <ollama>; the default is a clearly-labelled deterministic fixture.
+
+    Measurement, never certification (the register rides every card + receipt + board row).
+    """
+    import shutil as _shutil
+    import time as _t
+    import tempfile as _tmp
+    import hashlib as _hl
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+
+    from run_axis import as_card, load_axes
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from dorado_sign import sign as sign_card, is_signed
+    from dorado_verify import verify_card
+    from dorado_receipt import build_card_receipt
+    from dorado_receipt_verify import verify_receipt
+    from dorado_anchor import card_digest
+    from dorado_anchor_verify import verify_anchor
+
+    axes, registry_id = load_axes(args.domain)
+    n = len(axes)
+    if args.base and args.base != "none":
+        from run_axis import measure
+        res = measure(args.model, axes=axes, base=args.base, delay=args.delay,
+                      registry_id=registry_id)
+        mode = "live"
+    else:
+        # Deterministic fixture (clearly labelled) so the chain is reproducible offline.
+        ok = max(0, n - 2)
+        res = {"model": args.model, "registry": registry_id, "n": n, "ok": ok,
+               "accuracy": round(ok / n, 6) if n else 0.0, "measured": n, "total": n,
+               "ts": args.pin_ts,
+               "per_axis": [{"axis": a["slug"], "gold": a["gold"],
+                             "verdict": ("PASS" if i < ok else "FAIL"),
+                             "resp": "fixture", "measured": True}
+                            for i, a in enumerate(axes)]}
+        mode = "fixture"
+
+    key = Ed25519PrivateKey.generate()
+    subject = {"id": args.model, "name": args.model, "digest": "fixture"}
+    card = as_card(res, subject, axes=axes)
+
+    # temp board dir so publish never clobbers the committed (authoritative) board
+    prior = os.environ.get("DORADO_BOARD_DIR")
+    tmpdir = _tmp.mkdtemp(prefix="dorado-e2e-")
+    os.environ["DORADO_BOARD_DIR"] = tmpdir
+
+    state = {}
+    budget = args.budget
+    whole_budget = args.whole_budget
+    t_start = _t.time()
+    sections = []
+    passed = True
+
+    def run_section(sid, fn):
+        nonlocal passed
+        t0 = _t.time()
+        rec = {"id": sid, "status": "FAIL", "ms": None, "detail": ""}
+        try:
+            detail = fn()
+            rec["ms"] = round((_t.time() - t0) * 1000, 1)
+            if rec["ms"] / 1000.0 > budget:
+                rec["status"] = "BUDGET"
+                passed = False
+            else:
+                rec["status"] = "PASS"
+            rec["detail"] = detail
+        except Exception as e:  # noqa: BLE001 — report any section failure as FAIL
+            rec["ms"] = round((_t.time() - t0) * 1000, 1)
+            rec["status"] = "FAIL"
+            rec["detail"] = f"{type(e).__name__}: {e}"
+            passed = False
+        sections.append(rec)
+        return rec
+
+    def _step_card():
+        state["card"] = card
+        return f"{n}-axis card built, registry={registry_id}"
+
+    def _step_sign():
+        signed = sign_card(card, key, kid=args.kid, allow_test_identity=True)
+        state["signed"] = signed
+        assert is_signed(signed), "card not signed after sign()"
+        # an ephemeral (non-published) key is always stamped kid=test (one-signer
+        # doctrine); capture it so the receipt + anchors carry the SAME honest kid.
+        state["sig_kid"] = signed["signature"]["kid"]
+        return ("signed alg=%s kid=%s thumb=%s…" % (
+            signed["signature"]["alg"], signed["signature"]["kid"],
+            signed["signature"]["pubkey_thumbprint"][:10]))
+
+    def _step_verify():
+        v = verify_card(state["signed"])
+        if not v["ok"]:
+            raise AssertionError(v["reason"])
+        return v["reason"]
+
+    def _step_receipt():
+        rcp = build_card_receipt(state["signed"], private_key=key, kid=state["sig_kid"],
+                                 issued_at=args.pin_ts)
+        assert rcp.get("signature", {}).get("sig"), "receipt not signed"
+        assert rcp["subject_content_sha256"] == \
+            _hl.sha256(_import_canonical(state["signed"])).hexdigest(), "receipt not bound to card canonical"
+        state["receipt"] = rcp
+        return "receipt content_id=%s… subject=%s… kid=%s" % (
+            rcp["content_id"][:12], rcp["subject_content_sha256"][:12], rcp["kid"])
+
+    def _step_verify_receipt():
+        v = verify_receipt(state["receipt"], state["signed"])
+        if not v["ok"]:
+            raise AssertionError(v["reason"])
+        return v["reason"]
+
+    def _step_anchor():
+        dig = card_digest(state["signed"])
+        a = {"schema": "csoai.card-anchor/0.1", "card_content_sha256": dig,
+             "anchors": [{"kind": "tsa-rfc3161", "digest_sha256": dig,
+                          "message_imprint_matches": True, "gen_time": args.pin_ts}]}
+        assert verify_anchor(a, state["signed"])["ok"], "hermetic anchor did not verify"
+        state["anchor"] = a
+        return "anchor digest=%s… imprint_matches=True" % dig[:12]
+
+    def _step_verify_anchor():
+        v = verify_anchor(state["anchor"], state["signed"])
+        if not v["ok"]:
+            raise AssertionError(v["reason"])
+        return v["reason"]
+
+    def _step_publish():
+        from dorado_board import publish
+        e = publish(state["signed"], state["receipt"], state["anchor"])
+        if e.get("deduped"):
+            raise AssertionError("board deduped a fresh card")
+        state["entry"] = e
+        return "published hash=%s… kid=%s signed=%s" % (
+            e["hash"][:16], e["kid"], e["signed"])
+
+    def _step_board():
+        from dorado_board import rebuild_index
+        idx = rebuild_index()
+        state["index"] = idx
+        if not idx.get("chainOk") or idx.get("count") < 1 or \
+           idx.get("linked") != idx.get("count"):
+            raise AssertionError("board index not coherent: %s" % idx)
+        return "board count=%s chainOk=%s linked=%s" % (
+            idx["count"], idx["chainOk"], idx["linked"])
+
+    try:
+        for sid, fn in [("card", _step_card), ("sign", _step_sign),
+                        ("verify", _step_verify), ("receipt", _step_receipt),
+                        ("verify-receipt", _step_verify_receipt),
+                        ("anchor", _step_anchor), ("verify-anchor", _step_verify_anchor),
+                        ("publish", _step_publish), ("board", _step_board)]:
+            rec = run_section(sid, fn)
+            if args.fail_fast and rec["status"] == "FAIL":
+                break
+    finally:
+        _shutil.rmtree(tmpdir, ignore_errors=True)
+        if prior is None:
+            os.environ.pop("DORADO_BOARD_DIR", None)
+        else:
+            os.environ["DORADO_BOARD_DIR"] = prior
+
+    total_ms = round((_t.time() - t_start) * 1000, 1)
+    if total_ms / 1000.0 > whole_budget:
+        passed = False
+
+    result = {
+        "schema": "csoai.dorado-e2e/0.1",
+        "kind": "end-to-end smoke — a MEASUREMENT pipeline check, never a certification",
+        "register": "This is a measurement credential. It is not a certification, "
+                    "endorsement, or conformity mark, and must not be presented as one.",
+        "run": mode,
+        "model": args.model,
+        "domain": registry_id,
+        "ephemeral_key": True,
+        # the ACTUAL stamped kid (an ephemeral key is stamped test-identity by the
+        # one-signer doctrine), never the requested-but-overridden did:web id.
+        "kid": state.get("sig_kid", args.kid),
+        "budget_seconds_per_section": budget,
+        "whole_run_seconds": args.whole_budget,
+        "elapsed_ms": total_ms,
+        "fail_fast": args.fail_fast,
+        "sections": sections,
+        "pass": passed,
+    }
+    if args.out:
+        json.dump(result, open(args.out, "w"), indent=2)
+        print(f"wrote {args.out}", flush=True)
+        print(json.dumps(result, indent=2), flush=True)
+    elif args.json:
+        print(json.dumps(result, indent=2), flush=True)
+    else:
+        np = sum(1 for s in sections if s["status"] == "PASS")
+        print(f"E2E: {'PASS' if passed else 'FAIL'} ({np}/{len(sections)} sections, "
+              f"{total_ms}ms) run={mode} — measurement, never certification", flush=True)
+    return 0 if passed else 1
+
+
+def _import_canonical(card):
+    from dorado_sign import canonical
+    return canonical(card)
+
+
 def main():
     ap = argparse.ArgumentParser(description="DORADO measurement CLI.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -678,6 +890,22 @@ def main():
     p = sub.add_parser("status", help="Consolidated live-endpoint payload (board + relative + operational + identity)")
     p.add_argument("--out", default=None, help="Write the status payload to a JSON file")
     p.set_defaults(func=cmd_status)
+
+    p = sub.add_parser("e2e", help="One-command end-to-end smoke (measure->card->sign->verify->receipt->anchor->publish->board), JSON, fail-fast, per-section + whole-run time budgets (hermetic, ephemeral key, temp board)")
+    p.add_argument("--model", default="fixture-model")
+    p.add_argument("--domain", default=None, help="Domain registry (default 16-axis); must be a provision-mapped domain for the crosswalk card")
+    p.add_argument("--base", default="none", help="Ollama endpoint for a LIVE measure (default none = deterministic fixture)")
+    p.add_argument("--delay", type=float, default=0.0)
+    p.add_argument("--kid", default="did:web:csoai.org#test-identity",
+                   help="kid for the ephemeral e2e key (an ephemeral key is ALWAYS stamped "
+                        "test-identity by the one-signer doctrine; do not pass the production kid)")
+    p.add_argument("--pin-ts", default="2026-08-24T00:00:00Z", help="RFC 3339 issued_at (pinned for the fixture's determinism)")
+    p.add_argument("--budget", type=float, default=60.0, help="Per-section time budget (seconds)")
+    p.add_argument("--whole-budget", type=float, default=300.0, help="Whole-run time budget (seconds)")
+    p.add_argument("--fail-fast", action="store_true", help="Stop at the first hard section failure")
+    p.add_argument("--json", action="store_true", help="Emit the full JSON report to stdout")
+    p.add_argument("--out", default=None, help="Write the full JSON report to a file")
+    p.set_defaults(func=cmd_e2e)
 
     p = sub.add_parser("export", help="Turn an axis-engine result into the licensable data product")
     p.add_argument("--in", dest="inp", required=True, help="axis-engine result JSON")
