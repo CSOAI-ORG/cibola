@@ -104,6 +104,30 @@ RFC 3161 anchor -> chain`. The CLI (`cli/dorado.py verify / verify-receipt / ver
 and the engine (`engine/dorado_verify.py`, `dorado_receipt_verify.py`, `dorado_anchor_verify.py`)
 implement this offline with only `cryptography` (+ `asn1crypto` for the anchor leg).
 
+## Frozen verification vectors (registry-of-record entry, move 6)
+
+The registry of record also indexes the estate's **pinned stranger-verification fixtures** —
+FROZEN VECTORS v1. These are the canonical, hash-pinned inputs every verifier must still
+accept (valid) and reject (bad-sig, bad-receipt) if the stranger-verification pipeline is
+sound. They live in the repo, content-addressed by the manifest:
+
+| Vector | File | Must | sha256 (pinned) |
+|---|---|---|---|
+| valid (card + receipt stranger-verify) | `test/vectors/card-valid.json` · `receipt-valid.json` | verify **ok** | `2819c817…` / `ae249654…` |
+| bad-sig (card signature tampered) | `test/vectors/card-bad-sig.json` | fail **signature** | `9024fc6e…` |
+| bad-receipt (receipt bound to a *different* card) | `test/vectors/receipt-bad.json` | fail **card-bind** | `3afa5c7a…` |
+
+- The valid card's canonical digest `card_digest_sha256 = dc4aa02f6caad7bf65cdc0697dd0dfdb8d
+  c8e1dae217444162561e4dcab5f8d9` is pinned in `test/vectors/FROZEN-VECTORS-MANIFEST.json`.
+- All vectors use `kid = did:web:csoai.org#test-identity` (the fixed test key derived in
+  `scripts/gen-frozen-vectors.py`) — **never** the production `#card-attestation-1` identity.
+- Regeneration is deterministic: `python3 scripts/gen-frozen-vectors.py`; CI fails loudly on
+  any drift (`test/frozen-vectors.py` → 8/8, `test/frozen-vectors-kit.py` → 12/12, which
+  also stranger-verifies the frozen valid card+receipt through the **offline verify-kit**
+  surface, move 17).
+- A fixture is a *verification vector*, evidence of what the pipeline measures and when — it
+  is a measurement device, never a certification, endorsement, or conformity mark.
+
 ## Maintenance notes
 
 - `board-index.json` is regenerated from `measurements.jsonl` on publish; a `dirty` index is a

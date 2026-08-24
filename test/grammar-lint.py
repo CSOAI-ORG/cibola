@@ -43,7 +43,14 @@ STAGED = ["docs/outreach/PACK-METR-V2-2026-08-24.md",
           "docs/ART50-TRANSPARENCY-CONSULTATION-RESPONSE-2026-08-24.md",
           "docs/revenue/ART50-READINESS-PRODUCT-2026-08-24.md",
           "docs/revenue/ART50-CAPTURE-MAP-2026-08-24.md",
-          "docs/revenue/END-USER-REVENUE-READY.md"]
+          "docs/revenue/END-USER-REVENUE-READY.md",
+          # closing round — owner-gated external texts (STAGE, never send/submit) +
+          # the public verify-page stranger walkthrough (moves 5/71).
+          "docs/outreach/IANA-MEDIA-TYPE-FORM-2026-08-24.md",
+          "docs/outreach/DATATRACKER-I-D-SUBMISSION-2026-08-24.md",
+          "docs/outreach/AGUI-AUDIO-PROPOSAL-2026-08-24.md",
+          "docs/outreach/MCP-426-REANCHOR-PR-2026-08-24.md",
+          "docs/stranger-verify-walkthrough-2026-08-24.md"]
 
 # The words that, used POSITIVELY, over-claim what a measurement grant is.
 FORBIDDEN = re.compile(r"\b(certification|certified|certify|accredited|accreditation|"

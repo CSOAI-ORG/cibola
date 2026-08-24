@@ -39,6 +39,15 @@ jobs:
           git diff --exit-code test/vectors || { echo "FROZEN VECTORS DRIFT: run scripts/gen-frozen-vectors.py and commit the regenerated vectors"; exit 1; }
           python3 test/frozen-vectors.py
 
+      # FROZEN VECTORS <-> OFFLINE VERIFY-KIT integration (closing round): packs the frozen
+      # VALID card + receipt into ONE offline verify-kit and stranger-verifies the WHOLE kit
+      # (digest + card signature + receipt bind + identity pin), and proves the frozen
+      # bad-sig / bad-receipt vectors fail honestly through the SAME kit path. This is the
+      # closing seam the estate must never break — the pinned fixtures and the stranger
+      # artifact verify EACH OTHER. Hermetic, deterministic, no network, no pod.
+      - name: Frozen vectors <-> verify-kit integration (closing)
+        run: python3 test/frozen-vectors-kit.py
+
       # End-user persona suite — the front end tested as all types of users.
       - name: End-user personas (hermetic)
         run: python3 test/personas.py
