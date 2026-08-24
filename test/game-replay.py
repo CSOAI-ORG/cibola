@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """test/game-replay.py — GAME seed→replay→receipt→stranger-verify determinism (moves 45/44/36).
 
-The estate's competitive scenarios (the "5 games") must be SHIPPABLE as a deterministic
+The estate's competitive scenarios (the games, v3's 5 + v4 move 22's 2 impartial
+combinatorial games) must be SHIPPABLE as a deterministic
 replay that a stranger can verify: for each of connect4, tic_tac_toe, rock_paper_scissors,
-connectx, halite, we (1) run a fixed-seed replay, (2) bind the JSV (RFC 8785) canonical
+connectx, halite, nim, wythoff, we (1) run a fixed-seed replay, (2) bind the JSV (RFC 8785) canonical
 form of that transcript to an issuer in a move-43 `kind:"scenario"` receipt, and (3) let a
 STRANGER verify it with ONLY the receipt + cryptography (no key, no pod).
 
@@ -45,7 +46,12 @@ def _transcript_hash(t: dict) -> str:
 def main() -> int:
     key = Ed25519PrivateKey.generate()
     games = list_games()
-    assert len(games) == 5, f"expected the 5 games, got {games}"
+    # the canonical replay set is EXTENSIBLE (move 22 grew it): assert the original
+    # 5 games are present and that EVERY env in list_games() passes the full gate
+    # (determinism + JCS-binding + double-run + anti-retarget + tamper).
+    canonical_5 = {"connect4", "ttt", "rps", "connectx", "halite"}
+    assert canonical_5 <= set(games), f"missing canonical env(s): {canonical_5 - set(games)}"
+    assert len(games) >= 5, f"expected >=5 games, got {games}"
 
     for game in games:
         t1 = run_game(game, SEED)

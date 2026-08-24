@@ -631,6 +631,60 @@ def cmd_verify_kit(args):
     return 0
 
 
+def cmd_velocity(args):
+    """Issuance-velocity / rate-cap attestation (move 51).
+
+    Reads a deterministic issuance ledger (events: [{subject_id, card_id, issued_at}]) and
+    attests the estate's OWN issuance velocity honestly: an over-cap window is reported
+    VERBATIM (never clipped, never re-rated; anti-Goodhart / nobody-ranked-pays). Emits a
+    `csoai.velocity-attestation/0.1` card, carried by the measurement-credential register
+    (a self-audit record, never a certification).
+
+    --fixture uses a deterministic within-cap fixture for a CI/selfcheck smoke (test identity).
+    """
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from rate_cap import attest, sign_attestation, verify_attestation
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    if args.fixture:
+        key = Ed25519PrivateKey.from_private_bytes(b"velocity-fixture-v1-2026-08-24"[:32].ljust(32, b"!"))
+        events = [{"subject_id": s, "card_id": f"c-{i:04d}",
+                   "issued_at": f"2026-08-24T00:{i % 60:02d}:00Z"}
+                  for i, s in enumerate(["model-a"] * 3 + ["model-b"] * 3)]
+        card = attest(events, caps={"per_subject": 5, "global": 20})
+        signed = sign_attestation(card, key, kid="did:web:csoai.org#test-identity")
+        v = verify_attestation(signed)
+        print(f"fixture velocity: verdict={card['verdict']} windows={len(card['observed']['windows'])} "
+              f"max_per_subject={card['observed']['max_per_subject']} max_global={card['observed']['max_global']} "
+              f"signed_ok={v['ok']}", flush=True)
+        return 0 if card["verdict"] == "within-cap" and v["ok"] else 1
+
+    events = json.load(open(args.inp))
+    caps = json.loads(args.caps) if args.caps else None
+    card = attest(events, caps=caps, window_seconds=args.window, subject=args.subject)
+    key = None
+    if args.key_file:
+        key = _load_signing_key()
+    if key:
+        card = sign_attestation(card, key, kid=args.kid, allow_test_identity=args.allow_test_identity)
+    if args.out:
+        json.dump(card, open(args.out, "w"), indent=2)
+        print(f"wrote velocity-attestation to {args.out} (verdict={card['verdict']}, "
+              f"violations={len(card['violations'])})", flush=True)
+    elif args.json:
+        print(json.dumps(card, indent=2), flush=True)
+    else:
+        print(f"velocity attestation: verdict={card['verdict']} windows={len(card['observed']['windows'])} "
+              f"max_per_subject={card['observed']['max_per_subject']} max_global={card['observed']['max_global']}",
+              flush=True)
+        for w in card["observed"]["windows"]:
+            print(f"  {w['window_start']}: {w['count']} cards {w['by_subject']}", flush=True)
+        for v_ in card["violations"]:
+            print(f"  VIOLATION {v_['kind']} {v_['window_start']} count={v_['count']} cap={v_['cap']}", flush=True)
+    return 0 if card["verdict"] == "within-cap" else 1
+
+
 def cmd_license(args):
     import hashlib as _hl
     from datetime import datetime, timezone
@@ -1139,6 +1193,19 @@ def main():
     p.add_argument("--fixture", action="store_true", help="Deterministic hermetic fixture smoke (test identity, CI/selfcheck)")
     p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     p.set_defaults(func=cmd_verify_kit)
+
+    p = sub.add_parser("velocity", help="Issuance-velocity / rate-cap attestation (move 51) — honest over-cap reporting, never clipped (measurement, never certification)")
+    p.add_argument("--in", dest="inp", default=None, help="Issuance ledger JSON: [{subject_id, card_id, issued_at}]")
+    p.add_argument("--caps", default=None, help="JSON rate-cap policy {per_subject, global}")
+    p.add_argument("--window", type=int, default=3600, help="Fixed window in seconds (default 3600)")
+    p.add_argument("--subject", default=None, help="Optionally narrow the attestation to one subject")
+    p.add_argument("--key-file", default=None, help="Pod Ed25519 private key (repo never embeds it)")
+    p.add_argument("--kid", default=None, help="kid to stamp (default did:web:csoai.org#card-attestation-1)")
+    p.add_argument("--allow-test-identity", action="store_true", help="Allow a NON-published key (stamps kid=test)")
+    p.add_argument("--out", default=None, help="Write the velocity-attestation card JSON here")
+    p.add_argument("--fixture", action="store_true", help="Deterministic within-cap fixture smoke (test identity, CI/selfcheck)")
+    p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    p.set_defaults(func=cmd_velocity)
 
     a = ap.parse_args()
     code = a.func(a)

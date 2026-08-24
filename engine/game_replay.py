@@ -15,9 +15,11 @@ Properties this engine guarantees (and test/game-replay.py asserts):
                        NEVER float) so RFC 8785 jcs() canonicalises it for a receipt.
   * no LLM-judge     — replay is pure game logic; nothing here scores a model.
 
-Games (the 5 named in NEXT-100 v3 move 29): connect4, tic_tac_toe, rock_paper_scissors,
-connectx, halite. Each returns a transcript dict with {game, seed, players, rounds,
-moves, outcome, winner, terminal}.
+Games (the 5 named in NEXT-100 v3 move 29, plus the 2 impartial combinatorial games
+added in NEXT-100 v4 move 22): connect4, tic_tac_toe, rock_paper_scissors, connectx,
+halite, nim, wythoff. Each returns a transcript dict with {game, seed, players,
+rounds, moves, outcome, winner, terminal}. A new env MUST be deterministic (same
+(game, seed) -> byte-identical transcript) so it passes the move-44 determinism gate.
 
 Register (verbatim from canon): a replay record is non-repudiable evidence of WHAT
 episode was replayed — it is a measurement-derived record, never a certification.
@@ -33,8 +35,16 @@ CANONICAL = {
     "rps": "rps", "rock_paper_scissors": "rps", "rock-paper-scissors": "rps",
     "connectx": "connectx", "connect-x": "connectx", "connect_x": "connectx",
     "halite": "halite",
+    "nim": "nim", "take_away": "nim", "take-away": "nim",
+    "wythoff": "wythoff", "wythoffs_game": "wythoff", "wythoff-game": "wythoff",
 }
-GAMES = ("connect4", "ttt", "rps", "connectx", "halite")
+# GAMES is the ordered, canonical replay-env set. Order matters only for stable
+# display; the set is EXTENSIBLE (move 22 grows it; every env must pass the move-44
+# determinism gate in test/game-replay.py).
+GAMES = ("connect4", "ttt", "rps", "connectx", "halite", "nim", "wythoff")
+# envs whose run_game transcript never takes a `rounds` cap (they are bounded by
+# construction and always reach a terminal state before any cap would bind).
+NO_ROUNDS = {"ttt"}
 
 
 def normalize(name: str) -> str:
@@ -228,8 +238,87 @@ def _halite(rng, rounds=10):
     }
 
 
+def _nim(rng, rounds=30):
+    """nim — classic impartial take-away (normal play), added in move 22.
+
+    Three heaps of tokens (canonical [3,4,5]); each turn a player removes 1..3 tokens
+    from ONE non-empty heap. The player who takes the LAST token wins. Deterministic +
+    integer-only (no floats), so the transcript is JCS-bindable and stranger-verifiable.
+
+    `heaps` are seeded from the rng (bounded 1..6) so a different seed yields a different
+    position (and thus a different transcript) — the move-44 gate needs seed-sensitivity.
+    """
+    heaps = [rng.randint(1, 6) for _ in range(3)]
+    players = ["player-a", "player-b"]
+    moves, outcome, winner = [], "draw", None
+    for t in range(rounds):
+        nonempty = [i for i, h in enumerate(heaps) if h > 0]
+        if not nonempty:
+            break
+        h = rng.choice(nonempty)
+        take = rng.randint(1, min(3, heaps[h]))
+        heaps[h] -= take
+        player = players[t % 2]
+        moves.append({"turn": t, "player": player, "heap": int(h), "take": int(take),
+                      "remaining": [int(x) for x in heaps]})
+        if sum(heaps) == 0:                      # normal play: last taker wins
+            outcome, winner = "win", player
+            break
+    return {
+        "game": "nim", "heaps": heaps, "seed": None, "players": players,
+        "rounds": len(moves), "moves": moves, "outcome": outcome, "winner": winner,
+        "terminal": True, "play": "normal-play last-taker-wins",
+    }
+
+
+def _wythoff(rng, rounds=40):
+    """wythoff — Wythoff's game (two-pile impartial take-away), added in move 22.
+
+    Two piles (a, b). On each turn a player removes any positive number from ONE pile,
+    OR the SAME positive number from BOTH piles. The player who removes the last token
+    wins (normal play). Deterministic + integer-only; the golden-ratio cold positions
+    (the Wythoff sequence) are a natural *strategic* structure, so this env is a
+    meaningful addition to the combinatorial-game canon.
+
+    Piles are seeded (a,b, b<=a) from the rng in a bounded range so a different seed
+    yields a different position and thus a different transcript.
+    """
+    a, b = rng.randint(2, 9), rng.randint(2, 9)
+    a, b = max(a, b), min(a, b)                  # canonical: a >= b >= 0
+    players = ["player-a", "player-b"]
+    moves, outcome, winner = [], "draw", None
+    for t in range(rounds):
+        if a == 0 and b == 0:
+            break
+        # pool of legal moves (each removes >=1 token)
+        legal = {"single-a": a, "single-b": b, "both": min(a, b)}
+        legal = {k: v for k, v in legal.items() if v > 0}
+        if not legal:
+            break
+        mode = rng.choice(sorted(legal))
+        take = rng.randint(1, legal[mode])
+        if mode == "single-a":
+            a -= take
+        elif mode == "single-b":
+            b -= take
+        else:
+            a -= take
+            b -= take
+        player = players[t % 2]
+        moves.append({"turn": t, "player": player, "mode": mode, "take": int(take),
+                      "piles": [int(a), int(b)]})
+        if a == 0 and b == 0:
+            outcome, winner = "win", player
+            break
+    return {
+        "game": "wythoff", "piles": [int(a), int(b)], "seed": None, "players": players,
+        "rounds": len(moves), "moves": moves, "outcome": outcome, "winner": winner,
+        "terminal": True, "play": "normal-play last-taker-wins",
+    }
+
+
 _ENGINES = {"connect4": _connect4, "connectx": _connectx, "ttt": _ttt,
-            "rps": _rps, "halite": _halite}
+            "rps": _rps, "halite": _halite, "nim": _nim, "wythoff": _wythoff}
 
 
 def run_game(name: str, seed: int, rounds: int | None = None) -> dict:
@@ -242,11 +331,11 @@ def run_game(name: str, seed: int, rounds: int | None = None) -> dict:
     """
     key = normalize(name)
     rng = random.Random(seed)
-    defaults = {"connect4": 42, "connectx": 36, "ttt": 9, "rps": 3, "halite": 10}
+    defaults = {"connect4": 42, "connectx": 36, "ttt": 9, "rps": 3, "halite": 10,
+                "nim": 30, "wythoff": 40}
     r = rounds if rounds is not None else defaults[key]
     if r < 1:
         raise ValueError("rounds must be >= 1")
-    transcript = _ENGINES[key](rng, r) if key in ("connect4", "connectx", "halite", "rps") \
-        else _ENGINES[key](rng)      # ttt takes no rounds arg
+    transcript = _ENGINES[key](rng) if key in NO_ROUNDS else _ENGINES[key](rng, r)
     transcript["seed"] = int(seed)
     return transcript

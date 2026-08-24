@@ -156,14 +156,26 @@ jobs:
           python3 test/verify-kit.py
           python3 cli/dorado.py verify-kit --fixture
 
-      # GAME seed→replay→receipt→stranger-verify determinism (moves 45/44/36): the 5
-      # games (connect4/ttt/rps/connectx/halite) run as deterministic replay records,
-      # each JCS-bound to an issuer in a kind:"scenario" receipt and stranger-verified.
-      # Asserts seed->replay determinism, double-run determinism (identical receipt
-      # content_id/digest), a different-seed/altered transcript NOT bound, and the
-      # measurement-credential register. Pure-Python deterministic engines — no network,
-      # no LLM-judge, no external game runtime.
-      - name: Game replay -> receipt -> stranger-verify determinism (moves 45/44/36)
+      # ISSUANCE-VELOCITY / RATE-CAP attestation (move 51): the estate attests its OWN
+      # issuance velocity honestly — an over-cap window is reported VERBATIM, never silently
+      # clipped or re-rated (anti-Goodhart / nobody-ranked-pays). The controller derives its
+      # window partition ONLY from event timestamps (no wall clock), produces a deterministic
+      # `csoai.velocity-attestation/0.1` card carried by the measurement-credential register
+      # (a self-audit record, never a certification), signs it and stranger-verifies it
+      # (cryptography only). No LLM-judge; hermetic + off-network.
+      - name: Issuance-velocity / rate-cap attestation (move 51)
+        run: |
+          python3 test/rate-cap.py
+          python3 cli/dorado.py velocity --fixture
+
+      # GAME seed→replay→receipt→stranger-verify determinism (moves 45/44/36): the games
+      # (connect4/ttt/rps/connectx/halite, + nim + wythoff added in move 22) run as
+      # deterministic replay records, each JCS-bound to an issuer in a kind:"scenario"
+      # receipt and stranger-verified. Asserts seed->replay determinism, double-run
+      # determinism (identical receipt content_id/digest), a different-seed/altered
+      # transcript NOT bound, and the measurement-credential register. Pure-Python
+      # deterministic engines — no network, no LLM-judge, no external game runtime.
+      - name: Game replay -> receipt -> stranger-verify determinism (moves 45/44/36/22)
         run: python3 test/game-replay.py
 
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
