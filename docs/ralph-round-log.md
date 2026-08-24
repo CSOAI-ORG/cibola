@@ -98,3 +98,97 @@ rewritten.
   `#card-attestation-1` key). This round ADDITIONALLY closed the move-6 ↔ move-17 seam and
   STAGED moves 2/3/58/57 + the move-5/71 walkthrough. Move 1's *public* genesis-card deploy and
   the move-61 registry page remain site-deploy owner-gated (not agent-deployable).
+
+---
+
+## ROUND 2 (closing set, round 2 of 10) — 2026-08-24
+
+**COMPLETED**
+- **Move 59 — Inspect (MIT) signed-receipt SCORER hook.** `harness/inspect_hook.py` is a hermetic,
+  dependency-free adapter for the Inspect `Score` hook surface. It attaches a signed
+  `a2a.signed-receipt/0.1` (`kind:"score"`) to a scored result so the result carries
+  cryptographic provenance a stranger verifies offline — provenance rides, NEVER alters, the
+  measurement (the Score's `value`/`explanation` are preserved verbatim).
+  - `attach_signed_receipt(score, ...)` is PURE and binds the result to the issuer via the
+    move-43 JCS payload-binding path (`dorado_receipt.build_scenario_receipt`, `kind="score"`);
+    the receipt rides `metadata["signed_receipt"]`.
+  - `verify_score_receipt(score)` re-derives the Score payload (RFC 8785 JCS) and verifies the
+    Ed25519 signature AND that it binds THIS exact result — a tampered `value`/`explanation`/
+    `metadata`/`subject` silently fails the bind. A Score with no receipt is honestly
+    "no signed receipt / honestly-unsigned (unsealed-never-signed)", never invented.
+  - `signed_scorer(fn)` wraps an Inspect-style scorer so EVERY returned Score rides a receipt.
+  - `kind:"score"` is NOT cross-confusable with a `kind:"measurement-card"` receipt (both paths
+    reject the other). No `inspect_ai` import (external + network-dep).
+- **`test/inspect-hook.py`** (12/12, wired into `.github/workflows/ci.yml`): purity (input Score
+  untouched), receipt rides the Score, stranger-verify, tampered value/subject/metadata NOT bound,
+  honestly-unsigned (no key) never verified, determinism (same key+payload+issued_at ->
+  identical content_id), `signed_scorer`, register rides every Score, and the score-receipt vs
+  measurement-card-receipt non-confusability. Hermetic, deterministic, no network, no pod.
+- **Move 72 — standards-engagement log consolidated** (stage-only): `docs/standards-engagement-log-2026-08-24.md`
+  consolidates the engagement rows across the four staged external texts (IETF I-D · IANA media-type ·
+  AG-UI audio · MCP #426 re-anchor) + ART50 consultation + METR/TB-Harbor packs + board-membership
+  posture, each with its owner-gated send leg. Everything STAGED — nothing sent/submitted/posted.
+- **`cli/dorado.py inspect-hook`** subcommand (`--fixture` hermetic smoke + sign/`--verify` path).
+- `engines/dorado_receipt.py` + `dorado_receipt_verify.py`: ADDITIVE, backward-compatible
+  `kind`/`kinds` params on `build_scenario_receipt`/`verify_scenario_receipt` so the move-43 JCS
+  path is reused for `kind:"score"` without duplicating the canonical-sign-verify machinery.
+  Defaults preserve every existing behaviour (move-43 + verify-kit + frozen-vectors all green).
+- `test/licence-sweep.py`: `inspect_hook` added to the estate-internal allowlist (PASS, landmine-free).
+
+**PROBED** (deltas vs 2026-08-24 state anchors / round 1)
+- Board: `board/board-index.json` count **42**, `chainOk = true`, linked 42 / unlinked 0
+  (unchanged — no new production measurement landed this round; move 59 is an eval-provenance
+  seam, not a board entry).
+- Registers: 8 domain registries; corrections register = 15 entries (1 entry — C-2026-0819-13 —
+  honestly surfaces a missing machine-readable `status`; surfaced not back-filled, append-only).
+- SCITT: in-repo cryptographic-verify surfaces unchanged (move 31 verifier + verify-kit + the new
+  score-receipt JCS path). No SCITT statement count claimed in-repo.
+- Pods: unchanged (3090 + A100 RUNNING; +7 0-GPU agents RUNNING; 10+ EXITED). Read-only probe only;
+  no pod ops performed.
+- git: `main` = 2d467bb + closing rounds (round 1 `5b91641`, a concurrent sibling-lane
+  `a7cee22` "dorado: bind 1/2/3", and this round's commit). All hermetic CI tests green.
+
+**BLOCKED**
+- Move 71 / Move 5 (live) — verify page + genesis card PUBLIC: owner-gated (site deploy) + the
+  genesis card itself is POD-signed (move 1, `kid=real pod key` = key ceremony). The stageable
+  walkthrough (round 1) + the stageable standards-engagement log (this round) are shipped; the
+  deploy stays owner-gated.
+- Move 61 / Move 75 — registry page + standards-engagement log LIVE on councilof.ai / csoai.org:
+  site deploy, owner-gated (deploy forbidden). Content now staged (round 1 walkthrough + this
+  round's standards-engagement log; registry-page content driven by REGISTRY.md).
+- Move 1 / 2 / 3 (send legs) — genesis POD sign + I-D datatracker submit + IANA form submit:
+  stage-only (key ceremony / external send, owner-gated). Texts staged.
+- Move 59's LIVE Inspect integration (importing the real `inspect_ai` SDK + registering the hook
+  in a live eval run) is NOT completed — it needs the Inspect SDK contract + a network fetch,
+  which is a live-eval integration, not an in-repo seam. The hermetic hook contract + the
+  signed-receipt-rides-the-score test ARE shipped.
+
+**NEXT ROUND** (highest-value remaining client moves)
+1. Move 18 — 72h-done report + POD-signed artifact manifest (the proof inventory), staged on the
+   genesis card once POD-signed.
+2. Move 13 — east-west bridge card demo on the verify page (EU / US-IL / CN readings side-by-side),
+   stageable as content once live-measurement reads exist.
+3. Move 61/75 — registry page + standards-engagement log: build the page content from
+   `REGISTRY.md` + this log; deploy after owner nod.
+4. Move 59-live — wire the Inspect hook into a real Inspect `score`/`eval.hooks.score` registration
+   + a live eval run once the SDK contract is available (external integration).
+5. Move 72-live — publish the standards-engagement log to the registry page once the site is
+   owner-deployed.
+
+### Loop close-out metrics (closing set — as of round 2)
+- **Rounds (closing set):** 2 of 10 (round 1 `5b91641`, round 2 this commit). Prior in-session
+  NEXT-100-v4 batch rounds: 5.
+- **Commits:** `main` moved `2d467bb` → (round 1 `5b91641`) → (concurrent sibling `a7cee22`) → this
+  round; 0 ahead / 0 behind `origin/main` at start of round 2.
+- **Board:** 42 measurements, `chainOk = true`, linked 42 / unlinked 0.
+- **Registers:** 8 domain registries; corrections register = 15 entries; REGISTRY.md = registry-of-record
+  flow + frozen-vector entry; standards-engagement log (move 72) staged.
+- **SCITT:** in-repo COSE_Sign1 cryptographic verify kit + score-receipt JCS path; no statement count
+  claimed (sibling-lane metric not read in-repo).
+- **Chain:** 0 breaks (chainOk true, linked 42).
+- **Pods:** 3090 + A100 RUNNING (signing/measure); +7 0-GPU agents RUNNING; 10+ EXITED; no pod ops.
+- **Moves landed:** the handoff set (1/5/12/17/21/22h/31/33/34/36/42/43/44/45/46/51/52/54/69/91/97/99)
+  + this closing set closed the move-6↔move-17 seam and STAGE-only moves 2/3/58/57 + move-5/71
+  walkthrough (round 1), and ADDITIONALLY landed **move 59** (Inspect signed-receipt scorer hook)
+  + **move 72** (standards-engagement log consolidated). Owner-gated deploy legs (move 1 genesis
+  card, move 61/75 registry+verify page) remain site-deploy gated, not agent-deployable.
