@@ -34,7 +34,7 @@ MANIFEST = os.path.join(ROOT, "data", "dependency-licence-manifest.json")
 INTERNAL_MODULES = {
     "agent", "csoai_city", "dorado_a2a_client", "dorado_anchor", "dorado_anchor_verify",
     "dorado_board", "dorado_receipt", "dorado_receipt_verify", "dorado_sign",
-    "dorado_verify", "elo", "engine", "export_data", "gbt_gates", "game_replay", "harness",
+    "dorado_verify", "elo", "engine", "export_data", "data_listing", "gbt_gates", "game_replay", "harness",
     "mcp_server", "or_telemetry", "rate_cap", "run_axis", "sb315", "scitt_verify",
     "verify_kit",
 }
