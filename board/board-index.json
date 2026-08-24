@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-24T05:41:24.724334+00:00",
-  "count": 30,
+  "generated_at": "2026-08-24T06:45:07.542816+00:00",
+  "count": 36,
   "chainOk": true,
-  "linked": 30,
+  "linked": 36,
   "unlinked": 0,
   "measurements": [
     {
@@ -393,6 +393,84 @@
       "signed": true,
       "receipt": "5af27df7d381",
       "anchor_time": "2026-08-24 05:41:24+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "e6fa433db51ad900",
+      "ts": "2026-08-24T05:46:11Z",
+      "registry": "csoai.gspc-domains/insurance/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 6,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "240638ca1b4e",
+      "anchor_time": "2026-08-24 05:46:13+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "cab04207680cfb69",
+      "ts": "2026-08-24T05:51:12Z",
+      "registry": "csoai.gspc-domains/equity/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 6,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "fd101ccd0329",
+      "anchor_time": "2026-08-24 05:51:14+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "0393f28103ea6380",
+      "ts": "2026-08-24T05:55:42Z",
+      "registry": "csoai.gspc-domains/index/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 6,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "91130855f227",
+      "anchor_time": "2026-08-24 05:55:47+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "f60fbbbf097b32c4",
+      "ts": "2026-08-24T06:01:20Z",
+      "registry": "csoai.gspc-domains/cross-border/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 6,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "757f35f3665c",
+      "anchor_time": "2026-08-24 06:01:22+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "c4ad94e68249b97b",
+      "ts": "2026-08-24T06:40:07Z",
+      "registry": "csoai.gspc-domains/bond/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 4,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "a971e34e54e0",
+      "anchor_time": "2026-08-24 06:40:09+00:00",
+      "provision_axes": 6
+    },
+    {
+      "hash": "5ff2304a7812bbc9",
+      "ts": "2026-08-24T06:45:05Z",
+      "registry": "csoai.gspc-domains/index/1.0",
+      "subject": "qwen3:4b-8k",
+      "measured": 6,
+      "total": 6,
+      "kid": "did:web:csoai.org#test-identity",
+      "signed": true,
+      "receipt": "4e00a7ee30b3",
+      "anchor_time": "2026-08-24 06:45:06+00:00",
       "provision_axes": 6
     }
   ]
