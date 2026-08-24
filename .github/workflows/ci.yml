@@ -28,6 +28,15 @@ jobs:
       - name: Deterministic test battery
         run: python3 test/battery.py
 
+      # FROZEN VECTORS v1 (move 6): hash-pinned stranger-verification fixtures.
+      # Regeneration is deterministic; the committing test validates the pin +
+      # behaviour (card-valid verifies, bad-sig fails, bad-receipt fails card-bind).
+      - name: Frozen vectors v1 (hash-pinned, hermetic)
+        run: |
+          python3 scripts/gen-frozen-vectors.py
+          git diff --exit-code test/vectors || { echo "FROZEN VECTORS DRIFT: run scripts/gen-frozen-vectors.py and commit the regenerated vectors"; exit 1; }
+          python3 test/frozen-vectors.py
+
       # End-user persona suite — the front end tested as all types of users.
       - name: End-user personas (hermetic)
         run: python3 test/personas.py
@@ -39,6 +48,11 @@ jobs:
       # Banned-lane-brand CI guard on PUBLIC surfaces (allowed: legal 'sovereign' + real infra ids).
       - name: Banned-string lint (public surfaces)
         run: python3 test/banned-strings.py
+
+      # Binding-canongrammar CI guard (moves 39/65): public + staged week-1 external text
+      # must use "measurement credential" grammar, never a positive certification claim.
+      - name: Grammar lint (measurement-credential canon)
+        run: python3 test/grammar-lint.py
 
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
       - name: Schema CI (example card)

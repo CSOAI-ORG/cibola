@@ -1,0 +1,25 @@
+{
+  "schema": "a2a.signed-receipt/0.1",
+  "issuer": "did:web:csoai.org",
+  "kind": "measurement-card",
+  "subject": "frozen-vector-subject",
+  "subject_content_sha256": "dc4aa02f6caad7bf65cdc0697dd0dfdb8dc8e1dae217444162561e4dcab5f8d9",
+  "claims": [
+    {
+      "type": "measurement",
+      "detail": "measured card dc4aa02f6caad7bf\u2026 bound to issuer",
+      "evidence_sha256": "dc4aa02f6caad7bf65cdc0697dd0dfdb8dc8e1dae217444162561e4dcab5f8d9"
+    }
+  ],
+  "issued_at": "2026-08-24T00:00:00Z",
+  "kid": "did:web:csoai.org#test-identity",
+  "content_id": "08d3715b73672122b7f2ca1fdbb831207cf0ddcd0cdbc8473033a653455a1072",
+  "signature": {
+    "alg": "Ed25519",
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "5MQMs+JDDP4Dl+AmP/1ZdUdhEWclRI7sl0GQqaN8moA=",
+    "sig": "b3OEMphCSSOX4d+VklCpmi3XJi3wssC6HQC6Uh6hnp0jT5usv47f3DUyhZzoLGuja+ia3iQJUNDlc4KzPgNkBg==",
+    "pubkey_thumbprint": "l84usQSt5mZmsDRiM3jG3DqNDa-ivAIIQQ8gTkMB-eY",
+    "sig_input": "ed25519(canonical receipt minus content_id/signature)"
+  }
+}

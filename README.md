@@ -8,6 +8,14 @@ measurement card is NOT a certification, endorsement, or conformity mark.
 - Neutrality: the scored entity never pays for its measurement; a vendor can buy
   the data (Q/A, relative pairs, operational telemetry), never a score.
 
+> **Naming split (2026-08-24, decision log 001).** **CIBOLA** is the public protocol
+> name (`application/vnd.cibola.measurement-card+json` planned) and the GitHub repo
+> name, `CSOAI-ORG/cibola` — the repo is intentionally **not** renamed. **DORADO** is
+> the internal monorepo codename used in code and internal docs. **Council of AI**
+> (CSOAI Ltd, UK 16939677) is the body brand. Public-facing text should use *CIBOLA*
+> and the *measurement credential / verified measurement credential* grammar; internal
+> code may keep the DORADO codename. The two are kept explicitly separate — never conflated.
+
 ## Verify in 60 seconds (from a cold clone)
 
 ```bash

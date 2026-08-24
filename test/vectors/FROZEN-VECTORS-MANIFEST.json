@@ -1,0 +1,30 @@
+{
+  "schema": "csoai.frozen-vectors-manifest/0.1",
+  "generated_for": "NEXT-100-v4 move 6 \u2014 frozen vector version 1",
+  "test_identity": "did:web:csoai.org#test-identity",
+  "card_digest_sha256": "dc4aa02f6caad7bf65cdc0697dd0dfdb8dc8e1dae217444162561e4dcab5f8d9",
+  "register": "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+  "expected": {
+    "valid_verify": "ok",
+    "bad_sig_verify": "fail",
+    "bad_receipt_verify": "fail"
+  },
+  "vectors": {
+    "card_valid": {
+      "file": "card-valid.json",
+      "sha256": "2819c8174a43bf59bf58ec746be2d5ceda10f1f396e69a2f29324a5d72a78af8"
+    },
+    "card_bad_sig": {
+      "file": "card-bad-sig.json",
+      "sha256": "9024fc6ebeb531f126b9ed92a3244c60bb01be32475061eb75c600c55183f1f9"
+    },
+    "receipt_valid": {
+      "file": "receipt-valid.json",
+      "sha256": "ae2496544a9e5cca4795ef72094306834e600a90fb3e7a2cf73defb6e7fcad71"
+    },
+    "receipt_bad": {
+      "file": "receipt-bad.json",
+      "sha256": "3afa5c7a36e02f72ae69f2b79cd106ae061f253419c967b1676c042f0a5a83a4"
+    }
+  }
+}
