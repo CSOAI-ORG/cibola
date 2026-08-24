@@ -1,0 +1,12 @@
+{
+  "schema": "csoai.card-anchor/0.1",
+  "card_content_sha256": "4ea4ee556a942b9674e7dd903e79933efb4a60d035fe3ec785148c323a660030",
+  "anchors": [
+    {
+      "kind": "tsa-rfc3161",
+      "digest_sha256": "4ea4ee556a942b9674e7dd903e79933efb4a60d035fe3ec785148c323a660030",
+      "message_imprint_matches": true,
+      "gen_time": "2026-08-23T00:00:00Z"
+    }
+  ]
+}

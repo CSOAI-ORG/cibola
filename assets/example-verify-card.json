@@ -1,0 +1,90 @@
+{
+  "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+  "card_version": "0.1.0",
+  "subject": {
+    "id": "demo",
+    "name": "bond-demo",
+    "digest": "x"
+  },
+  "benchmark": {
+    "id": "csoai.gspc-domains/bond/1.0",
+    "name": "GSPC 6-Axis Bond",
+    "version": "1.0",
+    "digest": "8e127e6a990f9a255fe74c915a9da5388a5928b436365d683e50abed288a61c2",
+    "gold_labels": "axes/gspc-16.json"
+  },
+  "scores": {
+    "bond_price_transparency": {
+      "score": 1.0,
+      "n": 1
+    },
+    "bond_issuer_conflict": {
+      "score": 1.0,
+      "n": 1
+    },
+    "bond_settlement_finality": {
+      "score": 1.0,
+      "n": 1
+    },
+    "bond_custody_attribution": {
+      "score": 1.0,
+      "n": 1
+    },
+    "bond_default_discrimination": {
+      "score": 0.0,
+      "n": 1
+    },
+    "bond_retail_fractional_disclosure": {
+      "score": 0.0,
+      "n": 1
+    }
+  },
+  "measured_count": 6,
+  "total_count": 6,
+  "issued_at": "2026-08-23T00:00:00Z",
+  "credential_register": "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+  "run_manifest": {
+    "harness_hash": "run_axis.py:2026-08-23T00:00:00Z"
+  },
+  "provision_map": {
+    "bond_price_transparency": [
+      "EU-MICHEL-2014-65-EU-Art17",
+      "MiFID II RTS 1 \u2014 post-trade transparency (EU 2017/583)",
+      "US-SEC-Rule-17a-5"
+    ],
+    "bond_issuer_conflict": [
+      "EU-MiFID-II-2014-65-EU-Art23",
+      "ESMA-Conflict-of-Interest-Guidelines",
+      "UK-FCA-MAR-7.4"
+    ],
+    "bond_settlement_finality": [
+      "EU-Settlement-Finality-Directive-1998-26-EC",
+      "CPMI-IOSCO-Principles-for-Financial-Market-Infrastructures-Principle-8",
+      "EU-CSD-Regulation-909-2014-Art-37"
+    ],
+    "bond_custody_attribution": [
+      "EU-CSD-Regulation-909-2014-Art-38",
+      "UK-FCA-CASS-7.11",
+      "SEC-Rule-Custody-206-4-2"
+    ],
+    "bond_default_discrimination": [
+      "EU-Insolvency-Regulation-2015-848",
+      "UNCITRAL-Model-Law-on-Insolvency",
+      "ICMA-Sovereign-Default-Dispute-Resolution"
+    ],
+    "bond_retail_fractional_disclosure": [
+      "EU-MiFID-II-2014-65-EU-Art-24",
+      "EU-PRIIPs-Regulation-1286-2014",
+      "UK-FCA-COBS-6.1"
+    ]
+  },
+  "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "Wwz9oMH1LFXV340QfespXQSIb/W09uSxhVH+7U+MWR8=",
+    "sig": "e3QksBooAPiE1IzQtFPqqSZhQRPGWB4eZUHW1v8BPN4cPF6aZAFE+F6nX1lyNgbS5aQJCxl1lI7C4vMMPwPnCg==",
+    "pubkey_thumbprint": "3JwGsSHC7FEJJbfv5S7J_yoW7rCnuUk5sS0JaFuN3WU",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+  }
+}

@@ -20,12 +20,12 @@ python3 test/battery.py && python3 test/elo-test.py
 
 # 3. verify a published measurement card + receipt + RFC3161 anchor end-to-end
 python3 cli/dorado.py verify-receipt \
-  --receipt assets/example-card-receipt.json --card assets/example-card-receipt.json 2>/dev/null || true
+  --receipt assets/example-verify-receipt.json --card assets/example-verify-card.json
 python3 cli/dorado.py verify-anchor \
-  --anchor assets/example-linked-anchor.json --card assets/example-linked-card.json
+  --anchor assets/example-verify-anchor.json --card assets/example-verify-card.json
 
 # 4. stranger-verify a signed card with only the published key + cryptography
-python3 cli/dorado.py verify --card assets/example-measured-card.json
+python3 cli/dorado.py verify --card assets/example-verify-card.json
 ```
 
 A stranger verifies a card/receipt/anchor **offline** with only the published
