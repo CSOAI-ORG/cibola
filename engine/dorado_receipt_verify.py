@@ -17,12 +17,15 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dorado_receipt import canonical, content_id, content_id as cid_of
+from dorado_receipt import canonical, content_id, content_id as cid_of, jcs
 
 
-def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
+def _verify_core(receipt: dict) -> dict:
+    """Verify the receipt envelope itself (content_id + Ed25519 signature).
+
+    Shared by the card verifier and the scenario verifier. Stranger-only: no signing key,
+    no pod — only the receipt and `cryptography`."""
     r = receipt
-    # recompute content_id over canonical (minus signature/content_id fields)
     recomputed = content_id(r)
     if recomputed != r.get("content_id"):
         return {"ok": False, "reason": f"content_id mismatch (got {recomputed[:12]}…, card says {str(r.get('content_id'))[:12]}…)"}
@@ -37,6 +40,14 @@ def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
         pk.verify(base64.b64decode(s["sig"]), canonical(r))
     except Exception:
         return {"ok": False, "reason": "INVALID — receipt signature does not verify"}
+    return {"ok": True, "reason": "receipt signature valid", "content_id": recomputed, "kid": s.get("kid")}
+
+
+def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
+    r = receipt
+    core = _verify_core(r)
+    if not core["ok"]:
+        return core
     # bind to a card, if given: the receipt's subject_content_sha256 must equal the card digest
     card_msg = None
     if card is not None:
@@ -46,7 +57,31 @@ def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
             return {"ok": False, "reason": f"receipt does NOT attest to this card (receipt={r.get('subject_content_sha256','')[:12]}…, card={card_digest[:12]}…)"}
         card_msg = f" — attests to card {card_digest[:12]}…"
     return {"ok": True, "reason": "VALID receipt (measurement, not certification)" + (card_msg or ""),
-            "content_id": recomputed, "kid": s.get("kid")}
+            "content_id": core["content_id"], "kid": core["kid"]}
+
+
+def verify_scenario_receipt(receipt: dict, payload: dict | None = None) -> dict:
+    """Stranger-verify a SCENARIO receipt (move 43), optionally binding it to a payload.
+
+    `payload` is the SAME JSON object passed to build_scenario_receipt. If given, the
+    receipt's subject_content_sha256 must equal sha256(jcs(payload)) — proving THIS
+    receipt attests to THAT payload. If omitted, verifies only the envelope (self-consistency
+    + signature); the payload digest is cross-checked by re-running jcs."""
+    r = receipt
+    core = _verify_core(r)
+    if not core["ok"]:
+        return core
+    if r.get("kind") != "scenario":
+        return {"ok": False, "reason": f"not a scenario receipt (kind={r.get('kind')!r})"}
+    payload_msg = None
+    if payload is not None:
+        # JCS payload-binding: canon is RFC 8785, so the digest is deterministic + cross-language
+        payload_digest = hashlib.sha256(jcs(payload).encode()).hexdigest()
+        if r.get("subject_content_sha256") != payload_digest:
+            return {"ok": False, "reason": f"receipt does NOT attest to this scenario (receipt={r.get('subject_content_sha256','')[:12]}…, payload={payload_digest[:12]}…)"}
+        payload_msg = f" — attests to scenario {payload_digest[:12]}…"
+    return {"ok": True, "reason": "VALID scenario receipt (measurement, not certification)" + (payload_msg or ""),
+            "content_id": core["content_id"], "kid": core["kid"]}
 
 
 def main() -> int:

@@ -86,3 +86,60 @@ def build_card_receipt(card: dict, private_key=None, pubkey_raw=None, kid=None,
     else:
         receipt["signature"] = {"alg": "Ed25519", "kid": receipt["kid"], "sig": None}
     return receipt
+
+
+def build_scenario_receipt(payload: dict, *, label: str | None = None, private_key=None,
+                           pubkey_raw=None, kid=None, issued_at: str | None = None) -> dict:
+    """Build an a2a.signed-receipt/0.1 binding an ARBITRARY SCENARIO payload (move 43).
+
+    This is the generic JCS payload-binding counterpart to build_card_receipt: instead of
+    binding a measurement card's content_id, it binds a SCENARIO / incident / probe result
+    (a jail-break probe, a refusal record, a serious-incident report) by its RFC 8785
+    canonical form. A stranger verifies it with ONLY the receipt + `cryptography`, proving
+    THIS issuer recorded THIS payload at THIS time — the ASRS / Art 73 serious-incident
+    structure (`kind: "scenario"`).
+
+    The payload is canonicalized with `jcs()` (RFC 8785 JSON Canonicalization Scheme) so
+    the digest is deterministic cross-language and cross-tooling. The digest is carried in
+    `subject_content_sha256` (the same bind field the card receipt uses), and the payload
+    itself is NOT embedded (attest the digest, never the full payload — it may be large or
+    partly secret). Verify with verify_scenario_receipt(receipt, payload).
+
+    Register (verbatim from canon): non-repudiable evidence of WHAT was recorded and WHEN —
+    not proof the scenario source is honest. Measurement, never certification.
+    """
+    from dorado_sign import rfc9679_thumbprint, KID_DEFAULT as CARD_KID
+
+    payload_digest = hashlib.sha256(jcs(payload).encode()).hexdigest()
+    receipt = {
+        "schema": SCHEMA,
+        "issuer": (kid or KID_DEFAULT).split("#", 1)[0],
+        "kind": "scenario",
+        "subject": payload.get("id") or label or "scenario",
+        "subject_content_sha256": payload_digest,
+        "claims": [{
+            "type": "scenario-record",
+            "detail": f"recorded scenario {payload_digest[:16]}… bound to issuer",
+            "evidence_sha256": payload_digest,
+        }],
+        "issued_at": issued_at or datetime.now(timezone.utc).isoformat(),
+        "kid": kid or KID_DEFAULT,
+        "payload_canonical": "rfc8785-jcs",
+    }
+    cid = content_id(receipt)
+    receipt["content_id"] = cid
+    if private_key is not None:
+        from cryptography.hazmat.primitives import serialization as _ser
+        if pubkey_raw is None:
+            pubkey_raw = private_key.public_key().public_bytes(
+                encoding=_ser.Encoding.Raw, format=_ser.PublicFormat.Raw)
+        sig = private_key.sign(canonical(receipt))
+        receipt["signature"] = {
+            "alg": "Ed25519", "kid": receipt["kid"], "pubkey": base64.b64encode(pubkey_raw).decode(),
+            "sig": base64.b64encode(sig).decode(),
+            "pubkey_thumbprint": rfc9679_thumbprint(pubkey_raw),
+            "sig_input": "ed25519(canonical receipt minus content_id/signature)",
+        }
+    else:
+        receipt["signature"] = {"alg": "Ed25519", "kid": receipt["kid"], "sig": None}
+    return receipt

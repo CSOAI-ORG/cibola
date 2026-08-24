@@ -107,6 +107,14 @@ jobs:
       - name: Dependency licence landmine sweep (move 34)
         run: python3 test/licence-sweep.py
 
+      # SCENARIO RECEIPT / JCS payload-binding stranger-verify (move 43): a `kind:
+      # "scenario"` receipt binds the RFC 8785 canonical form of an arbitrary prompt/probe/
+      # refusal record to an issuer at a time. Proves build→verify round-trip, JCS
+      # key-order-independent binding, different-payload NOT bound, tamper/unsigned refused,
+      # and that scenario vs measurement-card receipts are not cross-confusable.
+      - name: Scenario receipt / JCS payload-binding (move 43)
+        run: python3 test/scenario-receipt.py
+
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
       - name: Schema CI (example card)
         run: python3 test/schema-test.py
