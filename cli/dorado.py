@@ -779,6 +779,53 @@ def cmd_velocity(args):
     return 0 if card["verdict"] == "within-cap" else 1
 
 
+def cmd_inspect(args):
+    """Inspect (MIT) signed-receipt SCORER hook (move 59).
+
+    Attaches a signed `a2a.signed-receipt/0.1` (kind:"score") to an Inspect-style `Score`
+    result so the scored result carries cryptographic provenance a stranger can verify
+    offline — provenance rides, never alters, the measurement. Uses the move-43 JCS
+    payload-binding path; `--fixture` is a deterministic hermetic smoke (test identity).
+
+    `--in <score.json>` signs a Score (with `--key-file` if given, else honestly-unsigned);
+    `--in <score.json> --verify` re-verifies its riding receipt (stranger path).
+    """
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from inspect_hook import attach_signed_receipt, verify_score_receipt, RECEIPT_META_KEY
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    if args.fixture:
+        key = Ed25519PrivateKey.from_private_bytes(b"inspect-hook-v1-2026-08-24"[:32].ljust(32, b"!"))
+        score = {"id": "s-001", "value": 0.83,
+                 "explanation": "0.83 correct on the held-out axes",
+                 "metadata": {"model": "model-x", "sample_id": "s-001",
+                              "per_axis": [{"axis": "safety", "verdict": "PASS"}]}}
+        signed = attach_signed_receipt(score, private_key=key, kid="did:web:csoai.org#test-identity",
+                                       issued_at="2026-08-24T12:00:00Z")
+        v = verify_score_receipt(signed)
+        print(f"fixture inspect-hook: value={signed['value']} receipt_kind="
+              f"{signed['metadata'][RECEIPT_META_KEY]['kind']} verified={v['ok']}", flush=True)
+        return 0 if signed["value"] == 0.83 and v["ok"] else 1
+
+    score = json.load(open(args.inp))
+    if args.verify:
+        v = verify_score_receipt(score)
+        print(json.dumps(v, indent=2), flush=True)
+        return 0 if v["ok"] else 1
+    key = None
+    if args.key_file:
+        key = _load_signing_key()
+    signed = attach_signed_receipt(score, private_key=key, kid=args.kid)
+    if args.out:
+        json.dump(signed, open(args.out, "w"), indent=2)
+        print(f"wrote signed Score to {args.out} (receipt kind="
+              f"{signed['metadata'][RECEIPT_META_KEY]['kind']})", flush=True)
+    else:
+        print(json.dumps(signed, indent=2), flush=True)
+    return 0
+
+
 def cmd_license(args):
     import hashlib as _hl
     from datetime import datetime, timezone
@@ -1315,6 +1362,16 @@ def main():
     p.add_argument("--fixture", action="store_true", help="Deterministic within-cap fixture smoke (test identity, CI/selfcheck)")
     p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     p.set_defaults(func=cmd_velocity)
+
+    p = sub.add_parser("inspect", help="Inspect (MIT) signed-receipt SCORER hook (move 59) — attach a signed a2a score receipt to a Score result, or stranger-verify one. Provenance rides, never alters, the measurement (measurement, never certification)")
+    p.add_argument("--in-score", dest="in_score", default=None, help="A signed Score JSON: verify its riding receipt and print the verdict")
+    p.add_argument("--score-file", default=None, help="A bare Score JSON to sign")
+    p.add_argument("--key-file", default=None, help="Pod Ed25519 private key (repo never embeds it)")
+    p.add_argument("--kid", default=None, help="kid to stamp (default did:web:csoai.org#card-attestation-1)")
+    p.add_argument("--allow-test-identity", action="store_true", help="Allow a NON-published key (stamps kid=test)")
+    p.add_argument("--out", default=None, help="Write the signed Score JSON here")
+    p.add_argument("--fixture", action="store_true", help="Deterministic hermetic fixture smoke (test identity, CI/selfcheck)")
+    p.set_defaults(func=cmd_inspect)
 
     a = ap.parse_args()
     code = a.func(a)

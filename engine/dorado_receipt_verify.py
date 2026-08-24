@@ -60,19 +60,27 @@ def verify_receipt(receipt: dict, card: dict | None = None) -> dict:
             "content_id": core["content_id"], "kid": core["kid"]}
 
 
-def verify_scenario_receipt(receipt: dict, payload: dict | None = None) -> dict:
+def verify_scenario_receipt(receipt: dict, payload: dict | None = None,
+                            kinds: tuple[str, ...] = ("scenario",)) -> dict:
     """Stranger-verify a SCENARIO receipt (move 43), optionally binding it to a payload.
 
     `payload` is the SAME JSON object passed to build_scenario_receipt. If given, the
     receipt's subject_content_sha256 must equal sha256(jcs(payload)) — proving THIS
     receipt attests to THAT payload. If omitted, verifies only the envelope (self-consistency
-    + signature); the payload digest is cross-checked by re-running jcs."""
+    + signature); the payload digest is cross-checked by re-running jcs.
+
+    `kinds` is the set of receipt kinds accepted by this verifier (default ("scenario",)).
+    A caller reusing the JCS path for another record kind — e.g. `"score"` for the move-59
+    Inspect scorer hook — passes kinds=("score",); the default preserves the existing
+    kind check exactly.
+    """
     r = receipt
     core = _verify_core(r)
     if not core["ok"]:
         return core
-    if r.get("kind") != "scenario":
+    if r.get("kind") not in kinds:
         return {"ok": False, "reason": f"not a scenario receipt (kind={r.get('kind')!r})"}
+    kind_label = r.get("kind", "scenario")
     payload_msg = None
     if payload is not None:
         # JCS payload-binding: canon is RFC 8785, so the digest is deterministic + cross-language
@@ -80,7 +88,7 @@ def verify_scenario_receipt(receipt: dict, payload: dict | None = None) -> dict:
         if r.get("subject_content_sha256") != payload_digest:
             return {"ok": False, "reason": f"receipt does NOT attest to this scenario (receipt={r.get('subject_content_sha256','')[:12]}…, payload={payload_digest[:12]}…)"}
         payload_msg = f" — attests to scenario {payload_digest[:12]}…"
-    return {"ok": True, "reason": "VALID scenario receipt (measurement, not certification)" + (payload_msg or ""),
+    return {"ok": True, "reason": f"VALID {kind_label} receipt (measurement, not certification)" + (payload_msg or ""),
             "content_id": core["content_id"], "kid": core["kid"]}
 
 

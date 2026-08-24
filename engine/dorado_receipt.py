@@ -89,7 +89,8 @@ def build_card_receipt(card: dict, private_key=None, pubkey_raw=None, kid=None,
 
 
 def build_scenario_receipt(payload: dict, *, label: str | None = None, private_key=None,
-                           pubkey_raw=None, kid=None, issued_at: str | None = None) -> dict:
+                           pubkey_raw=None, kid=None, issued_at: str | None = None,
+                           kind: str = "scenario") -> dict:
     """Build an a2a.signed-receipt/0.1 binding an ARBITRARY SCENARIO payload (move 43).
 
     This is the generic JCS payload-binding counterpart to build_card_receipt: instead of
@@ -97,7 +98,12 @@ def build_scenario_receipt(payload: dict, *, label: str | None = None, private_k
     (a jail-break probe, a refusal record, a serious-incident report) by its RFC 8785
     canonical form. A stranger verifies it with ONLY the receipt + `cryptography`, proving
     THIS issuer recorded THIS payload at THIS time — the ASRS / Art 73 serious-incident
-    structure (`kind: "scenario"`).
+    structure.
+
+    `kind` (default "scenario") lets a caller reuse the SAME JCS payload-binding path for
+    another record kind (e.g. `"score"` for the move-59 Inspect signed-receipt scorer hook)
+    without duplicating the canonical-sign-verify machinery. The default preserves the
+    existing `kind: "scenario"` behaviour exactly; the claim type becomes f"{kind}-record".
 
     The payload is canonicalized with `jcs()` (RFC 8785 JSON Canonicalization Scheme) so
     the digest is deterministic cross-language and cross-tooling. The digest is carried in
@@ -114,11 +120,11 @@ def build_scenario_receipt(payload: dict, *, label: str | None = None, private_k
     receipt = {
         "schema": SCHEMA,
         "issuer": (kid or KID_DEFAULT).split("#", 1)[0],
-        "kind": "scenario",
+        "kind": kind,
         "subject": payload.get("id") or label or "scenario",
         "subject_content_sha256": payload_digest,
         "claims": [{
-            "type": "scenario-record",
+            "type": f"{kind}-record",
             "detail": f"recorded scenario {payload_digest[:16]}… bound to issuer",
             "evidence_sha256": payload_digest,
         }],
