@@ -1,0 +1,34 @@
+{
+  "schema": "csoai.or-provider-application/0.1",
+  "provider": "CSOAI Ltd (Council of AI)",
+  "did": "did:web:csoai.org",
+  "register": "This data is derived from a measurement. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+  "neutrality": "licenses the measured data, never the score",
+  "note": "measured operational telemetry (cost/latency/throughput) \u2014 the metrics OpenRouter's provider page wants. Deployment registration is an owner action (server-side); this is the prep payload.",
+  "models": [
+    {
+      "id": "t",
+      "runs": 1,
+      "latency_p50_ms": 1,
+      "throughput_tok_s": 2000.0,
+      "avg_cost_usd": 0.0001,
+      "evidence": "measured by DORADO (cost/latency/throughput telemetry, neutral)"
+    },
+    {
+      "id": "qwen3:4b-8k",
+      "runs": 19,
+      "latency_p50_ms": 298307.1,
+      "throughput_tok_s": 0.4,
+      "avg_cost_usd": 0.000106,
+      "evidence": "measured by DORADO (cost/latency/throughput telemetry, neutral)"
+    },
+    {
+      "id": "deepseek-r1:7b",
+      "runs": 4,
+      "latency_p50_ms": 672833.4,
+      "throughput_tok_s": 0.2,
+      "avg_cost_usd": 7e-05,
+      "evidence": "measured by DORADO (cost/latency/throughput telemetry, neutral)"
+    }
+  ]
+}

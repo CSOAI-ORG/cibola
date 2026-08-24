@@ -30,6 +30,9 @@ import argparse, json, os, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+REGISTER = ("This data is derived from a measurement. It is not a certification, "
+            "endorsement, or conformity mark, and must not be presented as one.")
+NEUTRALITY = "licenses the measured data, never the score"
 sys.path.insert(0, ROOT)
 
 
@@ -337,6 +340,97 @@ def cmd_telemetry(args):
     for r in rows[-args.limit:]:
         print(f"  {r['model']:30s} latency={r.get('latency_ms')}ms tok_s={r.get('tok_s')} "
               f"cost=${r.get('cost_usd')} run={r.get('runtime')} {r.get('ts','')[:19]}")
+    return 0
+
+
+def cmd_data_listing(args):
+    """Package the measurement corpus as a licensable data-listing (bind 2)."""
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from data_listing import build_listing, write_listing
+    # read an axis-engine result set (one file per measurement) + build the listing
+    results = []
+    if args.in_dir:
+        import glob as _g
+        for f in sorted(_g.glob(os.path.join(args.in_dir, "*.json"))):
+            try:
+                results.append(json.load(open(f)))
+            except Exception:
+                pass
+    listing = build_listing(results)
+    meta = write_listing(listing, args.out_dir)
+    print(f"data-listing written -> {args.out_dir}")
+    print(f"  rows: {listing['counts']}")
+    print(f"  signed_by: {listing['provenance']['signed_by']}  register: {meta['register'][:40]}...")
+    print(f"  neutrality: {meta['neutrality']}")
+    return 0
+
+
+def cmd_or_provider(args):
+    """Generate the OpenRouter provider-application payload from measured telemetry (bind 3)."""
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from or_telemetry import load as load_tel
+    rows = load_tel()[-args.samples:] if args.samples else load_tel()
+    models = {}
+    for r in rows:
+        m = models.setdefault(r["model"], {"id": r["model"], "runs": 0,
+                                           "latency_ms": [], "tok_s": [], "cost_usd": []})
+        m["runs"] += 1
+        m["latency_ms"].append(r.get("latency_ms", 0))
+        m["tok_s"].append(r.get("tok_s", 0))
+        m["cost_usd"].append(r.get("cost_usd", 0))
+    provider_models = []
+    for mid, m in models.items():
+        n = m["runs"]
+        provider_models.append({
+            "id": mid,
+            "runs": n,
+            "latency_p50_ms": round(sorted(m["latency_ms"])[n // 2], 1),
+            "throughput_tok_s": round(sum(m["tok_s"]) / n, 1),
+            "avg_cost_usd": round(sum(m["cost_usd"]) / n, 6),
+            "evidence": "measured by DORADO (cost/latency/throughput telemetry, neutral)",
+        })
+    payload = {
+        "schema": "csoai.or-provider-application/0.1",
+        "provider": "CSOAI Ltd (Council of AI)", "did": "did:web:csoai.org",
+        "register": REGISTER,
+        "neutrality": NEUTRALITY,
+        "note": "measured operational telemetry (cost/latency/throughput) — the metrics OpenRouter's provider page wants. Deployment registration is an owner action (server-side); this is the prep payload.",
+        "models": provider_models,
+    }
+    if args.out:
+        json.dump(payload, open(args.out, "w"), indent=2)
+        print(f"wrote provider application payload -> {args.out} ({len(provider_models)} models)", flush=True)
+    else:
+        print(json.dumps(payload, indent=2), flush=True)
+    return 0
+
+
+def cmd_hf_eval(args):
+    """Prepare a HuggingFace eval-result / model-card payload from a production-signed card (bind 1)."""
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    card = json.load(open(args.card))
+    subj = card.get("subject", {})
+    bm = card.get("benchmark", {})
+    payload = {
+        "schema": "csoai.hf-eval-result/0.1",
+        "model": subj.get("name"), "model_digest": subj.get("digest"),
+        "benchmark": bm.get("id"), "benchmark_digest": bm.get("digest"),
+        "results": card.get("scores"),
+        "measured_count": card.get("measured_count"),
+        "total_count": card.get("total_count"),
+        "signed_by": (card.get("signature") or {}).get("kid"),
+        "register": REGISTER,
+        "neutrality": NEUTRALITY,
+        "note": "publish as an HF eval-result / model-card component; ties a governance score to a weights digest (a model NAME is not a model). HF push is an owner action (HF token) — this is the payload.",
+    }
+    if args.out:
+        json.dump(payload, open(args.out, "w"), indent=2)
+        print(f"wrote HF eval-result payload -> {args.out}", flush=True)
+    else:
+        print(json.dumps(payload, indent=2), flush=True)
     return 0
 
 
@@ -1046,6 +1140,21 @@ def main():
     p.add_argument("--limit", type=int, default=20)
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_telemetry)
+
+    p = sub.add_parser("data-listing", help="Package the measurement corpus as a licensable data-listing (bind 2)")
+    p.add_argument("--in-dir", default=None, help="Dir of axis-engine result JSONs")
+    p.add_argument("--out-dir", default="data-listing-out")
+    p.set_defaults(func=cmd_data_listing)
+
+    p = sub.add_parser("or-provider", help="Generate OpenRouter provider-application payload from telemetry (bind 3)")
+    p.add_argument("--samples", type=int, default=None, help="Use the last N telemetry rows")
+    p.add_argument("--out", default=None)
+    p.set_defaults(func=cmd_or_provider)
+
+    p = sub.add_parser("hf-eval", help="Prepare a HuggingFace eval-result/model-card payload (bind 1)")
+    p.add_argument("--card", required=True, help="A production-signed measurement card")
+    p.add_argument("--out", default=None)
+    p.set_defaults(func=cmd_hf_eval)
 
     p = sub.add_parser("crosswalk", help="Show the domain->provision crosswalk (east-west bridge)")
     p.add_argument("--domain", default=None, help="Show provisions for one domain only")

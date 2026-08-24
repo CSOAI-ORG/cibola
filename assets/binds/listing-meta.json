@@ -1,0 +1,18 @@
+{
+  "schema": "csoai.data-listing/0.1",
+  "register": "This data is derived from a measurement. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+  "neutrality": "licenses the measured data, never the score",
+  "counts": {
+    "qa": 132,
+    "preference_pairs": 0,
+    "safety_incidents": 0
+  },
+  "provenance": {
+    "number_of_measured_cards": 22,
+    "registries": [
+      "?"
+    ],
+    "signed_by": "did:web:csoai.org#card-attestation-1",
+    "generated_at": "2026-08-24T15:35:06Z"
+  }
+}
