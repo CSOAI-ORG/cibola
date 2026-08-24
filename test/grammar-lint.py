@@ -40,7 +40,10 @@ PUBLIC = ["index.html", "verify.html", "leaderboard.html", "a2a.md", "llms.txt",
           ".well-known/agent.json", ".well-known/mcp.json"]
 STAGED = ["docs/outreach/PACK-METR-V2-2026-08-24.md",
           "docs/outreach/PACK-TBHARBOR-V2-2026-08-24.md",
-          "docs/ART50-TRANSPARENCY-CONSULTATION-RESPONSE-2026-08-24.md"]
+          "docs/ART50-TRANSPARENCY-CONSULTATION-RESPONSE-2026-08-24.md",
+          "docs/revenue/ART50-READINESS-PRODUCT-2026-08-24.md",
+          "docs/revenue/ART50-CAPTURE-MAP-2026-08-24.md",
+          "docs/revenue/END-USER-REVENUE-READY.md"]
 
 # The words that, used POSITIVELY, over-claim what a measurement grant is.
 FORBIDDEN = re.compile(r"\b(certification|certified|certify|accredited|accreditation|"

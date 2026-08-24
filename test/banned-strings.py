@@ -25,7 +25,9 @@ PUBLIC = ["index.html", "verify.html", "leaderboard.html", "a2a.md", "llms.txt",
 # banned-lane-brand guard so nothing pre-send carries the old public-lane brand.
 STAGED = ["docs/outreach/PACK-METR-V2-2026-08-24.md",
           "docs/outreach/PACK-TBHARBOR-V2-2026-08-24.md",
-          "docs/ART50-TRANSPARENCY-CONSULTATION-RESPONSE-2026-08-24.md"]
+          "docs/ART50-TRANSPARENCY-CONSULTATION-RESPONSE-2026-08-24.md",
+          "docs/revenue/ART50-READINESS-PRODUCT-2026-08-24.md",
+          "docs/revenue/ART50-CAPTURE-MAP-2026-08-24.md"]
 # real infra identifiers that legitimately contain the banned substrings
 ALLOWED = {"sov-brain-2", "sovos-light-a100", "sov33-unified", "sov-brain",
            "sovos-owem", "sovos-city"}
