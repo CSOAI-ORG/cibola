@@ -293,3 +293,91 @@ rewritten.
   (72h-done report + POD-signed artifact manifest) + **move 61/75** content (registry page +
   standards-engagement log page). Owner-gated deploy legs (move 1 genesis card, move 4 dual-TS,
   move 61/75 live) remain site-deploy / key-ceremony gated, not agent-deployable.
+
+---
+
+## ROUND 4 (closing set, round 4 of 10) — 2026-08-24
+
+**COMPLETED**
+- **Move 7 gap — registry-of-record alignment.** `REGISTRY.md`'s board state was stale
+  (`count = 28`, verified 2026-08-23/24) against the live authoritative register
+  (`board/board-index.json` → `count 42`, `chainOk true`, linked 42 / unlinked 0). Corrected
+  the registry-of-record doc to the live count + chain state and added the **honest
+  production-vs-test signing split** (6 rows `kid = did:web:csoai.org#card-attestation-1` =
+  production-authentic, six domains measured 6/6, receipt + RFC 3161 anchor; 36 rows
+  `kid = did:web:csoai.org#test-identity` = present-but-fixed test key, honestly surfaced,
+  never blurred or claimed authentic) so the doc matches the source of truth. This round also
+  re-confirmed the whole objective-(a) surface is complete + green: frozen vectors v1
+  (valid/bad-sig/bad-receipt, hash-pinned), REGISTRY.md registry-of-record rows, the
+  verify-kit↔frozen-vectors integration, the stranger walkthrough, the move-59 Inspect
+  signed-receipt scorer hook, and the move-61/75 registry page (staged).
+
+**PROBED** (deltas vs state anchors / round 3)
+- Board: `board/board-index.json` count **42**, `chainOk = true`, linked 42 / unlinked 0
+  (unchanged from round 3): 6 production-signed (`#card-attestation-1`) / 36 test-identity.
+  Frozen-vector regen confirmed **drift-free** (`scripts/gen-frozen-vectors.py` → 0 diff on
+  `test/vectors/`; manifest `card_digest_sha256 = dc4aa02f…` unchanged).
+- Registers: 8 domain registries (`axes/domains/`); corrections register = 15 entries
+  (unchanged). `REGISTRY.md` registry-of-record doc re-aligned to the live board this round.
+- SCITT: in-repo COSE_Sign1 cryptographic-verify surfaces unchanged (move 31 verifier +
+  verify-kit + score-receipt JCS path, move 59). No statement count claimed in-repo.
+- Pods (read-only `runpodctl get pod`): **delta — the 3090 `sov-repull-20260808` (signing/
+  measure) is now EXITED** (it was RUNNING at round 3). A100 `sovos-light-master-mine-20260816`
+  RUNNING (unchanged). 0-GPU RUNNING (6): `oowm-agent-02-measure` · `oowm-agent-03-mine` ·
+  `oowm-agent-04-route` · `oowm-agent-05-product` · `dsh-agent-backend-01` ·
+  `sov-volume-sink-cpu`. ~10 EXITED (takeover / kimi-k2-lora / council-ring / fuel-train /
+  overnight-bench / sov-brain). No pod ops performed (STOP/START forbidden).
+- git: `main` = d4f1002 at start of round + this round's commit. 77 commits on `main` at start
+  of round 4, all dated 2026-08-24; HEAD == origin/main == d4f1002, 0 ahead / 0 behind, clean
+  tree. Hermetic CI green (frozen-vectors 8/8, frozen-vectors-kit 12/12, verify-kit 28,
+  inspect-hook 12/12, grammar-lint + --selfcheck PASS, banned-strings PASS, full deterministic
+  battery PASS).
+
+**BLOCKED**
+- Move 1 / Move 71 / Move 61/75 (live) — genesis card POD-signed + verify page + registry page
+  + standards-engagement log LIVE: owner-gated (real-pod key ceremony + site deploy, deploy
+  forbidden). The stageable walkthrough, standards-engagement log, registry page, verify-kit +
+  frozen vectors, and the REGISTRY.md registry-of-record doc are shipped.
+- Move 4 (dual-TS) — needs the POD-signed genesis card (owner-gated key ceremony) before a
+  second independent transparency registration + cross-verify matrix in CI.
+- Move 59-live (Inspect real SDK) — requires the `inspect_ai` SDK contract + a network fetch
+  (live-eval integration, not an in-repo seam). The hermetic hook contract + the
+  signed-receipt-rides-the-Score test are shipped.
+- Move 2/3/58/57 (sends) — I-D datatracker submit + IANA form + AG-UI issue + MCP #426
+  re-anchor: STAGED texts on disk, never submitted/posted (external-comms hard stop;
+  owner-gated).
+
+**NEXT ROUND** (highest-value remaining client moves)
+1. Move 13 — east-west bridge card demo on the verify page (EU / US-IL / CN readings
+   side-by-side): stageable as content once live cross-region reads exist.
+2. Move 4 — dual-TS: once the genesis card is POD-signed, register it in a second independent
+   transparency service + cross-verify the matrix in CI (needs the POD-signed card).
+3. Move 61/75-live — deploy `registry.html` + the standards-engagement log footer once the
+   site is owner-deployed (site deploy is owner-gated).
+4. Move 72/9 — consolidate any new DRCF/BSI/corpus-watch rows into the standards-engagement
+   log before the 2 Sep DRCF send (owner-gated).
+5. Move 27/70 — Ofcom categorisation-register watch + board/committee posture audit across
+   OpenSSF / OWASP AI&MCP / AI Verify (agent-doable research fan-out).
+
+### Loop close-out metrics (closing set — as of round 4)
+- **Rounds (closing set):** 4 of 10 (round 1 `5b91641`, round 2 `9f887d4`, round 3 `d4f1002`,
+  round 4 this commit). Prior in-session NEXT-100-v4 batch rounds: 5.
+- **Commits:** 77 on `main` at start of round 4, all dated 2026-08-24 (61+ prefixed
+  `dorado:`); this round adds the REGISTRY.md registry-of-record alignment + round log.
+- **Board:** 42 measurements, `chainOk = true`, linked 42 / unlinked 0; 6 production-signed
+  (`#card-attestation-1`, six domains 6/6) / 36 test-identity (honestly surfaced, not blurred).
+- **Registers:** 8 domain registries; corrections register = 15 entries; REGISTRY.md =
+  registry-of-record flow + frozen-vector entry **re-aligned to the live board this round**;
+  standards-engagement log + registry-page content staged.
+- **SCITT:** in-repo COSE_Sign1 cryptographic verify kit + score-receipt JCS path; no SCITT
+  statement count claimed in-repo (sibling-lane metric not read in-repo).
+- **Chain:** 0 breaks (chainOk true, linked 42).
+- **Pods:** A100 `sovos-light-master-mine` RUNNING; **3090 `sov-repull` EXITED this round**
+  (was RUNNING at round 3); +6 0-GPU agents RUNNING; ~10 EXITED; no pod ops performed.
+- **Moves landed:** the handoff set (1/5/12/17/21/22h/31/33/34/36/42/43/44/45/46/51/52/54/69/91/97/99)
+  + the closing set shipped the move-6↔move-17 seam + STAGE-only moves 2/3/58/57 + the
+  move-5/71 walkthrough (round 1), **move 59** + **move 72** (round 2), **move 18** +
+  **move 61/75** content (round 3), and this round realigned **move 7**'s REGISTRY.md
+  registry-of-record doc to the live board count/split. Owner-gated deploy legs (move 1
+  genesis card, move 4 dual-TS, move 61/75 live) remain site-deploy / key-ceremony gated,
+  not agent-deployable.

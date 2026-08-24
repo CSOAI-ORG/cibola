@@ -15,9 +15,17 @@ Two files in `board/` are the authoritative register:
 | `board/board-index.json` | content-addressed index of the chain | `generated_at`, `count`, `chainOk`, `linked` (int), `unlinked` (int), `measurements` (list of row summaries) |
 | `board/measurements.jsonl` | append-only, ordered row log (the raw rows) | one JSON object per line, hash-chained via `prev` |
 
-`chainOk = true` (verified 2026-08-23/24; `count = 28`, 0 breaks) means every row's `prev`
-link resolves to the prior row's `hash` and the chain is intact. `linked`/`unlinked` are the
-counts of rows bound / not yet bound into the index.
+`chainOk = true` (verified 2026-08-24; `count = 42`, 0 breaks, linked 42 / unlinked 0) means
+every row's `prev` link resolves to the prior row's `hash` and the chain is intact.
+`linked`/`unlinked` are the counts of rows bound / not yet bound into the index.
+
+**Honest signing split on the live board (2026-08-24):** of the 42 rows, **6** carry
+`kid = did:web:csoai.org#card-attestation-1` (production-authentic — six domains measured 6/6,
+with a receipt + RFC 3161 anchor) and **36** carry `kid = did:web:csoai.org#test-identity`
+(a present-but-fixed test key — the row is signed and self-consistent, but it is NOT a
+production did:web identity, so it is honestly surfaced as test, never blurred or claimed
+authentic). The register on each row is the same measurement-credential negation regardless of
+key.
 
 ## Registry-of-record row structure
 
