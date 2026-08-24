@@ -64,18 +64,24 @@ dorado board [--json]                                                 # show the
 The estate's licensable asset is the **data**, never a score. A vendor can license the
 measured dataset; it can never buy a ranking.
 
+**Live on HuggingFace (public, verifiable):**
+- `https://huggingface.co/datasets/csoai/dorado-eval-results` — production-signed
+  governance measurement (6 registries, all 6/6, RFC 3161-anchored, signed_by
+  `#card-attestation-1`).
+- `https://huggingface.co/datasets/csoai/dorado-data-listing` — licensable honey corpus
+  (132 measurement-derived Q/A rows, 6 registries, register + neutrality on every row).
+
+**Payloads committed in-repo:**
 - `data.html` — the front-end sale surface for the licensable bundle.
 - `assets/binds/listing-meta.json` — the bundle manifest (counts, register, neutrality).
 - `assets/binds/qa.jsonl` — measurement-derived Q/A per axis (132 rows).
 - `assets/binds/hf-eval.json` — HuggingFace eval-result/model-card payload (a score tied to a
-  weights digest, signed_by `#card-attestation-1`). Live bind: an HF model-card eval-result
-  entry; the listing is owner-gated (HF token), the payload is committed and publisher-ready.
+  weights digest, signed_by `#card-attestation-1`).
 - `assets/binds/or-provider.json` — OpenRouter provider-application payload from measured
-  cost/latency/throughput telemetry. Live bind: provider registration (owner/server-side); the
-  payload is committed and publisher-ready.
+  cost/latency/throughput telemetry (provider registration is a server-side owner action; the
+  OpenRouter key is valid, `/api/v1/models` reachable).
 
-Live binds are owner-gated at the venues (HF token / OpenRouter account), so the repo commits
-the payloads and the site surfaces them; the venue listing is a human final step.
+`dorado status` surfaces all binds with a `binds` block (repo + url + status + what).
 
 ## Verification (free, public)
 

@@ -13,8 +13,14 @@ a buyer can license it. <strong>A vendor can never buy a score.</strong> Every r
 a signed, RFC 3161-anchored measurement.</p>
 
 <h2>The licensable bundle</h2>
+<p><strong>Live on HuggingFace (now public, verifiable):</strong></p>
 <table>
 <tr><th>Asset</th><th>What it is</th><th>Provenance</th></tr>
+<tr><td><a href="https://huggingface.co/datasets/csoai/dorado-data-listing">huggingface.co/csoai/dorado-data-listing</a></td><td>Licensable honey corpus (132 measurement-derived Q/A rows, 6 registries)</td><td>all signer_kid #card-attestation-1</td></tr>
+<tr><td><a href="https://huggingface.co/datasets/csoai/dorado-eval-results">huggingface.co/csoai/dorado-eval-results</a></td><td>Production-signed governance measurement (6 registries, 6/6, anchored)</td><td>signed_by #card-attestation-1</td></tr>
+</table>
+<table>
+<tr><th>Asset (this site)</th><th>What it is</th><th>Provenance</th></tr>
 <tr><td><a href="assets/binds/qa.jsonl">qa.jsonl</a></td><td>Measurement-derived Q/A per axis</td><td>signed, anchored</td></tr>
 <tr><td><a href="assets/binds/listing-meta.json">listing-meta.json</a></td><td>Bundle manifest (counts, register, neutrality)</td><td>—</td></tr>
 <tr><td><a href="assets/binds/hf-eval.json">hf-eval.json</a></td><td>HF eval-result payload (a score tied to a weights digest)</td><td>signed_by #card-attestation-1</td></tr>

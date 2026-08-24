@@ -918,6 +918,25 @@ def cmd_status(args):
                     os.path.exists(os.path.join(ROOT, "board", "elo.json")) else None,
         "operational": {"records": len(load_tel()),
                         "recent": load_tel()[-10:]},
+        "binds": {
+            "hf_eval_results": {
+                "repo": "csoai/dorado-eval-results",
+                "url": "https://huggingface.co/datasets/csoai/dorado-eval-results",
+                "status": "live",
+                "what": "production-signed governance measurement (6 registries, 6/6), RFC 3161-anchored",
+            },
+            "data_listing": {
+                "repo": "csoai/dorado-data-listing",
+                "url": "https://huggingface.co/datasets/csoai/dorado-data-listing",
+                "status": "live",
+                "what": "licensable honey corpus (132 Q/A rows, 6 registries, register + neutrality)",
+            },
+            "openrouter": {
+                "payload": "assets/binds/or-provider.json",
+                "status": "prepared-owner-action",
+                "what": "measured operational telemetry (cost/latency/throughput) — provider registration is a server-side owner action",
+            },
+        },
     }
     if args.out:
         json.dump(status, open(args.out, "w"), indent=2)
