@@ -69,7 +69,7 @@ See `agent/agent.json` (A2A agent card) and `a2a.md` for the exact contract. An 
 - `schemas/measurement-card.schema.json` — the card schema.
 - `draft/draft-csoai-scitt-measurement-card-00.md` — the RFC draft.
 - `engine/`, `harness/`, `cli/`, `axes/`, `test/` — implementation.
-- `GOVERNANCE.md` — doctrine (two heads one SOVOS, neutrality, anti-capture).
+- `GOVERNANCE.md` — doctrine (two heads, one neutral substrate, neutrality, anti-capture).
 
 ## Register (verbatim)
 

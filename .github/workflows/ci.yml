@@ -36,6 +36,10 @@ jobs:
       - name: Elo/Bradley-Terry oracle (hermetic)
         run: python3 test/elo-test.py
 
+      # Banned-lane-brand CI guard on PUBLIC surfaces (allowed: legal 'sovereign' + real infra ids).
+      - name: Banned-string lint (public surfaces)
+        run: python3 test/banned-strings.py
+
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
       - name: Schema CI (example card)
         run: python3 test/schema-test.py
