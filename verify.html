@@ -43,9 +43,12 @@ attests to <em>this</em> card's digest (card-bind). A receipt for a different ca
 agent via the DORADO MCP server (<code>dorado.verify</code> / <code>verifyReceipt</code> /
 <code>verifyAnchor</code>). The RFC 3161 TSA time-binding is real (GlobalSign R45 AATL chain);
 <code>gen_time 2026-08-23 06:00:11Z</code>.</p>
-<p class="reg"><strong>Note:</strong> the published example is signed with a development key to
-demonstrate the pipeline. A production card signs with
-<code>did:web:csoai.org#card-attestation-1</code> (Mac/keystone-held, never committed).</p>
+<p class="reg"><strong>Production:</strong> the measurement board
+(<code>board/board-index.json</code>) records the six canonical production cards — all six
+domains measured <strong>6/6</strong>, each signed with
+<code>did:web:csoai.org#card-attestation-1</code> and RFC 3161-anchored
+(<code>chainOk: true</code>, count 42). A stranger verifies using only the published key;
+the private key is never committed.</p>
 
 <h2>Do it yourself (A2A agent)</h2>
 <p>An A2A agent verifies independently via the DORADO MCP server
@@ -63,6 +66,6 @@ buy the data; a vendor can never buy the score.</li>
 <li><strong>Join on weights, not names.</strong> Two cards that name the same model but measure
 different weights are distinct.</li>
 </ul>
-<p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:councilof.ai · Measurement
+<p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:csoai.org#card-attestation-1 · Measurement
 credential, not certification.</p>
 </body></html>

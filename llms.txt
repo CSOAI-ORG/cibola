@@ -32,6 +32,10 @@ dorado verify   --card card.json --pubkey <b64>          # stranger-verify
 dorado verify-receipt   --receipt receipt.json --card card.json
 dorado verify-anchor    --anchor anchor.json  --card card.json
 dorado verify-all       --card card.json [--receipt r.json] [--anchor a.json]
+dorado inspect          --fixture                         # signed-receipt SCORER hook (move 59), determinist
+dorado data-listing     --in result.json --out listing.json   # licensable data-listing (bind 2)
+dorado or-provider      --key-id $OPENROUTER_KEY --provider-meta p.json   # OpenRouter application (bind 3)
+dorado hf-eval          --model X --domain bond --out hf-eval.json        # HF eval-result payload (bind 1)
 dorado export   --in axis.json --out-dir data-out        # licensable data product
 dorado crosswalk [--domain bond]                         # provision citations
 dorado selfcheck                                         # hermetic tests
@@ -44,15 +48,34 @@ A stranger verifies with only the published Ed25519 key + `cryptography` (anchor
 
 The DORADO measurement **board** (the body's record of what it measured) is a
 content-addressed, append-only registry at `board/board-index.json` — fetch it as
-`https://csoai-org.github.io/dorado/board/board-index.json`. It is a MEASUREMENT
+`https://csoai-org.github.io/cibola/board/board-index.json`. It is a MEASUREMENT
 registry, not a rank table. Each entry records a signed card's content hash,
 registry, subject, measured/total, kid, receipt content_id, anchor time, and
-provision-axis count, with `chainOk` / `linked` diagnostics.
+provision-axis count, with `chainOk` / `linked` diagnostics. It is production-signed
+with `did:web:csoai.org#card-attestation-1` and RFC 3161-anchored (`chainOk: true`).
 
 ```bash
 dorado publish --card card.json [--receipt r.json] [--anchor a.json]   # append (dedupe)
 dorado board [--json]                                                 # show the index
 ```
+
+## Licensable data product (bind 2) — the real-world value surface
+
+The estate's licensable asset is the **data**, never a score. A vendor can license the
+measured dataset; it can never buy a ranking.
+
+- `data.html` — the front-end sale surface for the licensable bundle.
+- `assets/binds/listing-meta.json` — the bundle manifest (counts, register, neutrality).
+- `assets/binds/qa.jsonl` — measurement-derived Q/A per axis (132 rows).
+- `assets/binds/hf-eval.json` — HuggingFace eval-result/model-card payload (a score tied to a
+  weights digest, signed_by `#card-attestation-1`). Live bind: an HF model-card eval-result
+  entry; the listing is owner-gated (HF token), the payload is committed and publisher-ready.
+- `assets/binds/or-provider.json` — OpenRouter provider-application payload from measured
+  cost/latency/throughput telemetry. Live bind: provider registration (owner/server-side); the
+  payload is committed and publisher-ready.
+
+Live binds are owner-gated at the venues (HF token / OpenRouter account), so the repo commits
+the payloads and the site surfaces them; the venue listing is a human final step.
 
 ## Verification (free, public)
 

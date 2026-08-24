@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DORADO — Licensable Measurement Data</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:820px;margin:3rem auto;padding:0 1rem;line-height:1.5;color:#111}
+h1{color:#047857}h2{color:#0f766e;margin-top:2rem}code{background:#f0f4f3;padding:2px 5px;border-radius:4px}
+table{border-collapse:collapse;width:100%;margin-top:.5rem}th,td{border:1px solid #d1d5db;padding:6px 10px;text-align:left;font-size:.92rem}
+th{background:#f9fafb}.reg{color:#6b7280;font-style:italic;font-size:.9rem}.ok{color:#047857}
+</style></head><body>
+<h1>DORADO — Licensable Measurement Data</h1>
+<p>Measurement-derived, attributable, signed data. The product is the <strong>data</strong>;
+a buyer can license it. <strong>A vendor can never buy a score.</strong> Every row traces to
+a signed, RFC 3161-anchored measurement.</p>
+
+<h2>The licensable bundle</h2>
+<table>
+<tr><th>Asset</th><th>What it is</th><th>Provenance</th></tr>
+<tr><td><a href="assets/binds/qa.jsonl">qa.jsonl</a></td><td>Measurement-derived Q/A per axis</td><td>signed, anchored</td></tr>
+<tr><td><a href="assets/binds/listing-meta.json">listing-meta.json</a></td><td>Bundle manifest (counts, register, neutrality)</td><td>—</td></tr>
+<tr><td><a href="assets/binds/hf-eval.json">hf-eval.json</a></td><td>HF eval-result payload (a score tied to a weights digest)</td><td>signed_by #card-attestation-1</td></tr>
+<tr><td><a href="assets/binds/or-provider.json">or-provider.json</a></td><td>OpenRouter provider-application (measured cost/latency/throughput)</td><td>measured</td></tr>
+</table>
+<p class="reg">This data is derived from a measurement. It is not a certification, endorsement,
+or conformity mark, and must not be presented as one.</p>
+
+<h2>Neutrality (binds every license)</h2>
+<ul>
+<li><strong>Licenses the measured data, never the score.</strong> A vendor may buy the dataset;
+it can never buy a ranking.</li>
+<li><strong>Measurement, never certification.</strong> The register verbatim is on every row.</li>
+<li><strong>Join on weights, not names.</strong> Each record carries the subject digest so a model
+NAME is not a model.</li>
+</ul>
+
+<h2>The measurement body</h2>
+<p>DORADO is an independent AI-governance <strong>measurement</strong> body over the RFC 9943
+substrate. See the <a href="board/board-index.json">measurement board</a> (production-signed,
+RFC 3161-anchored), <a href="leaderboard.html">leaderboard</a>, <a href="verify.html">verify</a>,
+and <a href="llms.txt">llms.txt</a>.</p>
+<p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:csoai.org#card-attestation-1 · Measurement credential, not certification.</p>
+</body></html>
