@@ -192,3 +192,104 @@ rewritten.
   walkthrough (round 1), and ADDITIONALLY landed **move 59** (Inspect signed-receipt scorer hook)
   + **move 72** (standards-engagement log consolidated). Owner-gated deploy legs (move 1 genesis
   card, move 61/75 registry+verify page) remain site-deploy gated, not agent-deployable.
+
+---
+
+## ROUND 3 (closing set, round 3 of 10) — 2026-08-24
+
+**COMPLETED**
+- **Move 18 — 72h-done report + POD-signed artifact manifest (the proof inventory).**
+  `docs/72h-done-report-2026-08-24.md` is a STAGED internal record (nothing sent/submitted/
+  posted). It enumerates the estate's durable, verifiable artifacts as a proof-inventory
+  manifest: artifact · location · signing status · production-authentic? · stranger path. It
+  honestly surfaces the production-vs-test split on the board (6 rows production-signed with
+  `did:web:csoai.org#card-attestation-1` = six domains measured 6/6; 36 rows carry a signature
+  with the fixed test key `#test-identity` and are NOT production-authentic), names the
+  owner-gated POD-sign (move 1) + dual-TS (move 4) + public deploy (moves 71/61/75) legs that
+  remain, and re-affirms the canon (measurement credential, never certification; "13 measured
+  of 14"; no fabricated signature).
+- **Move 61 / Move 75 — registry page + standards-engagement log content (STAGED page).**
+  `registry.html` (repo-root, deploy-candidate but NOT deployed) is the registry page driven by
+  `REGISTRY.md` + `docs/standards-engagement-log-2026-08-24.md` + the live board index: the
+  trust root (`did:web:csoai.org` → `councilof.ai/.well-known/did.json`), the active signing
+  identities, the board snapshot (42 rows, chainOk, 6 production-signed / 36 test-identity),
+  the 8 domain registries, the frozen vectors, the standards-engagement log (STAGED rows) and
+  the verify path. Wired as a link from `index.html`; `registry.html` added to the PUBLIC list
+  of both `test/banned-strings.py` and `test/grammar-lint.py` so the new public surface is
+  lint-guarded. Content staged; any deploy stays owner-gated (deploy forbidden).
+
+**PROBED** (deltas vs state anchors / round 2)
+- Board: `board/board-index.json` count **42**, `chainOk = true`, linked 42 / unlinked 0
+  (unchanged). **New honest split:** 6 rows `kid = did:web:csoai.org#card-attestation-1`
+  (production-signed, six domains measured 6/6, receipt + RFC 3161 anchor present) vs 36 rows
+  `kid = did:web:csoai.org#test-identity` (signature present but fixed test key — NOT a
+  production did:web identity). The registry page + 72h report both surface this split.
+- Registers: 8 domain registries (`axes/domains/`); corrections register = **15 entries**
+  (`test/corrections-register.py` PASS; C-2026-0819-13 honestly surfaces a missing
+  machine-readable `status`, surfaced not back-filled). `data/verify-log.jsonl` is a runtime
+  artifact (written by the counter into a temp dir in CI), not a committed file — no row count
+  claimed here.
+- SCITT: in-repo cryptographic-verify surfaces unchanged (move 31 verifier + verify-kit + the
+  score-receipt JCS path, move 59). No SCITT statement count claimed in-repo.
+- Pods (read-only `runpodctl get pod`): 3090 `sov-repull-20260808` RUNNING; A100
+  `sovos-light-master-mine-20260816` RUNNING (the signing/measure pair). 0-GPU RUNNING:
+  `oowm-agent-02-measure` · `oowm-agent-03-mine` · `oowm-agent-04-route` ·
+  `oowm-agent-05-product` · `dsh-agent-backend-01` · `sov-volume-sink-cpu` (6). ~11 EXITED
+  (takeover / council-ring / overnight-bench / fuel-train / kimi-k2-lora). No pod ops performed.
+- git: `main` = 9f887d4 at start of round + this round's commit(s). All hermetic CI tests green
+  (frozen-vectors 8/8, frozen-vectors-kit 12/12, verify-kit 28, inspect-hook 12/12,
+  licence-sweep landmine-free, grammar-lint + --selfcheck PASS, banned-strings PASS, full
+  deterministic battery PASS).
+
+**BLOCKED**
+- Move 71 / Move 5 (live) — verify page + genesis card PUBLIC: owner-gated (site deploy) + the
+  genesis card itself is POD-signed (move 1, `kid=real pod key` = key ceremony). The stageable
+  walkthrough (round 1), the stageable standards-engagement log (round 2), and the stageable
+  registry page + 72h proof-inventory report (this round) are shipped; the deploy stays
+  owner-gated, never agent-deployed.
+- Move 61 / Move 75 (live) — registry page + standards-engagement log LIVE on councilof.ai /
+  csoai.org: site deploy, owner-gated (deploy forbidden). Content now staged (this round's
+  `registry.html`; `REGISTRY.md` remains the registry-of-record source; the standards-engagement
+  log from round 2). No deploy performed.
+- Move 1 / 2 / 3 / 4 (send/ceremony legs) — genesis POD sign + dual-TS + I-D datatracker submit
+  + IANA form submit: stage-only (key ceremony / external send, owner-gated). Texts + the
+  proof-inventory manifest staged.
+- Move 59's LIVE Inspect integration (importing the real `inspect_ai` SDK + registering the hook
+  in a live eval run) is NOT completed — it needs the Inspect SDK contract + a network fetch,
+  which is a live-eval integration, not an in-repo seam. The hermetic hook contract + the
+  signed-receipt-rides-the-score test ARE shipped (round 2).
+
+**NEXT ROUND** (highest-value remaining client moves)
+1. Move 4 — dual-TS: once the genesis card is POD-signed, register it in a second independent
+   transparency service + cross-verify the matrix in CI (needs the POD-signed card).
+2. Move 13 — east-west bridge card demo on the verify page (EU / US-IL / CN readings
+   side-by-side): stageable as content once live cross-region reads exist.
+3. Move 59-live — wire the Inspect hook into a real `inspect_ai` `@score`/`eval.hooks.score`
+   registration + a live eval run once the SDK contract is available (external integration).
+4. Move 61/75-live — deploy `registry.html` + the standards-engagement log footer once the site
+   is owner-deployed (site deploy is owner-gated).
+5. Move 72/9 — consolidate any new DRCF/BSI/corpus-watch rows into the standards-engagement log
+   before the 2 Sep DRCF send (owner-gated).
+
+### Loop close-out metrics (closing set — as of round 3)
+- **Rounds (closing set):** 3 of 10 (round 1 `5b91641`, round 2 `9f887d4`, round 3 this commit).
+  Prior in-session NEXT-100-v4 batch rounds: 5.
+- **Commits:** 76 on `main` at start of round 3, all dated 2026-08-24 (61 prefixed `dorado:`);
+  this round adds move 18 + move 61/75 content + round log.
+- **Board:** 42 measurements, `chainOk = true`, linked 42 / unlinked 0; 6 production-signed
+  (`#card-attestation-1`, six domains 6/6) / 36 test-identity (honestly surfaced, not blurred).
+- **Registers:** 8 domain registries; corrections register = 15 entries; REGISTRY.md =
+  registry-of-record flow + frozen-vector entry; standards-engagement log (move 72) + registry
+  page content (move 61/75) staged.
+- **SCITT:** in-repo COSE_Sign1 cryptographic verify kit + score-receipt JCS path; no statement
+  count claimed (sibling-lane metric not read in-repo).
+- **Chain:** 0 breaks (chainOk true, linked 42).
+- **Pods:** 3090 + A100 RUNNING (signing/measure); +6 0-GPU agents RUNNING; ~11 EXITED; no pod
+  ops performed.
+- **Moves landed:** the handoff set (1/5/12/17/21/22h/31/33/34/36/42/43/44/45/46/51/52/54/69/91/97/99)
+  + the closing set closed the move-6↔move-17 seam, STAGE-only moves 2/3/58/57 + the move-5/71
+  walkthrough (round 1), **move 59** (Inspect signed-receipt scorer hook) + **move 72**
+  (standards-engagement log consolidated) (round 2), and this round STAGE-shipped **move 18**
+  (72h-done report + POD-signed artifact manifest) + **move 61/75** content (registry page +
+  standards-engagement log page). Owner-gated deploy legs (move 1 genesis card, move 4 dual-TS,
+  move 61/75 live) remain site-deploy / key-ceremony gated, not agent-deployable.

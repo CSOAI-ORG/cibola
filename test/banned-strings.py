@@ -18,7 +18,7 @@ from __future__ import annotations
 import os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PUBLIC = ["index.html", "verify.html", "leaderboard.html", "a2a.md", "llms.txt",
+PUBLIC = ["index.html", "verify.html", "leaderboard.html", "registry.html", "a2a.md", "llms.txt",
           "README.md", "agent/agent.json", "agent/agent-card.json",
           ".well-known/agent.json", ".well-known/mcp.json"]
 # Week-1 external text staged for owner-gated sends (move 39): these get the SAME

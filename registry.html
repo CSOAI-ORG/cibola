@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CIBOLA — Measurement Registry of Record</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:820px;margin:3rem auto;padding:0 1rem;line-height:1.5;color:#111}
+h1{color:#047857}h2{color:#0f766e;margin-top:2rem}code{background:#f0f4f3;padding:2px 5px;border-radius:4px}
+table{border-collapse:collapse;width:100%;margin-top:.5rem}th,td{border:1px solid #d1d5db;padding:6px 10px;text-align:left;font-size:.92rem}
+th{background:#f9fafb}a{color:#047857}.ok{color:#047857;font-weight:600}.reg{color:#6b7280;font-style:italic;font-size:.9rem}
+</style></head><body>
+<h1>Measurement Registry of Record</h1>
+<p>The <strong>registry of record</strong> is the measurement board — an append-only,
+content-addressed, hash-chained <strong>measurement register</strong>. Each row is a signed
+<strong>measurement credential</strong> on the RFC 9943 / RFC 9942 substrate. A credential is
+evidence of what was measured and when. <em>It is not a certification, endorsement, or
+conformity mark, and must not be presented as one.</em></p>
+
+<h2>Trust root</h2>
+<p><code>did:web:csoai.org</code> resolves to the published Ed25519 display in
+<code>https://councilof.ai/.well-known/did.json</code> (also served at
+<code>https://csoai.org/.well-known/did.json</code>). A stranger verifies a card offline
+with the published key listed there.</p>
+<table>
+<tr><th>kid (<code>#</code>)</th><th>Signs</th></tr>
+<tr><td><code>site-release-1</code></td><td>site deploys, release cards, agent cards</td></tr>
+<tr><td><code>estate-chain-1</code></td><td>fleet board chains + measurement cards</td></tr>
+<tr><td><code>board-attestation-1</code></td><td>board attestation</td></tr>
+<tr><td><code>card-attestation-1</code></td><td>the mine's measurement-card generation — the cards' actual signer</td></tr>
+</table>
+<p class="reg">Key rotation is additive and never breaks the chain; keys are retired via the
+superseded list, never removed. The full update flow is in <a href="REGISTRY.md">REGISTRY.md</a>.</p>
+
+<h2>The measurement register (board snapshot)</h2>
+<p>The board is an append-only, content-addressed register that never rewrites a row. Each
+row chains <code>prev -> prior row's hash</code>, so tampering is detectable.</p>
+<table>
+<tr><th>Rows</th><th>Chain</th><th>Linked</th><th>Production-signed (<code>#card-attestation-1</code>)</th><th>Test-identity rows</th></tr>
+<tr><td>42</td><td class="ok">chainOk = true</td><td>42 / 42</td><td>6 (six domains, measured 6/6)</td><td>36</td></tr>
+</table>
+<p class="reg">The roster reports 42 rows with an intact chain. Of those, 6 are
+production-signed with <code>did:web:csoai.org#card-attestation-1</code> (the six canonical
+domains, each measured 6/6, with a SCITT receipt and an RFC 3161 anchor); 36 carry a
+signature with the fixed test key (<code>#test-identity</code>), which is
+<strong>not</strong> a production did:web identity. The register surfaces that split
+honestly rather than blurring the count.</p>
+
+<h2>Domain registries</h2>
+<p>The horizontal axis set the vertical verifies. Each is a registered axis set, namespaced
+<code>csoai.gspc-domains/&lt;domain&gt;/&lt;semver&gt;</code>:</p>
+<p><code>bond</code> · <code>bank</code> · <code>insurance</code> · <code>equity</code> ·
+<code>index</code> · <code>cross-border</code> · <code>operational</code> ·
+<code>relative</code></p>
+<p>The absolute-governance grid is <code>axes/gspc-16.json</code> — a 16-axis grid with the
+canonical total of 14 for the completeness grammar: measured results report the honest
+<strong>"13 measured of 14"</strong> (the 14th canonical axis is the DPIA-gated human
+baseline, honest-unknown).</p>
+
+<h2>Frozen verification vectors (v1)</h2>
+<p>The repo also indexes the pinned stranger-verification fixtures — the canonical,
+hash-pinned inputs every verifier must still accept (valid) and reject (bad-sig,
+bad-receipt). These use <code>kid = #test-identity</code>, never the production identity:
+<code>test/vectors/card-valid.json</code> · <code>card-bad-sig.json</code> ·
+<code>receipt-bad.json</code>. See the registry-of-record entry in <a href="REGISTRY.md">REGISTRY.md</a>.</p>
+
+<h2>Standards engagement (staged)</h2>
+<p>The estate's standards-engagement ledger is consolidated in
+<code>docs/standards-engagement-log-2026-08-24.md</code> — IETF Internet-Draft, IANA
+media-type registration, AG-UI audio proposal, MCP #426 re-anchor, plus the ART50
+transparency consultation, the METR/TB-Harbor packs and the board-membership posture.
+<strong>Every row is staged: drafted and on disk, never sent, submitted, posted, or
+commented.</strong> Each engagement produces a verified measurement credential, never a
+certification.</p>
+
+<h2>Verify a card</h2>
+<p>Run the human one-command check against a card, its receipt and its RFC 3161 anchor, or
+use the offline verify-kit bundle:</p>
+<pre><code>dorado verify-all --card CARD.json --receipt RECEIPT.json --anchor ANCHOR.json
+# optional identity pinning to the published key:
+  --pubkey &lt;did:web:csoai.org#card-attestation-1 published key&gt;</code></pre>
+<p>See the <a href="verify.html">verify page</a> and the
+<a href="docs/stranger-verify-walkthrough-2026-08-24.md">stranger-verify walkthrough</a>.</p>
+
+<h2>Doctrine</h2>
+<ul>
+<li><strong>Measurement, never certification.</strong> A credential is evidence of what was
+measured and when; never accreditation, endorsement, or conformity.</li>
+<li><strong>Neutrality.</strong> The scored entity never pays for its measurement. A vendor
+can buy the data; a vendor can never buy the score.</li>
+<li><strong>Join on weights, not names.</strong> Two cards that name the same model but
+measure different weights are distinct.</li>
+</ul>
+<p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:csoai.org#card-attestation-1 ·
+Measurement credential, not certification.</p>
+</body></html>
