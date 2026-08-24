@@ -1,0 +1,56 @@
+{
+  "schema": "csoai.dependency-licence/0.1",
+  "generated": "2026-08-24",
+  "policy": "A new dependency is admissible only if it is permissive (BSD/MIT/Apache/ISC/Zlib/PSF family) AND not in a hard-excluded commercial/non-commercial agent-dataset family. Escalation is required for anything outside the permissive allowlist.",
+  "hard_excluded_families": [
+    "PersonaHub",
+    "genagents",
+    "AgentSociety-commercial",
+    "Genie 3",
+    "Cosmos"
+  ],
+  "permissive_allowlist_spdx": [
+    "BSD-3-Clause",
+    "BSD-2-Clause",
+    "MIT",
+    "Apache-2.0",
+    "ISC",
+    "Zlib",
+    "PSF-2.0"
+  ],
+  "dependencies": [
+    {
+      "name": "cryptography",
+      "provider": "PyCA (Python Cryptographic Authority)",
+      "spdx": "Apache-2.0 OR BSD-3-Clause",
+      "family": "permissive",
+      "where": "engine/dorado_sign.py, dorado_verify.py, dorado_receipt*.py, dorado_anchor*.py, cli/dorado.py",
+      "verdict": "OK",
+      "note": "Ed25519 signing/verify/receipt + RFC 3161 TSA. Installed explicitly in CI (pip install cryptography). Dual Apache/BSD, permissive."
+    },
+    {
+      "name": "asn1crypto",
+      "provider": "PyCA (Python Cryptographic Authority)",
+      "spdx": "MIT",
+      "family": "permissive",
+      "where": "engine/dorado_anchor.py, dorado_anchor_verify.py (conditional, RFC 3161 TSA + ASN.1)",
+      "verdict": "OK",
+      "note": "Conditionally imported for timestamp-authority verification. MIT, permissive. Not installed on the dev box (pod-side); declared so CI/audit knows its licence rather than treating an optional import as a gate."
+    }
+  ],
+  "internal_packages": [
+    {
+      "name": "csoai_city",
+      "where": "cli/dorado.py (load_signing_key)",
+      "verdict": "INTERNAL",
+      "note": "Estate's own package (CSOAI), licensed Apache-2.0 by the estate; not an external third-party dependency — excluded from the external-licence sweep."
+    }
+  ],
+  "sweep": {
+    "result": "CLEAN",
+    "detected": ["cryptography", "asn1crypto"],
+    "internal_detected": ["csoai_city"],
+    "excluded_family_hits_in_assets": 0,
+    "summary": "Only PyCA permissive deps (cryptography cross-license, asn1crypto MIT). No hard-excluded family appears in any code/data asset. The only repo mentions of the excluded families are in docs/NEXT-100-v3 where the rule itself is enumerated."
+  }
+}

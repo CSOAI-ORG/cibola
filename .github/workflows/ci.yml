@@ -82,6 +82,31 @@ jobs:
           bash scripts/gpu-flush-preflight.sh --selftest
           bash scripts/gpu-flush-preflight.sh --doctor
 
+      # TELEMETRY SCHEMA guard (move 21): every per-measure telemetry row must validate
+      # against the contract engine/or_telemetry.record() emits (model/provider/cost/
+      # latency/tokens/throughput), and tok_s must be exactly the emitter-derived value.
+      - name: Telemetry schema guard (move 21)
+        run: python3 test/telemetry-schema.py
+
+      # CORRECTIONS REGISTER guard (move 33): the append-only + schema contract of the
+      # corrections register (csoai.corrections/0.1) is asserted against a point-in-time
+      # snapshot (ids unique + monotonic by (date,id), date-embedding, policy asserts
+      # append-only, provenance envelope), with any missing status surfaced honestly.
+      - name: Corrections register append-only guard (move 33)
+        run: python3 test/corrections-register.py
+
+      # REGISTER INDEX consistency guard (move 42, in-repo half): the derived board index
+      # must be internally coherent (count==len, chainOk with 0 unlinked gaps, every entry
+      # signed + self-consistent), and the index-vs-files boundary is reported honestly.
+      - name: Board index consistency guard (move 42)
+        run: python3 test/board-index.py
+
+      # LICENCE LANDMINE SWEEP guard (move 34): every third-party import is declared +
+      # permissive (only PyCA cryptography/asn1crypto), and no hard-excluded family name
+      # appears in any code/data asset (docs/manifest/guard legitimately name the rule).
+      - name: Dependency licence landmine sweep (move 34)
+        run: python3 test/licence-sweep.py
+
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
       - name: Schema CI (example card)
         run: python3 test/schema-test.py
