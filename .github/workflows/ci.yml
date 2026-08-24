@@ -58,6 +58,30 @@ jobs:
           python3 test/grammar-lint.py
           python3 test/grammar-lint.py --selfcheck
 
+      # NO-LLM-JUDGE invariant guard (move 25): the tree must score deterministically
+      # (gold-label judge in engine/judge.py, no LLM judges another LLM) and export
+      # ratings as measurement-derived data that carries the register + the
+      # "never a purchased rank / never the score" neutrality. --selfcheck regression-tests.
+      - name: No-LLM-judge invariant (moves 25)
+        run: |
+          python3 test/no-llm-judge.py
+          python3 test/no-llm-judge.py --selfcheck
+
+      # HERMETIC DETERMINISM GATE (move 36): a canned axis-engine fixture run twice with
+      # the same key must produce the same card canonical digest, the same Ed25519
+      # signature, and the same receipt content_id (issued_at pinned to isolate the sole
+      # wall-clock input). Proves determinism + unsealed-never-signed, fully OFF-network.
+      - name: Determinism gate (double-run, hermetic)
+        run: python3 test/determinism-gate.py
+
+      # 3090 CONTENTION RULE guard (move 30): the GPU-flush preflight must be codified
+      # (doctrine doc) and pass its hermetic selftest + CI-friendly --doctor (cadence-lock
+      # discipline + honest GPU-deferred note; no score is faked by a contended GPU).
+      - name: 3090 contention preflight (move 30)
+        run: |
+          bash scripts/gpu-flush-preflight.sh --selftest
+          bash scripts/gpu-flush-preflight.sh --doctor
+
       # CI BOLA schema re-validation (structural, no jsonschema dependency).
       - name: Schema CI (example card)
         run: python3 test/schema-test.py
