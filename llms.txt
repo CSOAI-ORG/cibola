@@ -32,6 +32,7 @@ dorado verify   --card card.json --pubkey <b64>          # stranger-verify
 dorado verify-receipt   --receipt receipt.json --card card.json
 dorado verify-anchor    --anchor anchor.json  --card card.json
 dorado verify-all       --card card.json [--receipt r.json] [--anchor a.json]
+dorado elo-compare      --pairs pairs.json --model-a A --model-b B  # separated_leaders + paired McNemar
 dorado inspect          --fixture                         # signed-receipt SCORER hook (move 59), determinist
 dorado data-listing     --in result.json --out listing.json   # licensable data-listing (bind 2)
 dorado or-provider      --key-id $OPENROUTER_KEY --provider-meta p.json   # OpenRouter application (bind 3)
@@ -105,6 +106,8 @@ See `agent/agent.json` (A2A agent card) and `a2a.md` for the exact contract. An 
 
 - `schemas/measurement-card.schema.json` — the card schema.
 - `draft/draft-csoai-scitt-measurement-card-00.md` — the RFC draft.
+- `docs/METHODOLOGY-WHITE-PAPER-2026-08-25.md` — the public methodology white paper (Wilson CI +
+  conservative separation + paired McNemar; the statistical-governance governance asset).
 - `engine/`, `harness/`, `cli/`, `axes/`, `test/` — implementation.
 - `GOVERNANCE.md` — doctrine (two heads, one neutral substrate, neutrality, anti-capture).
 

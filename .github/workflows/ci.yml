@@ -56,6 +56,12 @@ jobs:
       - name: Elo/Bradley-Terry oracle (hermetic)
         run: python3 test/elo-test.py
 
+      # McNemar paired test + separated-leaders guard (GSPC methodology rec #2): conservative
+      # anti-overclaiming separation + field-standard paired head-to-head. Closes the
+      # 'overlapping CI != non-significance' criticism. Hermetic.
+      - name: ELO statistical guards (McNemar + separated-leaders)
+        run: python3 test/elo-stats-test.py
+
       # Banned-lane-brand CI guard on PUBLIC surfaces (allowed: legal 'sovereign' + real infra ids).
       - name: Banned-string lint (public surfaces)
         run: python3 test/banned-strings.py

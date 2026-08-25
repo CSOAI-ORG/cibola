@@ -142,3 +142,87 @@ SORT_KEY = "rating"
 def ranked(score: dict) -> list[tuple[str, dict]]:
     """Return models sorted by rating descending (LMArena-style leaderboard)."""
     return sorted(score.items(), key=lambda kv: kv[1][SORT_KEY], reverse=True)
+
+
+def separated_leaders(score: dict, *, n_min: int = 30) -> dict:
+    """Conservative leader-separation test (rec #2 of the GSPC methodology research).
+
+    The leader is only declared 'separated' when its win-rate CI does NOT overlap the
+    fleet mean (the average win-rate across the measured models). This is a DELIBERATELY
+    CONSERVATIVE anti-overclaiming rule: it errs toward declaring a tie rather than
+    over-claiming a lead. It is a design choice, NOT a formal significance test — the
+    research explicitly warns that overlapping CIs do not by themselves prove
+    non-significance, which is why a paired McNemar test (see `paired_mcnemar`) is the
+    field-standard for head-to-head 'does A beat B' claims.
+
+    Returns {fleet_mean_win_rate, leader, leader_win_rate, leader_ci, separated,
+            n, ci_ok, note}. `separated` is True only when leader CI is above the fleet
+    mean on both bounds; otherwise it is honestly a 'tie' (not over-claimed).
+    """
+    rows = sorted(score.items(), key=lambda kv: kv[1][SORT_KEY], reverse=True)
+    if not rows:
+        return {"fleet_mean_win_rate": 0.0, "leader": None, "separated": False,
+                "note": "no models measured"}
+    leader, led = rows[0]
+    win_rates = [r["win_rate"] for _, r in rows if r.get("n", 0) >= 1]
+    fleet_mean = sum(win_rates) / len(win_rates) if win_rates else 0.0
+    lo, hi = led.get("win_rate_ci", [0.0, 0.0])
+    separated = (led.get("ci_ok", False) and lo > fleet_mean)
+    return {
+        "fleet_mean_win_rate": round(fleet_mean, 4),
+        "leader": leader,
+        "leader_win_rate": led.get("win_rate"),
+        "leader_ci": [round(lo, 4), round(hi, 4)],
+        "separated": bool(separated),
+        "n": led.get("n", 0),
+        "ci_ok": bool(led.get("ci_ok", False)),
+        "note": ("leader CI clears the fleet mean — separated (anti-overclaiming conservative rule)"
+                 if separated else
+                 "leader CI overlaps the fleet mean — declared a TIE (never over-claimed); "
+                 "use a paired McNemar test for head-to-head claims"),
+    }
+
+
+def paired_mcnemar(pairs: list[tuple[str, str, float]], model_a: str, model_b: str) -> dict:
+    """Paired McNemar exact test for head-to-head 'does A beat B' (rec #2).
+
+    From pairwise results, count the DISCORDANT pairs between A and B: b = A wins & B
+    loses, c = B wins & A loses. McNemar's exact binomial test (two-sided) tests
+    H0: b == c. Only discordant pairs carry signal — concordant pairs (both win the same
+    way) are informative but are the 'noise' the paired design removes.
+
+    Critical-input: this is the field-standard paired test for eval head-to-head claims
+    (Miller arXiv:2411.00640 rec #4: inference on question-level PAIRED differences, not
+    population summary statistics). It closes the methodological gap where overlapping
+    Wilson CIs do NOT imply non-significance.
+
+    Returns {b, c, discordant, p_exact, significant, n_min_met, note}. `significant`
+    True at alpha=0.05 two-sided. A low n (few discordants) is reported honestly.
+    """
+    import math as _m
+    b = c = 0  # b: A over B; c: B over A
+    for w, l, _margin in pairs:
+        if {w, l} != {model_a, model_b}:
+            continue
+        if w == model_a and l == model_b:
+            b += 1
+        elif w == model_b and l == model_a:
+            c += 1
+    n_disc = b + c
+    if n_disc == 0:
+        return {"b": b, "c": c, "discordant": 0, "p_exact": 1.0, "significant": False,
+                "n_min_met": False, "note": "no discordant pairs — cannot test A vs B (they never directly met)"}
+    # exact two-sided binomial around the smaller tail, times 2 (two-sided), capped at 1.
+    k = min(b, c)
+    p = 0.0
+    for i in range(k + 1):
+        p += _m.comb(n_disc, i) * (0.5 ** n_disc)
+    p_exact = min(1.0, 2 * p)
+    return {
+        "b": b, "c": c, "discordant": n_disc,
+        "p_exact": round(p_exact, 6), "significant": bool(p_exact < 0.05),
+        "n_min_met": bool(n_disc >= 20),
+        "note": ("A significantly beats B (McNemar exact, p<0.05, two-sided)"
+                 if p_exact < 0.05 else
+                 "no significant head-to-head difference detected (McNemar exact, two-sided)"),
+    }

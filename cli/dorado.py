@@ -295,6 +295,38 @@ def cmd_elo(args):
     return 0
 
 
+def cmd_elo_compare(args):
+    """Head-to-head + leader-separation diagnostics (GSPC methodology rec #2).
+
+    Runs the conservative separated-leaders overlap test + the paired McNemar exact test
+    for 'does A beat B'. Closes the 'overlapping CI does not imply non-significance'
+    criticism: the Wilson-CI overlap rule is DELIBERATELY conservative (anti-overclaiming),
+    and a paired test is the field-standard for a real head-to-head claim.
+    Measurement, never certification.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from elo import elo_rank, separated_leaders, paired_mcnemar
+    pairs = json.load(open(args.pairs))
+    score = elo_rank(pairs, n_min=args.n_min)
+    sep = separated_leaders(score, n_min=args.n_min)
+    mcn = paired_mcnemar(pairs, args.model_a, args.model_b)
+    if args.json:
+        print(json.dumps({"method": "elo", "n_min": args.n_min,
+                          "separated_leaders": sep, "paired_mcnemar": mcn,
+                          "leaderboard": [{"model": m, **s} for m, s in
+                                          sorted(score.items(), key=lambda kv: kv[1]["rating"], reverse=True)]},
+                         indent=2))
+        return 0
+    print(f"SEPARATED-LEADERS ({args.n_min} n_min) — conservative anti-overclaiming rule")
+    print(f"  fleet_mean_win_rate={sep['fleet_mean_win_rate']}  leader={sep['leader']}  "
+          f"leader_win_rate={sep['leader_win_rate']}  ci={sep['leader_ci']}")
+    print(f"  separated={sep['separated']}  {sep['note']}")
+    print(f"\nPAIRED McNEMAR ({args.model_a} vs {args.model_b}) — exact two-sided")
+    print(f"  b(A beats B)={mcn['b']}  c(B beats A)={mcn['c']}  discordant={mcn['discordant']}")
+    print(f"  p_exact={mcn['p_exact']}  significant={mcn['significant']}  {mcn['note']}")
+    return 0
+
+
 def cmd_compare(args):
     sys.path.insert(0, os.path.join(ROOT, "engine"))
     sys.path.insert(0, os.path.join(ROOT, "harness"))
@@ -1219,6 +1251,14 @@ def main():
     p.add_argument("--n-min", type=int, default=30)
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_elo)
+
+    p = sub.add_parser("elo-compare", help="Head-to-head + leader-separation diagnostics: conservative separated-leaders overlap test + paired McNemar exact test (GSPC methodology rec #2). Closes the 'overlapping CI != non-significance' criticism. Measurement, never certification.")
+    p.add_argument("--pairs", required=True, help="JSON list of [winner, loser, margin]")
+    p.add_argument("--model-a", required=True)
+    p.add_argument("--model-b", required=True)
+    p.add_argument("--n-min", type=int, default=30)
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_elo_compare)
 
     p = sub.add_parser("compare", help="Compare two models on the relative (pairwise) axes + cost telemetry")
     p.add_argument("--model-a", required=True)
