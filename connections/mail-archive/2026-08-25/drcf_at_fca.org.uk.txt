@@ -1,0 +1,20 @@
+To: drcf@fca.org.uk
+Subject: DRCF Phase 2 submission — signable, verifiable incident and post-market-monitoring feeds for AI regulation
+
+Dear DRCF team,
+
+I'm writing in response to your Phase 2 work programme, on behalf of Council of AI (CSOAI Ltd, UK 16939677) — an independent AI measurement body. We measure, sign and preserve evidence; regulators decide. We are not a notified body, we certify nothing, and we claim no accreditation.
+
+Our submission is short and concrete: a working prototype of signed feeds for two obligations that Phase 2 already touches — Article 73 serious-incident reporting (15-day/24h clock fields, near-miss scope) and Article 72 post-market monitoring (daily continuous stream), each emitted as Ed25519-signed cards with RFC 9943 (SCITT) receipts, a public verification path, and regulator-facing pre-commitment terms modeled on the FAA ASRS structure — the immunity pre-commitment is exactly why aviation's feed flows, and we offer the same shape in writing.
+
+Why this matters now: the October 2026 Digital Omnibus (Reg 2026/174) keeps both obligations live for high-risk systems, and the market has zero signed feeds today — regulators receive channel-authenticated but unsigned data. Signed, DNS-anchored, offline-verifiable evidence is the difference between reading someone's email and auditing their record.
+
+We're happy to demo the prototype, share the schema, and align the fields with any implementing act or guidance you are drafting. The full submission pack (schema, sample cards, verification kit, pre-commitment terms) is available on request.
+
+Thank you for your time.
+
+Best regards,
+Nicholas Templeman
+Founder, Council of AI (CSOAI Ltd, UK 16939677)
+councilof.ai · csoai.org
+We measure, sign and preserve the evidence; regulators and accredited bodies decide.

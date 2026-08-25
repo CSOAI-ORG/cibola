@@ -1,0 +1,21 @@
+To: hello@metr.org
+Subject: Signed provenance for your next published result — an offer from an outside measurement body
+
+Hello METR team,
+
+Your GPT-5.6 Sol finding landed with force, and the question it raised is the one we build for: a result is only as good as its provenance, and narrating evidence is not the same as binding it.
+
+I'm Nicholas Templeman, founder of Council of AI (CSOAI Ltd, UK) — an independent measurement body. We do exactly one thing: we take a measurement, sign it (Ed25519), anchor it in transparency services (RFC 9943 receipts), and publish a stranger-verify page so anyone can check the card offline in 60 seconds, forever. We certify nothing and we never take money from the scored — our zero-lab-token policy is a written policy, not a slogan.
+
+What I'm offering, in three bullet points:
+1. A 45-minute walkthrough (async works too) — measure -> card -> dual receipts -> stranger-verify.
+2. Co-sign one of your published results with our attestation wrapper, so your number carries an independent, verifiable fingerprint.
+3. A no-strings re-measurement swap: we re-run one of your headline benchmarks in our deterministic harness and publish with a method note — you keep the raw data either way.
+
+The referee market is consolidating fast (Vals, LMArena, Braintrust are now under one roof), and the only inventory left unsold is independence. If that interests you, a 15-minute reply or call is enough to start.
+
+Best regards,
+Nicholas Templeman
+Founder, Council of AI (CSOAI Ltd, UK 16939677)
+councilof.ai · csoai.org
+We measure, sign and preserve the evidence; regulators and accredited bodies decide.

@@ -73,6 +73,20 @@ TOOLS = {
         "description": "Return captured cost/latency/throughput telemetry (model, latency_ms, tok_s, cost_usd) — the operational half OpenRouter throws away.",
         "inputSchema": {"type": "object", "properties": {"limit": {"type": "integer"}}},
     },
+    "connections.search": {
+        "description": "Search the living connections database (contacts + messages) — every lane's single source of truth for outreach, contacts, accounts and tracked moves. Prevents duplicate sends.",
+        "inputSchema": {"type": "object", "properties": {
+            "term": {"type": "string", "description": "organic substring of email/org/notes/subject"}},
+            "required": ["term"]},
+    },
+    "connections.log": {
+        "description": "Log an outward message (email/GitHub/portal) against a contact in the living DB. MUST be called before any external send so no lane duplicates it.",
+        "inputSchema": {"type": "object", "properties": {
+            "email": {"type": "string"}, "subject": {"type": "string"},
+            "status": {"type": "string", "enum": ["sent", "staged", "awaiting", "bounced", "done"]},
+            "body": {"type": "string", "description": "first 400 chars"}, "move_id": {"type": "string"}},
+            "required": ["email", "subject"]},
+    },
 }
 
 
@@ -134,6 +148,51 @@ def _telemetry(args):
     return {"records": len(load_tel()), "recent": load_tel()[-limit:]}
 
 
+def _conn_db():
+    import sqlite3
+    db = os.path.join(ROOT, "connections", "connections.db")
+    if not os.path.exists(db):
+        return None
+    return sqlite3.connect(db)
+
+
+def _conn_search(args):
+    term = args.get("term", "")
+    try:
+        c = _conn_db()
+        rows = c.execute(
+            "SELECT email, org, role, channel, status, updated_at FROM contacts "
+            "WHERE email LIKE ? OR org LIKE ? OR notes LIKE ? ORDER BY updated_at DESC LIMIT 20",
+            (f"%{term}%", f"%{term}%", f"%{term}%")).fetchall()
+        msgs = c.execute(
+            "SELECT m.subject, m.status, m.ts FROM messages m JOIN contacts k ON m.contact_id=k.id "
+            "WHERE k.email LIKE ? OR m.subject LIKE ? ORDER BY m.ts DESC LIMIT 20",
+            (f"%{term}%", f"%{term}%")).fetchall()
+        c.close()
+        return {"hits": [{"email": r[0], "org": r[1], "role": r[2], "channel": r[3], "status": r[4]} for r in rows],
+                "messages": [{"subject": m[0], "status": m[1], "ts": m[2]} for m in msgs]}
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
+def _conn_log(args):
+    import sqlite3
+    email = args.get("email", "")
+    subject = args.get("subject", "")
+    if not email or not subject:
+        return {"error": "email+subject required"}
+    try:
+        c = _conn_db()
+        ts = __import__("datetime").datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        c.execute("INSERT OR IGNORE INTO contacts(email, created_at, updated_at) VALUES(?,?,?)", (email, ts, ts))
+        cid = c.execute("SELECT id FROM contacts WHERE email=?", (email,)).fetchone()[0]
+        c.execute("INSERT INTO messages(contact_id, direction, subject, body, status, ts, move_id) VALUES(?,?,?,?,?,?,?)",
+                  (cid, "out", subject, args.get("body", "")[:400], args.get("status", "sent"), ts, args.get("move_id", "")))
+        c.commit(); c.close()
+        return {"logged": True, "email": email, "subject": subject}
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+
 HANDLERS = {
     "dorado.verify": _verify_card,
     "dorado.verifyReceipt": _verify_receipt,
@@ -144,7 +203,23 @@ HANDLERS = {
     "dorado.elo": _elo,
     "dorado.compare": _compare,
     "dorado.telemetry": _telemetry,
+    "connections.search": _conn_search,
+    "connections.log": _conn_log,
 }
+
+
+def dispatch(tool, args):
+    fn = HANDLERS.get(tool)
+    if not fn:
+        return {"error": f"unknown tool {tool}"}
+    try:
+        return fn(args)
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
+
+
 
 
 def dispatch(tool, args):
