@@ -37,6 +37,7 @@ dorado inspect          --fixture                         # signed-receipt SCORE
 dorado data-listing     --in result.json --out listing.json   # licensable data-listing (bind 2)
 dorado or-provider      --key-id $OPENROUTER_KEY --provider-meta p.json   # OpenRouter application (bind 3)
 dorado hf-eval          --model X --domain bond --out hf-eval.json        # HF eval-result payload (bind 1)
+dorado reg-feeds        --key-id $OPENROUTER_KEY --provider-meta p.json   # fetch + SHA-256-diff free official regulatory feeds (rec #4)
 dorado export   --in axis.json --out-dir data-out        # licensable data product
 dorado crosswalk [--domain bond]                         # provision citations
 dorado selfcheck                                         # hermetic tests
@@ -108,6 +109,9 @@ See `agent/agent.json` (A2A agent card) and `a2a.md` for the exact contract. An 
 - `draft/draft-csoai-scitt-measurement-card-00.md` — the RFC draft.
 - `docs/METHODOLOGY-WHITE-PAPER-2026-08-25.md` — the public methodology white paper (Wilson CI +
   conservative separation + paired McNemar; the statistical-governance governance asset).
+- `assets/registers/regulation-feeds/regulatory-feeds-registry.json` — the regulatory-feeds
+  cross-reference registry (free official feeds, SHA-256 change-detection; volatile-feeds
+  distinguished from real regulation changes).
 - `engine/`, `harness/`, `cli/`, `axes/`, `test/` — implementation.
 - `GOVERNANCE.md` — doctrine (two heads, one neutral substrate, neutrality, anti-capture).
 

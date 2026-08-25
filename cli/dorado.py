@@ -419,6 +419,29 @@ def cmd_rwa_target(args):
     return 0
 
 
+def cmd_reg_feeds(args):
+    """Fetch + SHA-256-diff the free official regulatory feeds (research rec #4).
+
+    Builds the regulatory-feeds registry (published for transparency) + records a CHANGE only
+    on a real content-hash delta against a content-stable feed. A feed that re-hashes every
+    fetch is marked 'volatile' (anti-bot/dynamic page), never reported as a regulation change;
+    an unreachable feed is recorded honestly, never fabricated. Measurement, never certification.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from fetch_regulation_feeds import main as fetch
+    out = fetch()
+    import json
+    reg = json.load(open(os.path.join(ROOT, "assets", "registers", "regulation-feeds", "regulatory-feeds-registry.json")))
+    reachable = sum(1 for f in reg["feeds"] if f.get("_reachable"))
+    obs = ", ".join(f"{c['feed']}={c['kind']}" for c in out["changes"])
+    print(f"regulation feeds: {len(reg['feeds'])} registry entries, {reachable} reachable", flush=True)
+    print(f"  register: {reg['register'][:60]}...", flush=True)
+    print(f"  observations: {obs}", flush=True)
+    print(f"  note: a change is recorded only on a real hash delta on a content-stable feed; "
+          f"a re-hashing feed is 'volatile', never a regulation change", flush=True)
+    return 0
+
+
 def cmd_or_provider(args):
     """Generate the OpenRouter provider-application payload from measured telemetry (bind 3)."""
     sys.path.insert(0, os.path.join(ROOT, "engine"))
@@ -1280,6 +1303,9 @@ def main():
 
     p = sub.add_parser("rwa-target", help="Build the tokenized-RWA target-list corpus (XRPL + EVM) — a MEASUREMENT TARGET LIST, never a certification. Maps the research into register records with honest 'verified:false' provenance (re-verify r-addresses on XRPScan before publication). Measure, never certify.")
     p.set_defaults(func=cmd_rwa_target)
+
+    p = sub.add_parser("reg-feeds", help="Fetch + SHA-256-diff the free official regulatory feeds (research rec #4) — records a CHANGE only on a real content-hash delta on a content-stable feed; a re-hashing feed is 'volatile' (never a regulation change); an unreachable feed is honest. Measurement, never certification.")
+    p.set_defaults(func=cmd_reg_feeds)
 
     p = sub.add_parser("or-provider", help="Generate OpenRouter provider-application payload from telemetry (bind 3)")
     p.add_argument("--samples", type=int, default=None, help="Use the last N telemetry rows")

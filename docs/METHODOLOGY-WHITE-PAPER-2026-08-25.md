@@ -162,6 +162,38 @@ offers, and one their issuer-pays franchise structurally prevents them from publ
 
 ---
 
+## 4.5 Live-regulation cross-reference (fed by free official feeds)
+
+DORADO cross-references the measurement against **live regulation** using **free official
+feeds**, and publishes the **feed list** (for transparency, per the methodology recommendation).
+The mechanism is DORADO's own cryptographic primitive applied to regulation-tracking: **SHA-256
+content-hash diffing** — the same pattern production compliance-monitoring tools already use to
+detect regulatory change.
+
+**The free/official feeds DORADO cross-references** (the registry is published at
+`assets/registers/regulation-feeds/regulatory-feeds-registry.json`):
+
+| Feed | Jurisdiction | Endpoint (verified) | Licence |
+|---|---|---|---|
+| **Federal Register API** | US | `federalregister.gov/api/v1/documents.json` | public domain |
+| **eCFR** | US | `ecfr.gov/api/versioner/v1/titles.json` | public domain |
+| **EUR-Lex** | EU | `eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:...` | CC-BY-4.0 (legislative) |
+| **BIS** | global | `bis.org/list/papers/index.htm` | informational, free to read |
+| **IOSCO** | global | `iosco.org/publications/` | informational; variably bot-gated |
+
+**Honest change-detection.** A `change` is recorded ONLY on a real SHA-256 content-hash delta
+against a **content-stable** feed. DORADO distinguishes a genuine delta from a **volatile** page
+(anti-bot cookie / inline timestamp / rotating element that re-hashes every fetch) — such a feed
+is marked **`volatile` and is never reported as a regulation change.** An **unreachable** feed
+(bot-gated, JS-rendered) is recorded honestly, never fabricated. This is the difference between
+a measurement and a false alarm: DORADO measures *whether the regulation text changed*, not
+whether it *looks* like it might have. Reserved paid RegTech (Thomson Reuters, Corlytics) only
+for jurisdictions/taxonomies the free feeds do not cover.
+
+Run it: `dorado reg-feeds`.
+
+---
+
 ## 5. Cryptographic verifiability (the "stranger can check" property)
 
 Every measurement is rendered as a signed card (Ed25519, alg -19) over an RFC 8785 (JCS)

@@ -62,6 +62,12 @@ jobs:
       - name: ELO statistical guards (McNemar + separated-leaders)
         run: python3 test/elo-stats-test.py
 
+      # Live-regulation SHA-256 change-detection (research rec #4): baseline/change/no-change
+      # /volatile/unreachable classification is honest — a re-hashing feed is 'volatile', never a
+      # false regulation change. Hermetic (no network; tests the pure classifier).
+      - name: Regulation-feed SHA-256 change-detection
+        run: python3 test/regulation-feeds-test.py
+
       # Banned-lane-brand CI guard on PUBLIC surfaces (allowed: legal 'sovereign' + real infra ids).
       - name: Banned-string lint (public surfaces)
         run: python3 test/banned-strings.py
