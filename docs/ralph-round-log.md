@@ -381,3 +381,10 @@ rewritten.
   registry-of-record doc to the live board count/split. Owner-gated deploy legs (move 1
   genesis card, move 4 dual-TS, move 61/75 live) remain site-deploy / key-ceremony gated,
   not agent-deployable.
+
+---
+## ROUND 5 (close-out, JEEVES direct — 2026-08-25)
+- **Landed:** move 13 east-west bridge provision-map content (docs/bridge-eastwest-provision-map...) · move 4 dual-TS cross-verify matrix prep (docs/dualtss-crossverify-prep...) · moves 27/70 watch+board posture note (docs/watch-board-posture...) — Ofcom categorisation register PUBLISHED (OSA trigger fired; rows staged for UK OSA register) + board audit (C2PA member; OpenSSF/OWASP AISVS **now live via NVIDIA agent-signing + AISVS BOM issue #347**; x402/AI Verify staged; AAIF submitted) · standards-engagement rows appended below.
+- **Driver note:** ralph fires 3/5/7 were duds (no workers spawned); fires 1/2/4/6 productive (Rounds 1-4). Remaining work executed direct by JEEVES.
+- **Pods (probed):** 3090 sov-repull RECOVERED/RUNNING (signing) · A100 sovos-light-master-mine + sov-brain-a100-fresh + k3-autodeploy RUNNING · 0-GPU agents ×3 RUNNING. Cost flag: 4 GPU pods billed (~$4-5/hr) — owner note.
+- **Close-out state:** board 42 measurements chainOk 0 unlinked · 6 production-signed / 36 test-identity (honest split) · 8 domain registries + 15 corrections · chain 0 breaks · END-USER-REVENUE-READY.md exists (owner-ready, not sent) · sends/IA-IANA/AG-UI/MCP #426 staged never sent · owner-gated legs: dual-TS live registration, site deploys (registry.html/status/bridge), DRCF send 2 Sep, BSI ART/1, UKIPO, Stripe chain.
