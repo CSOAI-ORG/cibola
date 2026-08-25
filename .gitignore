@@ -21,3 +21,8 @@ data-out/
 __pycache__/
 *.pyc
 .venv/
+
+# connection DB (outreach/conn ledger — contains contact PII, never committed)
+connections/*.db
+connections/mail-archive/
+*.env

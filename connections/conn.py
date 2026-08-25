@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS moves (
   gate_state TEXT DEFAULT 'open', last_action TEXT, updated_at TEXT
 );
 """
-now = lambda: datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+now = lambda: datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 SEED = [
     # (email, org, role, channel, source, status, notes)
@@ -122,11 +122,26 @@ def main():
         rows = c.execute("SELECT email,org,status,updated_at FROM contacts ORDER BY updated_at DESC LIMIT 40").fetchall()
         for r in rows: print(' | '.join(str(x) for x in r))
     elif cmd == 'account':
-        if len(args) >= 4 and args[1] == 'add':
+        if len(args) >= 3 and args[1] == 'add':
             ts = now()
+            kw = dict(a.split('=') for a in args if '=' in a)
+            status = kw.get('status', 'active')
             c.execute("INSERT OR IGNORE INTO accounts(service,account_id,email,status,created_at,updated_at) VALUES(?,?,?,?,?,?)",
-                      (args[2], args[3], args[4] if len(args) > 4 else '', 'active', ts, ts))
+                      (args[2], args[3], args[4] if len(args) > 4 else '', status, ts, ts))
             c.commit(); print('account added')
+        elif len(args) >= 2 and args[1] == 'list':
+            rows = c.execute("SELECT account_id,service,email,status FROM accounts ORDER BY service").fetchall()
+            for r in rows: print(' | '.join(str(x) for x in r))
+    elif cmd == 'move':
+        if len(args) >= 3 and args[1] == 'add':
+            ts = now()
+            rid = '_'.join(args[2].lower().replace('-', ' ').split())
+            c.execute("INSERT OR IGNORE INTO moves(id,title,owner,gate_state,last_action,updated_at) VALUES(?,?,?,?,?,?)",
+                      (rid, args[2], args[3] if len(args) > 3 else '', 'open', '', ts))
+            c.commit(); print('move added')
+        elif len(args) >= 2 and args[1] == 'list':
+            rows = c.execute("SELECT id,title,owner,gate_state,last_action FROM moves ORDER BY id").fetchall()
+            for r in rows: print(' | '.join(str(x) for x in r))
     else:
         ts = now()
         print(f"stats — contacts={c.execute('SELECT COUNT(*) FROM contacts').fetchone()[0]}, "
