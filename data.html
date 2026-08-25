@@ -43,5 +43,15 @@ NAME is not a model.</li>
 substrate. See the <a href="board/board-index.json">measurement board</a> (production-signed,
 RFC 3161-anchored), <a href="leaderboard.html">leaderboard</a>, <a href="verify.html">verify</a>,
 and <a href="llms.txt">llms.txt</a>.</p>
+<h2>Tokenized-RWA target-list corpus</h2>
+<p>A measurement target list of the tokenized-RWA universe — the input to a future signed
+attestation engine. <strong>Never a certification.</strong> Every record carries the register
+verbatim and honest `verified:false` provenance (re-verify each r-address on XRPScan before
+publication).</p>
+<ul>
+<li><a href="assets/registers/rwa/index.json">index.json</a> — target-list manifest (counts, caveats, register, neutrality)</li>
+<li><a href="assets/registers/rwa/xrpl.jsonl">xrpl.jsonl</a> — 17 XRPL instruments (with verified r-addresses where published)</li>
+<li><a href="assets/registers/rwa/evm-clusters.json">evm-clusters.json</a> — 8 EVM clusters (Securitize, Ondo, Backed, Franklin, Superstate, Hashnote, Centrifuge, Commodity)</li>
+</ul>
 <p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:csoai.org#card-attestation-1 · Measurement credential, not certification.</p>
 </body></html>

@@ -36,7 +36,7 @@ INTERNAL_MODULES = {
     "dorado_board", "dorado_receipt", "dorado_receipt_verify", "dorado_sign",
     "dorado_verify", "elo", "engine", "export_data", "data_listing", "gbt_gates", "game_replay", "harness",
     "mcp_server", "or_telemetry", "rate_cap", "run_axis", "sb315", "scitt_verify",
-    "verify_kit", "inspect_hook",
+    "verify_kit", "inspect_hook", "build_rwa_target_list",
 }
 # top-level modules that are stdlib (never a licence surface).
 STDLIB_OK = set(sys.stdlib_module_names)

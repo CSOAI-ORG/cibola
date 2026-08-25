@@ -1,0 +1,96 @@
+{
+  "schema": "csoai.rwa-target/0.1",
+  "kind": "evm-clusters",
+  "clusters": [
+    {
+      "cluster": "Securitize",
+      "issuer": "Securitize",
+      "count": "130+ tokens, $4.6B+ administered",
+      "flagships": [
+        "BlackRock BUIDL ($2.1B+ across 8 chains; BNY custody, PwC auditor)",
+        "Apollo Diversified Credit (ACRED)",
+        "VanEck VBILL",
+        "Hamilton Lane / KKR tokenized private-market feeders"
+      ],
+      "note": "DS Token standard (ERC-20 ext); 2026 per-investor on-chain vault; 2,000-investor cap"
+    },
+    {
+      "cluster": "Ondo Finance",
+      "issuer": "Ondo Finance",
+      "count": "OUSG + USDY + Ondo Stocks 438+",
+      "flagships": [
+        "OUSG ($690M+ historically; BUIDL-backed)",
+        "USDY (yield-bearing stablecoin)",
+        "Ondo Stocks 438+ tokenized US stocks/ETFs across ETH/SOL/BNB; $1B+ TVL"
+      ],
+      "note": "daily attestations at regulated US entities; SPV + independent director; Broadridge proxy-vote"
+    },
+    {
+      "cluster": "Backed Finance",
+      "issuer": "Backed Finance",
+      "count": "60+ tokenized equities/ETFs",
+      "flagships": [
+        "bCSPX (Core S&P 500)",
+        "bIB01 (iShares 0-1yr Treasury)",
+        "bNVDA",
+        "bCOIN",
+        "bTSLA",
+        "bMSFT",
+        "bGME",
+        "bMSTR",
+        "bGOOGL"
+      ],
+      "note": "ERC-20 tracker certificates 1:1; Swiss/Jersey SPV; xStocks line 55+ on Kraken/Solana"
+    },
+    {
+      "cluster": "Franklin Templeton",
+      "issuer": "Franklin Templeton",
+      "count": "BENJI (FOBXX)",
+      "flagships": [
+        "Franklin OnChain US Government Money Fund (FOBXX)"
+      ],
+      "note": "tokenized MMF, yield pass-through"
+    },
+    {
+      "cluster": "Superstate",
+      "issuer": "Superstate",
+      "count": "USTB + USCC",
+      "flagships": [
+        "USTB (Short Duration US Gov Securities)",
+        "USCC (Crypto Carry Fund)"
+      ],
+      "note": "managed-whitelist model"
+    },
+    {
+      "cluster": "Hashnote",
+      "issuer": "Hashnote",
+      "count": "USYC",
+      "flagships": [
+        "USYC (tokenized Treasury/money-market)"
+      ],
+      "note": "institutional"
+    },
+    {
+      "cluster": "Centrifuge",
+      "issuer": "Centrifuge",
+      "count": "tokenized private-credit pools",
+      "flagships": [
+        "Tinlake successor pools"
+      ],
+      "note": "protocol-level KYC"
+    },
+    {
+      "cluster": "Commodity/other",
+      "issuer": "Paxos / Tether / Dinari",
+      "count": "PAXG, XAUT, dShares",
+      "flagships": [
+        "Paxos Gold (PAXG ~$1B+)",
+        "Tether Gold (XAUT ~$1B+)",
+        "Dinari dShares"
+      ],
+      "note": "tokenized gold + tokenized US equities"
+    }
+  ],
+  "register": "This is a measurement target list. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+  "neutrality": "records the measured target, never certifies it"
+}

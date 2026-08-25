@@ -84,6 +84,10 @@ measured dataset; it can never buy a ranking.
 - `assets/binds/or-provider.json` — OpenRouter provider-application payload from measured
   cost/latency/throughput telemetry (provider registration is a server-side owner action; the
   OpenRouter key is valid, `/api/v1/models` reachable).
+- `assets/registers/rwa/` — tokenized-RWA target-list corpus (XRPL 17 instruments + 8 EVM
+  clusters). A **MEASUREMENT TARGET LIST, never a certification** — every record carries the
+  register verbatim + `verified:false` provenance (re-verify each r-address on XRPScan before
+  publication). `dorado rwa-target` rebuilds it.
 
 `dorado status` surfaces all binds with a `binds` block (repo + url + status + what).
 

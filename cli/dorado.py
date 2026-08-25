@@ -366,6 +366,27 @@ def cmd_data_listing(args):
     return 0
 
 
+def cmd_rwa_target(args):
+    """Build the tokenized-RWA target-list corpus (XRPL + EVM) — a MEASUREMENT TARGET LIST,
+    never a certification (bind: RWA signed-attestation research corpus).
+
+    Writes the target-list register (assets/registers/rwa/) and prints an honest summary.
+    Every record carries the register + neutrality verbatim and `verified:false` provenance
+    (re-verify each r-address on XRPScan before publication). This maps the research corpus
+    into an index/API-ready artifact — it does NOT certify any issuer.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    from build_rwa_target_list import main as build_rwa
+    build_rwa()
+    import json
+    idx = json.load(open(os.path.join(ROOT, "assets", "registers", "rwa", "index.json")))
+    print(f"rwa-target list built: {idx['counts']['xrpl']} XRPL + {idx['counts']['evm_clusters']} EVM clusters", flush=True)
+    print(f"  register: {idx['register'][:60]}...", flush=True)
+    print(f"  neutrality: {idx['neutrality']}", flush=True)
+    print(f"  caveats: {len(idx['caveats'])} honest caveats (represented-vs-distributed, re-verify r-addresses)", flush=True)
+    return 0
+
+
 def cmd_or_provider(args):
     """Generate the OpenRouter provider-application payload from measured telemetry (bind 3)."""
     sys.path.insert(0, os.path.join(ROOT, "engine"))
@@ -936,6 +957,11 @@ def cmd_status(args):
                 "status": "prepared-owner-action",
                 "what": "measured operational telemetry (cost/latency/throughput) — provider registration is a server-side owner action",
             },
+            "rwa_target_list": {
+                "path": "assets/registers/rwa/index.json",
+                "status": "target-list",
+                "what": "tokenized-RWA target-list corpus (XRPL 17 + EVM 8 clusters) — a measurement target list, never a certification; re-verify r-addresses on XRPScan before publication",
+            },
         },
     }
     if args.out:
@@ -1211,6 +1237,9 @@ def main():
     p.add_argument("--in-dir", default=None, help="Dir of axis-engine result JSONs")
     p.add_argument("--out-dir", default="data-listing-out")
     p.set_defaults(func=cmd_data_listing)
+
+    p = sub.add_parser("rwa-target", help="Build the tokenized-RWA target-list corpus (XRPL + EVM) — a MEASUREMENT TARGET LIST, never a certification. Maps the research into register records with honest 'verified:false' provenance (re-verify r-addresses on XRPScan before publication). Measure, never certify.")
+    p.set_defaults(func=cmd_rwa_target)
 
     p = sub.add_parser("or-provider", help="Generate OpenRouter provider-application payload from telemetry (bind 3)")
     p.add_argument("--samples", type=int, default=None, help="Use the last N telemetry rows")

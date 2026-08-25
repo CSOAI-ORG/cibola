@@ -742,6 +742,11 @@
       "payload": "assets/binds/or-provider.json",
       "status": "prepared-owner-action",
       "what": "measured operational telemetry (cost/latency/throughput) \u2014 provider registration is a server-side owner action"
+    },
+    "rwa_target_list": {
+      "path": "assets/registers/rwa/index.json",
+      "status": "target-list",
+      "what": "tokenized-RWA target-list corpus (XRPL 17 + EVM 8 clusters) \u2014 a measurement target list, never a certification; re-verify r-addresses on XRPScan before publication"
     }
   }
 }

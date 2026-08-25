@@ -1,0 +1,21 @@
+{
+  "schema": "csoai.rwa-target-list/0.1",
+  "kind": "measurement target list",
+  "counts": {
+    "xrpl": 17,
+    "evm_clusters": 8,
+    "total": 25
+  },
+  "note": "target list for future signed attestations; NOT a certification of any issuer",
+  "register": "This is a measurement target list. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+  "neutrality": "records the measured target, never certifies it",
+  "sources": "Blockworks, State of XRP Q2 2026 (42-asset XRPL registry, $4.46B tokenized RWA); RWA.xyz / CoinGecko RWA Report 2026; XRP Dashboard / xrpl.fi (Aug 2026); industry announcements.",
+  "caveats": [
+    "REPRESENTED vs DISTRIBUTED value: headline XRPL figures (e.g. Justoken JMWH $2.23B held entirely by issuer) overstate genuine adoption; distributed RWA value was only $386.1M in Q2 2026.",
+    "r-addresses and outstanding figures are REPORTED (Blockworks Q2 2026; XRP Dashboard/xrpl.fi Aug 2026); verify each on XRPScan before publication.",
+    "Total-RWA figures conflict (RWA.xyz >$24B vs CoinGecko RWA Report 2026 $19.32B); cite the source explicitly.",
+    "No explicit bank mandate for independent third-party verification found; the 'blocker' case rests on IOSCO/OECD/ECB framing + vendor sources (some commercial bias).",
+    "This is opportunity-mapping for strategic planning, not execution or investment advice."
+  ],
+  "legal": "Unsolicited attestation attached to third-party regulated securities may raise defamation, 'unsolicited rating'/NRSRO-adjacent, market-abuse and data-liability questions per jurisdiction; obtain counsel before publishing risk-negative attestations on named issuers."
+}
