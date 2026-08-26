@@ -1,0 +1,8 @@
+{
+ "schema": "csoai.absorption-fetch/0.1",
+ "fetched": "2026-08-26",
+ "source": "https://github.com/JailbreakBench/JailbreakBench",
+ "license": "MIT (verified 26 Aug)",
+ "axis": "jail",
+ "note": "license header + source cited on cards; dataset consumed as probes, never redistributed"
+}
