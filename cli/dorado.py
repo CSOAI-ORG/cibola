@@ -442,6 +442,68 @@ def cmd_reg_feeds(args):
     return 0
 
 
+def cmd_batch(args):
+    """Run the whole in-lane measurement batch in one entry point (auto-batch).
+
+    Runs, in order, the register/data artifacts that are safe, in-repo, no external send, no
+    cost: content-engine (AEO) index build → RWA target-list corpus → regulation-feeds SHA-256
+    change-detection → consolidated body status (board + relative + operational + binds). Each
+    step is a MEASUREMENT artifact (register + neutrality verbatim, honest provenance) — never a
+    send, never a paid activation. Owner-gated/external items are explicitly NOT auto-run.
+
+    Order matters: content-engine + RWA + reg-feeds regenerate the registers, then status.json
+    reflects the regenerated board + binds. Output is a compact per-step verdict.
+    """
+    sys.path.insert(0, os.path.join(ROOT, "harness"))
+    import json as _json
+    steps = []
+
+    def _run(name, fn, *a, **k):
+        try:
+            fn(*a, **k)
+            steps.append((name, "OK", ""))
+        except Exception as e:
+            steps.append((name, "FAIL", f"{type(e).__name__}: {str(e)[:120]}"))
+
+    # 1. content-engine (AEO) corpus index — register-bearing, search-ready.
+    from build_content_engine_index import main as _ce
+    _run("content-engine-index", _ce)
+    # 2. RWA target-list corpus (XRPL + EVM) — measurement target list, never a certification.
+    from build_rwa_target_list import main as _rwa
+    _run("rwa-target-list", _rwa)
+    # 3. regulation-feeds SHA-256 change-detection — honest baseline/change/volatile/unreachable.
+    from fetch_regulation_feeds import main as _rf
+    _run("regulation-feeds", _rf)
+    # 4. consolidated body status (board + relative + operational + binds).
+    from dorado_board import rebuild_index
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(ROOT, "engine"))
+    from or_telemetry import load as _load_tel
+    try:
+        board = rebuild_index()
+        status = {
+            "schema": "csoai.dorado-status/0.1",
+            "kind": "measurement body status — a MEASUREMENT summary, never a certification",
+            "register": "This is a measurement credential. It is not a certification, endorsement, "
+                        "or conformity mark, and must not be presented as one.",
+            "identity": "did:web:csoai.org#card-attestation-1",
+            "board": {"count": board.get("count"), "chainOk": board.get("chainOk")},
+            "operational": {"records": len(_load_tel())},
+        }
+        _json.dump(status, open(os.path.join(ROOT, "status.json"), "w"), indent=2)
+        steps.append(("status", "OK", f"board count={board.get('count')} chainOk={board.get('chainOk')}"))
+    except Exception as e:
+        steps.append(("status", "FAIL", f"{type(e).__name__}: {str(e)[:120]}"))
+
+    print("═ DORADO AUTO-BATCH ═", flush=True)
+    ok = 0
+    for name, verdict, note in steps:
+        ok += verdict == "OK"
+        print(f"  {'✓' if verdict=='OK' else '✗'} {name:24s} {verdict}  {note}", flush=True)
+    print(f"  batch {ok}/{len(steps)} steps OK — measurement, never certification", flush=True)
+    return 0 if ok == len(steps) else 1
+
+
 def cmd_or_provider(args):
     """Generate the OpenRouter provider-application payload from measured telemetry (bind 3)."""
     sys.path.insert(0, os.path.join(ROOT, "engine"))
@@ -1306,6 +1368,9 @@ def main():
 
     p = sub.add_parser("reg-feeds", help="Fetch + SHA-256-diff the free official regulatory feeds (research rec #4) — records a CHANGE only on a real content-hash delta on a content-stable feed; a re-hashing feed is 'volatile' (never a regulation change); an unreachable feed is honest. Measurement, never certification.")
     p.set_defaults(func=cmd_reg_feeds)
+
+    p = sub.add_parser("batch", help="Run the whole in-lane measurement batch in one entry point (auto-batch): content-engine (AEO) index → RWA target-list → regulation-feeds SHA-256 change-detection → consolidated status. Safe, in-repo, no external send, no cost. Measurement, never certification; owner-gated/external items are NOT auto-run.")
+    p.set_defaults(func=cmd_batch)
 
     p = sub.add_parser("or-provider", help="Generate OpenRouter provider-application payload from telemetry (bind 3)")
     p.add_argument("--samples", type=int, default=None, help="Use the last N telemetry rows")
