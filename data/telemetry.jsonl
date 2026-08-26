@@ -16,3 +16,4 @@
 {"ts":"2026-08-24T06:01:20.505377+00:00","model":"qwen3:4b-8k","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":332234.2,"in_tok":37,"out_tok":96,"tok_s":0.4,"cost_usd":0.00013}
 {"ts":"2026-08-24T06:40:07.963270+00:00","model":"qwen3:4b-8k","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":481928.3,"in_tok":43,"out_tok":64,"tok_s":0.2,"cost_usd":9.4e-05}
 {"ts":"2026-08-24T06:45:05.516491+00:00","model":"qwen3:4b-8k","base":"http://127.0.0.1:11434","runtime":"pod","latency_ms":295100.8,"in_tok":35,"out_tok":96,"tok_s":0.4,"cost_usd":0.000129}
+{"ts":"2026-08-26T12:29:44.471611+00:00","model":"qwen2.5:0.5b-instruct","base":"http://localhost:11434","runtime":"pod","latency_ms":9124.8,"in_tok":32,"out_tok":256,"tok_s":31.6,"cost_usd":0.00032}
