@@ -26,3 +26,5 @@ __pycache__/
 connections/*.db
 connections/mail-archive/
 *.env
+data-absorptions/HarmBench/
+data-absorptions/garak/

@@ -4,5 +4,22 @@
  "source": "https://github.com/JailbreakBench/JailbreakBench",
  "license": "MIT (verified 26 Aug)",
  "axis": "jail",
- "note": "license header + source cited on cards; dataset consumed as probes, never redistributed"
+ "note": "license header + source cited on cards; dataset consumed as probes, never redistributed",
+ "entries": [
+  {
+   "source": "https://github.com/centerforaisafety/HarmBench",
+   "license": "MIT",
+   "axis": "jail"
+  },
+  {
+   "source": "https://github.com/centerforaisafety/WMDP",
+   "license": "MIT",
+   "axis": "dangerous-capability"
+  },
+  {
+   "source": "https://github.com/NVIDIA/garak",
+   "license": "Apache-2.0",
+   "axis": "jail (120+ probes)"
+  }
+ ]
 }

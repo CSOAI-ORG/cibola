@@ -15,6 +15,20 @@
    "proof": "truth-layer/ots/4feb00c7236949ee.ots",
    "status": "anchored-raw-digest",
    "anchored_at": "2026-08-26T12:16:50Z"
+  },
+  {
+   "label": "qwen2.5-0.5b measured card (signed)",
+   "sha256": "5e432dcc39d967f66fa107b8f4eaadbc90e14583ee28dfb0ffc6662b7c4cb6f0",
+   "proof": "truth-layer/ots/5e432dcc39d967f6.ots",
+   "bytes": 172,
+   "anchored_at": "2026-08-26T14:36:14Z"
+  },
+  {
+   "label": "rating-the-raters 2026 card (signed)",
+   "sha256": "ebd73703f051a8c4fcf2d45786fb11c58d87ef7de8d82cbd7a2f48a4b181f790",
+   "proof": "truth-layer/ots/ebd73703f051a8c4.ots",
+   "bytes": 207,
+   "anchored_at": "2026-08-26T14:36:15Z"
   }
  ]
 }
