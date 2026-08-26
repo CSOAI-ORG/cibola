@@ -1,0 +1,49 @@
+{
+  "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+  "card_version": "0.1",
+  "issued_at": "2026-08-26T13:27:33Z",
+  "credential_register": "https://councilof.ai/registers",
+  "subject": {
+    "id": "framework-nist-ai-rmf",
+    "name": "measured against nist-ai-rmf"
+  },
+  "benchmark": {
+    "id": "csoai.framework-crosswalk/nist-ai-rmf",
+    "name": "Crosswalk: nist-ai-rmf"
+  },
+  "scores": {
+    "govern": {
+      "score": 1,
+      "n": 1
+    },
+    "measure": {
+      "score": 1,
+      "n": 1
+    },
+    "manage": {
+      "score": 1,
+      "n": 1
+    },
+    "map": {
+      "score": 1,
+      "n": 1
+    }
+  },
+  "measured_count": 4,
+  "total_count": 4,
+  "note": "Crosswalk proves the MAPPING, never compliance. Measured against framework X, never certified.",
+  "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+  },
+  "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "29+R5D9F7b6Y1N0WMkSbea+LGntEnJH1OlJ339lMb7g=",
+    "sig": "rD6ORQB+MS25JmLsLWgwjtnh/Zx1W/KLtv2AM9C+V8S7sPvvElA3IWJ7PNXeKs7R2ra6g6h/Q6d3bHmW1EaOBA==",
+    "pubkey_thumbprint": "aWjhqpC5BPS9texB_ROO2pdiK4GtFSvC7cnkZaHPU9M",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+  "card_version": "0.1",
+  "issued_at": "2026-08-26T13:27:33Z",
+  "credential_register": "https://councilof.ai/registers",
+  "subject": {
+    "id": "framework-eu-ai-act-art50",
+    "name": "measured against eu-ai-act-art50"
+  },
+  "benchmark": {
+    "id": "csoai.framework-crosswalk/eu-ai-act-art50",
+    "name": "Crosswalk: eu-ai-act-art50"
+  },
+  "scores": {
+    "disclosure": {
+      "score": 1,
+      "n": 1
+    },
+    "machine-readable-marking": {
+      "score": 1,
+      "n": 1
+    },
+    "detection-code-input": {
+      "score": 1,
+      "n": 1
+    },
+    "watermark-robustness": {
+      "score": 0,
+      "n": 1
+    }
+  },
+  "measured_count": 3,
+  "total_count": 4,
+  "note": "Crosswalk proves the MAPPING, never compliance. Measured against framework X, never certified.",
+  "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+  },
+  "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "o2aSPYwtNH5HxIpwAC3NMdeqw5G3XUZdr0FFPBfXUAQ=",
+    "sig": "1FO5ltkpt6YEXzZixctO65poV/plRAaRO7ywGruZg2Sf6qTompdwgW6/khqoMLVMistT4qINW1GvL8m2e6P5Bw==",
+    "pubkey_thumbprint": "krWL3pu9t8HgpPNoaMrg0PUuAF5GuaOzVUO-w_K4-YQ",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+  }
+}

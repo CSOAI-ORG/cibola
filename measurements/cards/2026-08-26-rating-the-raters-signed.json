@@ -1,0 +1,153 @@
+{
+  "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+  "card_version": "0.1",
+  "issued_at": "2026-08-26T13:27:33Z",
+  "credential_register": "https://councilof.ai/registers",
+  "subject": {
+    "id": "benchmark-rater-ecosystem-2026",
+    "name": "AI benchmark raters (Rate the Raters 2026)"
+  },
+  "benchmark": {
+    "id": "csoai.rate-the-raters/0.1",
+    "name": "Rating the Raters 2026 \u2014 CIs/corrections/signing"
+  },
+  "scores": {
+    "LMArena-Arena-Intelligence.cis": {
+      "score": 1,
+      "n": 1
+    },
+    "LMArena-Arena-Intelligence.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "LMArena-Arena-Intelligence.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "Vals-AI.cis": {
+      "score": 0.5,
+      "n": 1
+    },
+    "Vals-AI.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "Vals-AI.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "Artificial-Analysis.cis": {
+      "score": 0,
+      "n": 1
+    },
+    "Artificial-Analysis.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "Artificial-Analysis.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "Scale-SEAL-HLE.cis": {
+      "score": 1,
+      "n": 1
+    },
+    "Scale-SEAL-HLE.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "Scale-SEAL-HLE.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "Epoch-AI-Hub.cis": {
+      "score": 1,
+      "n": 1
+    },
+    "Epoch-AI-Hub.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "Epoch-AI-Hub.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "HF-Open-LLM-Leaderboard.cis": {
+      "score": 0,
+      "n": 1
+    },
+    "HF-Open-LLM-Leaderboard.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "HF-Open-LLM-Leaderboard.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "OpenRouter-rankings.cis": {
+      "score": 0,
+      "n": 1
+    },
+    "OpenRouter-rankings.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "OpenRouter-rankings.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "Aider-leaderboard.cis": {
+      "score": 0,
+      "n": 1
+    },
+    "Aider-leaderboard.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "Aider-leaderboard.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "Galileo-BenchLM.cis": {
+      "score": 0,
+      "n": 1
+    },
+    "Galileo-BenchLM.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "Galileo-BenchLM.signed": {
+      "score": 0,
+      "n": 1
+    },
+    "ARC-Prize-community.cis": {
+      "score": 0,
+      "n": 1
+    },
+    "ARC-Prize-community.corrections": {
+      "score": 0,
+      "n": 1
+    },
+    "ARC-Prize-community.signed": {
+      "score": 0,
+      "n": 1
+    }
+  },
+  "measured_count": 3,
+  "total_count": 30,
+  "note": "Rating the raters as MEASUREMENT, never certification. 1=public evidence found, 0.5=partial, 0=no public evidence as of 2026-08-26. Sources: docs/absorption/RATING-THE-RATERS-2026.",
+  "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+  },
+  "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "ArB7ZeGox95DkxQfX7d9hM0skCswQzBEkgQUuk/kzfA=",
+    "sig": "vC52ct5GI/4AsLD96RP930aQ4ZrXtrWtnpkM8i7IBUGqWZUyvcoHFF47IDUxwN2Orf5NI4nmS9Gfb/1lEx/vBw==",
+    "pubkey_thumbprint": "Ji6p_5y0l56QDxeY5s2bLvgdUmirGL8bkV_NM9yblcQ",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+  }
+}

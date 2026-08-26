@@ -1,0 +1,49 @@
+{
+  "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+  "card_version": "0.1",
+  "issued_at": "2026-08-26T13:27:33Z",
+  "credential_register": "https://councilof.ai/registers",
+  "subject": {
+    "id": "framework-owasp-llm-agentic-2026",
+    "name": "measured against owasp-llm-agentic-2026"
+  },
+  "benchmark": {
+    "id": "csoai.framework-crosswalk/owasp-llm-agentic-2026",
+    "name": "Crosswalk: owasp-llm-agentic-2026"
+  },
+  "scores": {
+    "prompt-injection": {
+      "score": 1,
+      "n": 1
+    },
+    "data-poisoning-sensitive-info": {
+      "score": 1,
+      "n": 1
+    },
+    "supply-chain": {
+      "score": 1,
+      "n": 1
+    },
+    "excessive-agency": {
+      "score": 1,
+      "n": 1
+    }
+  },
+  "measured_count": 4,
+  "total_count": 4,
+  "note": "Crosswalk proves the MAPPING, never compliance. Measured against framework X, never certified.",
+  "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+  },
+  "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "dC+1YTDRZuYmjUZ3c2/+/N5Lj+DSqoUYkAkxzYBQHpk=",
+    "sig": "hKShBT3wPHRcdl2kvr91YVrh+UanpzMwh+gc4dYlpbhoXhZSJtOTezoPAPe2OmVWUUdWSCj7W3PIo5fyv2NZAQ==",
+    "pubkey_thumbprint": "R362BIDVZGeiD9ORJcWYDjDYIYz3X6QOlHSKJBfTt2w",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+  }
+}
