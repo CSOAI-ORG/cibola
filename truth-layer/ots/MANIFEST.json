@@ -1,0 +1,20 @@
+{
+ "schema": "csoai.ots-manifest/0.1",
+ "note": "raw-digest submit to a.pool.opentimestamps.org; proof verifiable against the Bitcoin calendar with any OTS client (ots verify <digest> <proof>)",
+ "entries": [
+  {
+   "label": "card_index head (150-card signed board)",
+   "sha256": "66856aca4a1f9390f0f51d89b8b96d984ab902852ed77b0254730758260ad1da",
+   "proof": "truth-layer/ots/66856aca4a1f9390.ots",
+   "status": "anchored-raw-digest",
+   "anchored_at": "2026-08-26T12:16:50Z"
+  },
+  {
+   "label": "live /api/gspc board payload sha256",
+   "sha256": "4feb00c7236949ee922d12c10084cd99e98b9689d9cdac9ac112de7539d476be",
+   "proof": "truth-layer/ots/4feb00c7236949ee.ots",
+   "status": "anchored-raw-digest",
+   "anchored_at": "2026-08-26T12:16:50Z"
+  }
+ ]
+}
