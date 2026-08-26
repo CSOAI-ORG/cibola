@@ -1,0 +1,78 @@
+{
+ "schema": "csoai.absorption-pins/0.1",
+ "pinned": "2026-08-26",
+ "entries": [
+  {
+   "label": "InspectAI inspect_evals",
+   "repo": "UKGovernmentBEIS/inspect_evals",
+   "pin": "67a9ea5333d3",
+   "license": "MIT"
+  },
+  {
+   "label": "lm-evaluation-harness",
+   "repo": "EleutherAI/lm-evaluation-harness",
+   "pin": "ccde35c889a9",
+   "license": "MIT"
+  },
+  {
+   "label": "HELM",
+   "repo": "stanford-crfm/helm",
+   "pin": "63754d05db6f",
+   "license": "Apache-2.0"
+  },
+  {
+   "label": "garak",
+   "repo": "NVIDIA/garak",
+   "pin": "8ed1543b985a",
+   "license": "Apache-2.0"
+  },
+  {
+   "label": "PyRIT",
+   "repo": "Azure/PyRIT",
+   "pin": "bec7cb5d6089",
+   "license": "MIT"
+  },
+  {
+   "label": "promptfoo",
+   "repo": "promptfoo/promptfoo",
+   "pin": "2c140ef272bc",
+   "license": "MIT"
+  },
+  {
+   "label": "AILuminate",
+   "repo": "MLCommons/AILuminate",
+   "pin": "769cc2be9d20",
+   "license": "Apache-2.0"
+  },
+  {
+   "label": "modelbench",
+   "repo": "MLCommons/modelbench",
+   "pin": "6aaa9c6ea4a0",
+   "license": "Apache-2.0"
+  },
+  {
+   "label": "HarmBench",
+   "repo": "centerforaisafety/HarmBench",
+   "pin": "8e1604d1171f",
+   "license": "MIT"
+  },
+  {
+   "label": "JailbreakBench",
+   "repo": "JailbreakBench/JailbreakBench",
+   "pin": "23dbdf6b1965",
+   "license": "MIT"
+  },
+  {
+   "label": "WMDP",
+   "repo": "centerforaisafety/WMDP",
+   "pin": "c0b6c12bb0de",
+   "license": "MIT"
+  },
+  {
+   "label": "simple-evals",
+   "repo": "openai/simple-evals",
+   "pin": "652c89d0ca9d",
+   "license": "MIT"
+  }
+ ]
+}
