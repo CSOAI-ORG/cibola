@@ -4,8 +4,12 @@
 **Submission route:** arXiv account (or endorser) → New submission → paste title/abstract → categories → submit.
 **Endorser:** forward still owner-gated (per account-prep; academic contact needed if account is new).
 
-## Title
-Signed, Recomputable Attestations of AI Measurement: A Minimal Format with an Append-Only Corrections Ledger
+## Paper to submit (REVISED — use the lane's stronger draft)
+- **File:** `councilof-ai/docs/operations/paper/FAIR_TIES_DRAFT_2026-08-26.md`
+  "FAIR TIES: a significance-gated ranking method with a signed anti-gaming event core"
+  (for ARC Prize paper track + arXiv; abstract + method complete; polish pass before submit)
+- Fallback title (if the attestation-format paper is preferred):
+  Signed, Recomputable Attestations of AI Measurement: A Minimal Format with an Append-Only Corrections Ledger
 
 ## Authors
 Nicholas Templeman (CSOAI Ltd, UK 16939677) — affiliation: Council of AI
