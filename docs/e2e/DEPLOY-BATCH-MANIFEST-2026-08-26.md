@@ -58,6 +58,26 @@ node scripts/signed-json-guard.mjs dist/client
 - **Containment Index** — sources cited per row, verify-sources gate, no uncited claim.
 - Banned-string + grammar-lint PASS on every new page.
 
+## 3.5 PRE-DEPLOY BASELINE (probed 2026-08-26 — the gate's measured inputs)
+
+Probed before the R4 window so the post-deploy gate has exact targets:
+
+| Route | Pre-R4 (baseline) | Gate target after R4 |
+|---|---|---|
+| `/api/gspc` (`axes`) | **14** | **22** (the "14→22 target" — the machine layer must catch up to the human page) |
+| `/financial-axes` | **200** (title: "the 8 financial slots of the 22-axis canon") | stays 200 |
+| `/axes` | **404** | **200** (public candidacy page) |
+| `/candidacy` | **404** | **200** |
+| `/22-axis` | **404** | **200** (canon page) |
+| `/api/axis-register` | **200** (has `counting_rule`, `public_count`) | stays 200 |
+| councilof.ai `/` + `/llms.txt` + `/api/gspc` + `/api/axis-register` | **200** | stays 200 |
+| cibola `/`, `/index.html`, `/status.json`, `/board/board-index.json` | **200** | stays 200 |
+
+> **The one true R1 gap (measured):** the human page already says **22-axis canon**, but the
+> machine feed `api/gspc` still exposes **14**. R4 must make the API report 22 (the candidacy
+> layer: 7 axes honest UNMEASURED declared, never claimed measured-and-measured) so the machine
+> layer and the human page agree. This is the concrete, byte-verifiable gate — not a slogan.
+
 ## 4. The two small money/gate clicks around the window (owner)
 
 | Gate | What | Cost | When |
