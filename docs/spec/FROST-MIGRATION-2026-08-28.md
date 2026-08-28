@@ -9,7 +9,7 @@ that machine compromises the signing identity — the estate's single point of c
 - **FROST (Flexible Round-Optimized Schnorr Threshold)** for Ed25519 — `taurushq-io/frost` (or
   `ZcashFoundation/frost`) — threshold signatures (t-of-n) where NO party ever holds the full key.
 - **Critical property**: FROST emits a **STANDARD Ed25519 signature** — the pinned DID key,
-  every published verifier, the 150-card index, verify-card.mjs, dorado verify — all stay
+  every published verifier, the 313-card index, verify-card.mjs, dorado verify — all stay
   UNCHANGED. Only the signing side changes (shares instead of a single key).
 - **Shares in distinct trust domains** (pod + Oracle micro + one hardware/non-network location) —
   t-of-n (e.g., 2-of-3) survives single-domain compromise.

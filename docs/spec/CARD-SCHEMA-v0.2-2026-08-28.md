@@ -31,5 +31,5 @@ ABSENT `canon` = legacy CPython v1 rule forever (never re-sign v1 cards; the ver
 
 ## Cutover status
 OPT-IN today (`--jcs` flag). Cutover to default = lane co-sign + the CI gate (corpus + vectors
-running on every commit) + the site verifier adopting the dispatch. The 150-card frozen index and
-all existing v1 cards remain valid forever under the v1 dispatch.
+running on every commit) + the site verifier adopting the dispatch. The 313-card index (owner ruling 27 Aug; 150 verify against #card-attestation-1; index count
+≠ verified count) and all existing v1 cards remain valid forever under the v1 dispatch.

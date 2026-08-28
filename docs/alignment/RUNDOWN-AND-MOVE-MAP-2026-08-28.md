@@ -6,7 +6,7 @@
 | Board | 22 axes · 15 measured · 7 candidacy UNMEASURED · Ed25519-attested (board-attestation-1) |
 | Surfaces | 15/15+ live: / · /products (real) · /crosswalks · /get-measured · /rating-the-raters (result 001) · /gspc-verify · /api/mcp · well-known agent/did · llms.txt |
 | E2E | dorado engine pass=True (9 sections) · surface sweeps 15/15 + 30/30 (22-axis standard) |
-| Truth layer | 4 OTS Bitcoin proofs · SCITT (RFC 9943) receipts · RFC 3161 · did:web:csoai.org (4 keys) · 150-card frozen index + 335 verified in-repo |
+| Truth layer | 4 OTS Bitcoin proofs · SCITT (RFC 9943) receipts · RFC 3161 · did:web:csoai.org (4 keys) · 313-card live index (owner ruling 27 Aug; 150 verify vs #card-attestation-1; index ≠ verified) + 335 in-repo |
 | Standards | IANA media-type LODGED (vnd.cibola.measurement-card+json) · SCITT interop record (Crown 009) · I-D drafted · C2PA member · BSI account activated |
 | JCS v2 | RFC 8785 corpus 12/12 + real-card 8/8 · canon-dispatch operational in sign/verify (--jcs) · v1 backward-compat proven |
 | Outreach | 22 contacts / 13 messages logged · IANA + NLnet pre-check + EF ESP + Longview + AIUC + Armilla sent · METR (info@) · TB proposal issue · Equidam reply |
