@@ -33,7 +33,8 @@ def verify_card(card: dict, expected_pubkey_b64: str | None = None) -> dict:
     except Exception as e:
         return {"ok": False, "reason": f"bad pubkey: {e}"}
     try:
-        pk.verify(base64.b64decode(s["sig"]), canonical(card))
+        from dorado_sign import canonical_preimage
+        pk.verify(base64.b64decode(s["sig"]), canonical_preimage(card))
     except Exception:
         return {"ok": False, "reason": "INVALID — signature does not verify; card altered or wrong key"}
     # identity binding (only if a reference key is supplied)

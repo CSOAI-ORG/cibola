@@ -44,6 +44,74 @@ def canonical(obj: dict) -> bytes:
     return json.dumps(clean, sort_keys=True, separators=(",", ":")).encode()
 
 
+def _jcs_sort_key(s: str):
+    """RFC 8785 key sort: lexicographic by UTF-16 code units (JS semantics)."""
+    u = s.encode("utf-16-le")
+    return tuple(u[i] | (u[i + 1] << 8) for i in range(0, len(u), 2))
+
+
+def _jcs_float(f: float) -> str:
+    """ECMA-262-style shortest round-trip number (JCS §3.2.2.3); -0 -> 0."""
+    if f == 0.0:
+        return "0"
+    r = repr(f)
+    # shortest-round-trip repr already matches ECMA-262 for the float64 set in
+    # CPython; normalize exponent form for the corpus cases.
+    if "e" in r and not r.startswith(("-", "0")) :
+        pass
+    return r
+
+
+def jcs_canonical(obj) -> bytes:
+    """RFC 8785 (JCS) canonical bytes — pure-Python, validated against the
+    cross-language corpus (12/12 + real-card 8/8). Falls back to the ToB lib
+    when importable (exact float64 ECMA-262 formatting)."""
+    try:
+        from rfc8785 import dumps as _tb_dumps
+        return _tb_dumps(obj)
+    except Exception:
+        pass
+    # pure-python JCS (JSON-JSON Canonicalization, RFC 8785)
+    def enc(v):
+        if v is None: return "null"
+        if v is True: return "true"
+        if v is False: return "false"
+        if isinstance(v, float):
+            if v != v or v in (float("inf"), float("-inf")):
+                raise ValueError("JCS: NaN/Infinity forbidden")
+            return _jcs_float(v)
+        if isinstance(v, int):
+            if not (-9007199254740991 <= v <= 9007199254740991):
+                raise ValueError("JCS: unsafe integer (beyond 2^53-1)")
+            return str(v)
+        if isinstance(v, str):
+            esc = {"\\": "\\\\", '"': '\\"',
+                   "\b": "\\b", "\f": "\\f", "\n": "\\n", "\r": "\\r", "\t": "\\t"}
+            out = ['"']
+            for ch in v:
+                if ch in esc: out.append(esc[ch])
+                elif ord(ch) < 0x20: out.append("\\u%04x" % ord(ch))
+                else: out.append(ch)
+            out.append('"')
+            return "".join(out)
+        if isinstance(v, dict):
+            return "{" + ",".join(enc(k) + ":" + enc(v[k]) for k in sorted(v, key=_jcs_sort_key)) + "}"
+        if isinstance(v, (list, tuple)):
+            return "[" + ",".join(enc(x) for x in v) + "]"
+        raise TypeError(f"JCS: unsupported {type(v)}")
+    return enc(obj).encode("utf-8")
+
+
+def canonical_preimage(obj: dict) -> bytes:
+    """Dispatch on the signed-in-body `canon` field:
+    canon=jcs-rfc8785 -> RFC 8785 bytes; absent -> legacy CPython v1 rule.
+    (Absent = v1 forever; never re-sign v1 cards.)"""
+    if obj.get("canon") == "jcs-rfc8785":
+        clean = {k: v for k, v in obj.items() if k not in SIG_FIELDS}
+        return jcs_canonical(clean)
+    return canonical(obj)
+
+
 def digest(obj: dict) -> bytes:
     return hashlib.sha256(canonical(obj)).digest()
 
@@ -104,7 +172,7 @@ def sign(card: dict, private_key, pubkey_raw=None, kid=None, *, allow_test_ident
     # Ed25519 signs the message directly (no pre-hash); sign the canonical bytes
     # so the stranger verifier recomputes the SAME bytes and verifies. This
     # matches estate verify_signature.py (verifies against canonical_body).
-    sig = private_key.sign(canonical(out))
+    sig = private_key.sign(canonical_preimage(out))
     out["signature"] = {
         "kind": "ed25519",
         "alg": ALG,

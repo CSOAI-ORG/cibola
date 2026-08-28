@@ -180,6 +180,8 @@ def cmd_sign(args):
         _test_key_seed()  # no-op marker for clarity
     else:
         key = _load_signing_key()
+    if getattr(args, "jcs", False):
+        card["canon"] = "jcs-rfc8785"
     if is_signed(card):
         print(f"{args.card} already signed (signature present); re-signing over canonical form", flush=True)
     signed = sign(card, key, kid=args.kid, allow_test_identity=args.allow_test_identity)
@@ -1401,6 +1403,7 @@ def main():
     p.add_argument("--key-file", default=None, help="Raw/PEM Ed25519 private key (pod-held; NOT in repo)")
     p.add_argument("--pem-file", default=None, help="PEM Ed25519 private key")
     p.add_argument("--kid", default=None, help="kid (default did:web:csoai.org#card-attestation-1)")
+    p.add_argument("--jcs", action="store_true", help="sign with RFC 8785 (JCS) v2 preimage + stamp canon:jcs-rfc8785")
     p.add_argument("--allow-test-identity", action="store_true", help="Allow a NON-published key (stamps kid=test); required for demo/test keys (one-signer doctrine)")
     p.add_argument("--out", default=None)
     p.set_defaults(func=cmd_sign)
