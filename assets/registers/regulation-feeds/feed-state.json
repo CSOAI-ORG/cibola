@@ -1,27 +1,27 @@
 {
   "federal-register": {
-    "sha256": "ed2dc266605764f492a6a8126512d458fbc76ae9cd63257d5f30b932f60cfff1",
-    "last_class": "no-change",
-    "observed_at": "2026-08-26T13:28:51Z"
+    "sha256": "8a4913e9a702a457d6ead18a257c34f5906ce15c933bfa00016bd04d3f5201f9",
+    "last_class": "change",
+    "observed_at": "2026-08-28T04:02:58Z"
   },
   "ecfr": {
-    "sha256": "eb0ba155fb03b14689f65ba294165d0d856c9e04bb4108d2d5d923ff1c1a9a3b",
-    "last_class": "no-change",
-    "observed_at": "2026-08-26T13:28:52Z"
+    "sha256": "32d98813c7ed29730948c4e43aec113910466e150ad14406be605eb2e46fa253",
+    "last_class": "change",
+    "observed_at": "2026-08-28T04:02:58Z"
   },
   "eurlex": {
-    "sha256": null,
-    "last_class": "unreachable",
-    "observed_at": "2026-08-26T13:28:52Z"
+    "sha256": "538d7c90c9089fef649f529b34a616f9933de812b040aeea62f3f19c722ca307",
+    "last_class": "baseline",
+    "observed_at": "2026-08-28T04:02:59Z"
   },
   "bis": {
     "sha256": "3816796b36c79efd20b6b067599a8afb661eeee776ea5c10306f15b9e62330f4",
     "last_class": "no-change",
-    "observed_at": "2026-08-26T13:28:53Z"
+    "observed_at": "2026-08-28T04:02:59Z"
   },
   "iosco": {
-    "sha256": "69c4d0099c9abaa15cf316fa97d5a67567719d391118e423b7176ceb43777b31",
-    "last_class": "volatile",
-    "observed_at": "2026-08-26T13:28:53Z"
+    "sha256": "fd370a4f2deb91052b27e2676719cfb42d3eea00f8988449906456147fa724b3",
+    "last_class": "change",
+    "observed_at": "2026-08-28T04:03:00Z"
   }
 }

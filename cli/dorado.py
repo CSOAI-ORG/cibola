@@ -1035,6 +1035,22 @@ def cmd_board(args):
 
 def cmd_status(args):
     """Consolidated live-endpoint payload: board + relative + operational + identity."""
+    status = _build_status()
+    if args.out:
+        json.dump(status, open(args.out, "w"), indent=2)
+        print(f"wrote {args.out}", flush=True)
+    else:
+        print(json.dumps(status, indent=2), flush=True)
+    return 0
+
+
+def _build_status() -> dict:
+    """Shell the one consolidated body-status payload (board + relative + operational + binds).
+
+    Shared by `dorado status` and `dorado batch` so the batch-regenerated status.json always
+    carries the COMPLETE binds block (hf eval-results / data-listing / openrouter / rwa
+    target-list) — never a stripped status that drops the live-bind surface.
+    """
     sys.path.insert(0, os.path.join(ROOT, "harness"))
     sys.path.insert(0, os.path.join(ROOT, "engine"))
     from dorado_board import rebuild_index, load_entries
@@ -1077,12 +1093,7 @@ def cmd_status(args):
             },
         },
     }
-    if args.out:
-        json.dump(status, open(args.out, "w"), indent=2)
-        print(f"wrote {args.out}", flush=True)
-    else:
-        print(json.dumps(status, indent=2), flush=True)
-    return 0
+    return status
 
 
 def cmd_e2e(args):

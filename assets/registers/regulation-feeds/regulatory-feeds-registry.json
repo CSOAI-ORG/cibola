@@ -17,8 +17,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "ed2dc266605764f492a6a8126512d458fbc76ae9cd63257d5f30b932f60cfff1",
-      "_observation": "no-change"
+      "_content_sha256": "8a4913e9a702a457d6ead18a257c34f5906ce15c933bfa00016bd04d3f5201f9",
+      "_observation": "change"
     },
     {
       "id": "ecfr",
@@ -33,8 +33,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "eb0ba155fb03b14689f65ba294165d0d856c9e04bb4108d2d5d923ff1c1a9a3b",
-      "_observation": "no-change"
+      "_content_sha256": "32d98813c7ed29730948c4e43aec113910466e150ad14406be605eb2e46fa253",
+      "_observation": "change"
     },
     {
       "id": "eurlex",
@@ -46,10 +46,11 @@
       "verified_reachable": true,
       "verified_http": 202,
       "notes": "CELEX content resolver; the EU AI Act CELEX shown as the reference anchor. CELLAR SPARQL endpoint path varies \u2014 treat resolver as the stable free surface.",
-      "_last_fetch_status": 202,
-      "_reachable": false,
-      "_verified_reachable_updated": false,
-      "_observation": "unreachable"
+      "_last_fetch_status": 200,
+      "_reachable": true,
+      "_verified_reachable_updated": true,
+      "_content_sha256": "538d7c90c9089fef649f529b34a616f9933de812b040aeea62f3f19c722ca307",
+      "_observation": "baseline"
     },
     {
       "id": "bis",
@@ -80,8 +81,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "69c4d0099c9abaa15cf316fa97d5a67567719d391118e423b7176ceb43777b31",
-      "_observation": "volatile"
+      "_content_sha256": "fd370a4f2deb91052b27e2676719cfb42d3eea00f8988449906456147fa724b3",
+      "_observation": "change"
     }
   ],
   "note": "Free official feeds DORADO cross-references. Published for transparency (research rec #4). A change is recorded ONLY on a real SHA-256 content-hash delta on a content-stable feed; a feed that re-hashes every fetch is marked 'volatile' (anti-bot/dynamic), never reported as a regulation change; an unreachable feed is reported honestly, never fabricated."
