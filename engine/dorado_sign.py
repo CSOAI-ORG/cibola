@@ -51,14 +51,17 @@ def _jcs_sort_key(s: str):
 
 
 def _jcs_float(f: float) -> str:
-    """ECMA-262-style shortest round-trip number (JCS §3.2.2.3); -0 -> 0."""
-    if f == 0.0:
+    """ECMA-262-style number (JCS §3.2.2.3): integral floats drop the '.0'; -0 -> 0."""
+    if f == 0.0 or f == -0.0:
         return "0"
+    if f.is_integer():
+        return str(int(f))
     r = repr(f)
-    # shortest-round-trip repr already matches ECMA-262 for the float64 set in
-    # CPython; normalize exponent form for the corpus cases.
-    if "e" in r and not r.startswith(("-", "0")) :
-        pass
+    # shortest-round-trip repr matches ECMA-262 for the float64 set; normalize the
+    # exponent form ('1e-07' -> '1e-7') for the corpus edge cases.
+    if "e" in r:
+        mant, _, exp = r.partition("e")
+        r = mant + "e" + str(int(exp))
     return r
 
 
