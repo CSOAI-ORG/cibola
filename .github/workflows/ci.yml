@@ -68,6 +68,12 @@ jobs:
       - name: Regulation-feed SHA-256 change-detection
         run: python3 test/regulation-feeds-test.py
 
+      # Hermetic batch-regeneration guard: the OFFLINE auto-batch parts (content-engine AEO index
+      # + RWA target-list) must regenerate byte-identically — a register that silently rots fails
+      # the build. The reg-feeds network fetch is deliberately excluded (never a hard CI gate).
+      - name: Batch-regeneration guard (offline registers)
+        run: python3 test/batch-guard.py
+
       # Banned-lane-brand CI guard on PUBLIC surfaces (allowed: legal 'sovereign' + real infra ids).
       - name: Banned-string lint (public surfaces)
         run: python3 test/banned-strings.py
