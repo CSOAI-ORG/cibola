@@ -1,0 +1,26 @@
+{
+ "date": "2026-08-28",
+ "real_cards": 8,
+ "cross_language_agreement": "8/8",
+ "note": "5 dorado + 3 site card bodies incl. float-zero scores",
+ "python": {
+  "dorado:2026-08-26-rating-the-ra": "7ceb9aabbbdce7682e1838a331f82448469bf69edd8064905ba8bf0bd88f2d48",
+  "dorado:2026-08-26-crosswalk-art": "ef77e7225a0bad81bf0b08352a72ea28591556db85066226dbf5daa51ef33a7b",
+  "dorado:2026-08-26-qwen2.5-0.5b-": "3f3dbc44f60a790b818a59e84189cf0a9d899efa5378a3ded3c5ff193b9a489e",
+  "dorado:2026-08-26-crosswalk-owa": "7f43bd7ae007921080ab0c71206be5aafa5184a421bc2f33ba4d07521cf38846",
+  "dorado:2026-08-26-crosswalk-nis": "0a22a7ccc039d12562e610d4e0bc95e969ee69c78792e13b74d9f8b3d42760f4",
+  "site:dc5a58838f690074daa3": "088b67133b02d63cbb9e4e021a652e4382ff95897048d962eb022ef0676a443b",
+  "site:a3c7a995d28f573daf45": "df57e5ad7001bdac0a05245296a140dc69e253b95ec6f3582a87bb09444ffbf3",
+  "site:d2785c1a875bc71db65e": "d2785c1a875bc71db65e1f9caf8591e2f76d84ee6afc992ef9a832d2566dba5c"
+ },
+ "js": {
+  "dorado:2026-08-26-rating-the-ra": "7ceb9aabbbdce7682e1838a331f82448469bf69edd8064905ba8bf0bd88f2d48",
+  "dorado:2026-08-26-crosswalk-art": "ef77e7225a0bad81bf0b08352a72ea28591556db85066226dbf5daa51ef33a7b",
+  "dorado:2026-08-26-qwen2.5-0.5b-": "3f3dbc44f60a790b818a59e84189cf0a9d899efa5378a3ded3c5ff193b9a489e",
+  "dorado:2026-08-26-crosswalk-owa": "7f43bd7ae007921080ab0c71206be5aafa5184a421bc2f33ba4d07521cf38846",
+  "dorado:2026-08-26-crosswalk-nis": "0a22a7ccc039d12562e610d4e0bc95e969ee69c78792e13b74d9f8b3d42760f4",
+  "site:dc5a58838f690074daa3": "088b67133b02d63cbb9e4e021a652e4382ff95897048d962eb022ef0676a443b",
+  "site:a3c7a995d28f573daf45": "df57e5ad7001bdac0a05245296a140dc69e253b95ec6f3582a87bb09444ffbf3",
+  "site:d2785c1a875bc71db65e": "d2785c1a875bc71db65e1f9caf8591e2f76d84ee6afc992ef9a832d2566dba5c"
+ }
+}

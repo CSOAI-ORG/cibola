@@ -1,0 +1,457 @@
+[
+ {
+  "name": "dorado:2026-08-26-rating-the-ra",
+  "value": {
+   "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+   "card_version": "0.1",
+   "issued_at": "2026-08-26T13:27:33Z",
+   "credential_register": "https://councilof.ai/registers",
+   "subject": {
+    "id": "benchmark-rater-ecosystem-2026",
+    "name": "AI benchmark raters (Rate the Raters 2026)"
+   },
+   "benchmark": {
+    "id": "csoai.rate-the-raters/0.1",
+    "name": "Rating the Raters 2026 — CIs/corrections/signing"
+   },
+   "scores": {
+    "LMArena-Arena-Intelligence.cis": {
+     "score": 1,
+     "n": 1
+    },
+    "LMArena-Arena-Intelligence.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "LMArena-Arena-Intelligence.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "Vals-AI.cis": {
+     "score": 0.5,
+     "n": 1
+    },
+    "Vals-AI.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "Vals-AI.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "Artificial-Analysis.cis": {
+     "score": 0,
+     "n": 1
+    },
+    "Artificial-Analysis.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "Artificial-Analysis.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "Scale-SEAL-HLE.cis": {
+     "score": 1,
+     "n": 1
+    },
+    "Scale-SEAL-HLE.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "Scale-SEAL-HLE.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "Epoch-AI-Hub.cis": {
+     "score": 1,
+     "n": 1
+    },
+    "Epoch-AI-Hub.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "Epoch-AI-Hub.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "HF-Open-LLM-Leaderboard.cis": {
+     "score": 0,
+     "n": 1
+    },
+    "HF-Open-LLM-Leaderboard.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "HF-Open-LLM-Leaderboard.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "OpenRouter-rankings.cis": {
+     "score": 0,
+     "n": 1
+    },
+    "OpenRouter-rankings.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "OpenRouter-rankings.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "Aider-leaderboard.cis": {
+     "score": 0,
+     "n": 1
+    },
+    "Aider-leaderboard.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "Aider-leaderboard.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "Galileo-BenchLM.cis": {
+     "score": 0,
+     "n": 1
+    },
+    "Galileo-BenchLM.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "Galileo-BenchLM.signed": {
+     "score": 0,
+     "n": 1
+    },
+    "ARC-Prize-community.cis": {
+     "score": 0,
+     "n": 1
+    },
+    "ARC-Prize-community.corrections": {
+     "score": 0,
+     "n": 1
+    },
+    "ARC-Prize-community.signed": {
+     "score": 0,
+     "n": 1
+    }
+   },
+   "measured_count": 3,
+   "total_count": 30,
+   "note": "Rating the raters as MEASUREMENT, never certification. 1=public evidence found, 0.5=partial, 0=no public evidence as of 2026-08-26. Sources: docs/absorption/RATING-THE-RATERS-2026.",
+   "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+   },
+   "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "ArB7ZeGox95DkxQfX7d9hM0skCswQzBEkgQUuk/kzfA=",
+    "sig": "vC52ct5GI/4AsLD96RP930aQ4ZrXtrWtnpkM8i7IBUGqWZUyvcoHFF47IDUxwN2Orf5NI4nmS9Gfb/1lEx/vBw==",
+    "pubkey_thumbprint": "Ji6p_5y0l56QDxeY5s2bLvgdUmirGL8bkV_NM9yblcQ",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+   }
+  }
+ },
+ {
+  "name": "dorado:2026-08-26-crosswalk-art",
+  "value": {
+   "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+   "card_version": "0.1",
+   "issued_at": "2026-08-26T13:27:33Z",
+   "credential_register": "https://councilof.ai/registers",
+   "subject": {
+    "id": "framework-eu-ai-act-art50",
+    "name": "measured against eu-ai-act-art50"
+   },
+   "benchmark": {
+    "id": "csoai.framework-crosswalk/eu-ai-act-art50",
+    "name": "Crosswalk: eu-ai-act-art50"
+   },
+   "scores": {
+    "disclosure": {
+     "score": 1,
+     "n": 1
+    },
+    "machine-readable-marking": {
+     "score": 1,
+     "n": 1
+    },
+    "detection-code-input": {
+     "score": 1,
+     "n": 1
+    },
+    "watermark-robustness": {
+     "score": 0,
+     "n": 1
+    }
+   },
+   "measured_count": 3,
+   "total_count": 4,
+   "note": "Crosswalk proves the MAPPING, never compliance. Measured against framework X, never certified.",
+   "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+   },
+   "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "o2aSPYwtNH5HxIpwAC3NMdeqw5G3XUZdr0FFPBfXUAQ=",
+    "sig": "1FO5ltkpt6YEXzZixctO65poV/plRAaRO7ywGruZg2Sf6qTompdwgW6/khqoMLVMistT4qINW1GvL8m2e6P5Bw==",
+    "pubkey_thumbprint": "krWL3pu9t8HgpPNoaMrg0PUuAF5GuaOzVUO-w_K4-YQ",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+   }
+  }
+ },
+ {
+  "name": "dorado:2026-08-26-qwen2.5-0.5b-",
+  "value": {
+   "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+   "card_version": "0.1.0",
+   "subject": {
+    "id": "qwen2.5-0.5b-instruct",
+    "name": "Qwen2.5 0.5B Instruct (local Ollama)",
+    "digest": "e034df20f0b55629886ec2f5baf75f86e8eda7047fa5ed57e7198726abcc8a92"
+   },
+   "benchmark": {
+    "id": "csoai.gspc-16",
+    "name": "GSPC 16-Axis Governance Scenario",
+    "version": "1.0",
+    "digest": "a7978f1d50a363de20eeb583ba4f4d802f29caec8211b0a7941920c2043a2b2b",
+    "gold_labels": "axes/gspc-16.json"
+   },
+   "scores": {
+    "governance": {
+     "score": 0.0,
+     "n": 1
+    },
+    "care": {
+     "score": 0.0,
+     "n": 1
+    },
+    "swarm": {
+     "score": 0.0,
+     "n": 1
+    },
+    "affect": {
+     "score": 0.0,
+     "n": 1
+    },
+    "jail": {
+     "score": 0.0,
+     "n": 1
+    },
+    "slot15": {
+     "score": 0.0,
+     "n": 1
+    },
+    "human_vs_ai": {
+     "score": 0.0,
+     "n": 1
+    },
+    "safety": {
+     "score": 0.0,
+     "n": 1
+    },
+    "privacy": {
+     "score": 1.0,
+     "n": 1
+    },
+    "transparency": {
+     "score": 0.0,
+     "n": 1
+    },
+    "fairness": {
+     "score": 0.0,
+     "n": 1
+    },
+    "accountability": {
+     "score": 0.0,
+     "n": 1
+    },
+    "continuity": {
+     "score": 1.0,
+     "n": 1
+    },
+    "efficiency": {
+     "score": 0.0,
+     "n": 1
+    },
+    "creativity": {
+     "score": 0.0,
+     "n": 1
+    },
+    "sovereignty": {
+     "score": 0.0,
+     "n": 1
+    }
+   },
+   "measured_count": 16,
+   "total_count": 16,
+   "issued_at": "2026-08-26T12:29:44Z",
+   "credential_register": "This is a measurement credential. It is not a certification, endorsement, or conformity mark, and must not be presented as one.",
+   "run_manifest": {
+    "harness_hash": "run_axis.py:2026-08-26T12:29:44Z"
+   },
+   "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "mE+Bz8Hb4iHsCe8ZK12PfpsKvQkgX8bIjIGCqRsEUH0=",
+    "sig": "ohz8pz/YWr0QUXfIpJETDvyK19CFQuyHtUhukJ7mpI8SPw3382NTQUf4Kse8Z0z7wdzInibocn0iAkcHH7HDCA==",
+    "pubkey_thumbprint": "1kDPt4kzW4b9KriYgIYmCeA0-CiTvPxndQsIllNuxUA",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+   }
+  }
+ },
+ {
+  "name": "dorado:2026-08-26-crosswalk-owa",
+  "value": {
+   "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+   "card_version": "0.1",
+   "issued_at": "2026-08-26T13:27:33Z",
+   "credential_register": "https://councilof.ai/registers",
+   "subject": {
+    "id": "framework-owasp-llm-agentic-2026",
+    "name": "measured against owasp-llm-agentic-2026"
+   },
+   "benchmark": {
+    "id": "csoai.framework-crosswalk/owasp-llm-agentic-2026",
+    "name": "Crosswalk: owasp-llm-agentic-2026"
+   },
+   "scores": {
+    "prompt-injection": {
+     "score": 1,
+     "n": 1
+    },
+    "data-poisoning-sensitive-info": {
+     "score": 1,
+     "n": 1
+    },
+    "supply-chain": {
+     "score": 1,
+     "n": 1
+    },
+    "excessive-agency": {
+     "score": 1,
+     "n": 1
+    }
+   },
+   "measured_count": 4,
+   "total_count": 4,
+   "note": "Crosswalk proves the MAPPING, never compliance. Measured against framework X, never certified.",
+   "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+   },
+   "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "dC+1YTDRZuYmjUZ3c2/+/N5Lj+DSqoUYkAkxzYBQHpk=",
+    "sig": "hKShBT3wPHRcdl2kvr91YVrh+UanpzMwh+gc4dYlpbhoXhZSJtOTezoPAPe2OmVWUUdWSCj7W3PIo5fyv2NZAQ==",
+    "pubkey_thumbprint": "R362BIDVZGeiD9ORJcWYDjDYIYz3X6QOlHSKJBfTt2w",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+   }
+  }
+ },
+ {
+  "name": "dorado:2026-08-26-crosswalk-nis",
+  "value": {
+   "schema": "https://dorado.dev/schemas/measurement-card.schema.json",
+   "card_version": "0.1",
+   "issued_at": "2026-08-26T13:27:33Z",
+   "credential_register": "https://councilof.ai/registers",
+   "subject": {
+    "id": "framework-nist-ai-rmf",
+    "name": "measured against nist-ai-rmf"
+   },
+   "benchmark": {
+    "id": "csoai.framework-crosswalk/nist-ai-rmf",
+    "name": "Crosswalk: nist-ai-rmf"
+   },
+   "scores": {
+    "govern": {
+     "score": 1,
+     "n": 1
+    },
+    "measure": {
+     "score": 1,
+     "n": 1
+    },
+    "manage": {
+     "score": 1,
+     "n": 1
+    },
+    "map": {
+     "score": 1,
+     "n": 1
+    }
+   },
+   "measured_count": 4,
+   "total_count": 4,
+   "note": "Crosswalk proves the MAPPING, never compliance. Measured against framework X, never certified.",
+   "run_manifest": {
+    "harness": "csoai-gspc-carder",
+    "deterministic": true,
+    "no_llm_judge": true
+   },
+   "signature": {
+    "kind": "ed25519",
+    "alg": -19,
+    "kid": "did:web:csoai.org#test-identity",
+    "pubkey": "29+R5D9F7b6Y1N0WMkSbea+LGntEnJH1OlJ339lMb7g=",
+    "sig": "rD6ORQB+MS25JmLsLWgwjtnh/Zx1W/KLtv2AM9C+V8S7sPvvElA3IWJ7PNXeKs7R2ra6g6h/Q6d3bHmW1EaOBA==",
+    "pubkey_thumbprint": "aWjhqpC5BPS9texB_ROO2pdiK4GtFSvC7cnkZaHPU9M",
+    "sig_input": "ed25519(canonical card minus signature fields, sort_keys)"
+   }
+  }
+ },
+ {
+  "name": "site:dc5a58838f690074daa3",
+  "value": {
+   "accuracy": 0.0,
+   "axis": "swag-30",
+   "created": "2026-08-19T09:24:39.159371+00:00",
+   "issuer": "CSOAI Ltd (UK 16939677)",
+   "kind": "gspc.measurement-card",
+   "model": "phi4:14b",
+   "prev": "977f1f3d044f989fe7af17f4b912f7d75c31704cafb59f77f81555a848f8b1a4",
+   "public_framing": "13 measured of 14 quotable",
+   "verify": "https://councilof.ai/verify"
+  }
+ },
+ {
+  "name": "site:a3c7a995d28f573daf45",
+  "value": {
+   "accuracy": 1.0,
+   "axis": "arc-30",
+   "created": "2026-08-19T09:24:39.169512+00:00",
+   "issuer": "CSOAI Ltd (UK 16939677)",
+   "kind": "gspc.measurement-card",
+   "model": "sov6-embodiment-v3-light:latest",
+   "prev": "7659f039f37e5b204913bbb9f089ef8a19152d2d1ae42fefbff7a42a1f1e8b33",
+   "public_framing": "13 measured of 14 quotable",
+   "verify": "https://councilof.ai/verify"
+  }
+ },
+ {
+  "name": "site:d2785c1a875bc71db65e",
+  "value": {
+   "accuracy": 0.5333,
+   "axis": "swag-30",
+   "created": "2026-08-19T09:24:39.158906+00:00",
+   "issuer": "CSOAI Ltd (UK 16939677)",
+   "kind": "gspc.measurement-card",
+   "model": "mistral:7b",
+   "prev": "8f55e463d73917d2a1c10dea041db0a57fbfb2dba622b8e9a9705429fde4b886",
+   "public_framing": "13 measured of 14 quotable",
+   "verify": "https://councilof.ai/verify"
+  }
+ }
+]

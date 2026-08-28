@@ -480,18 +480,14 @@ def cmd_batch(args):
     _sys.path.insert(0, os.path.join(ROOT, "engine"))
     from or_telemetry import load as _load_tel
     try:
-        board = rebuild_index()
-        status = {
-            "schema": "csoai.dorado-status/0.1",
-            "kind": "measurement body status — a MEASUREMENT summary, never a certification",
-            "register": "This is a measurement credential. It is not a certification, endorsement, "
-                        "or conformity mark, and must not be presented as one.",
-            "identity": "did:web:csoai.org#card-attestation-1",
-            "board": {"count": board.get("count"), "chainOk": board.get("chainOk")},
-            "operational": {"records": len(_load_tel())},
-        }
+        # Reuse the full cmd_status build so the batch-regenerated status carries the complete
+        # binds block (hf eval-results / data-listing / openrouter / rwa target-list) — never a
+        # stripped status that drops the live-bind surface.
+        status = _build_status()
         _json.dump(status, open(os.path.join(ROOT, "status.json"), "w"), indent=2)
-        steps.append(("status", "OK", f"board count={board.get('count')} chainOk={board.get('chainOk')}"))
+        steps.append(("status", "OK",
+                      f"board count={status['board']['count']} chainOk={status['board']['chainOk']} "
+                      f"binds={len(status.get('binds', {}))}"))
     except Exception as e:
         steps.append(("status", "FAIL", f"{type(e).__name__}: {str(e)[:120]}"))
 
