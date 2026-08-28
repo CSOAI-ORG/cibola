@@ -1,0 +1,127 @@
+[
+ {
+  "name": "float-zero",
+  "value": {
+   "score": 0.0
+  }
+ },
+ {
+  "name": "float-negzero",
+  "value": {
+   "score": -0.0
+  }
+ },
+ {
+  "name": "float-integral",
+  "value": {
+   "score": 0.5,
+   "n": 2
+  }
+ },
+ {
+  "name": "key-order",
+  "value": {
+   "z": 1,
+   "a": 2,
+   "m": 3
+  }
+ },
+ {
+  "name": "unicode",
+  "value": {
+   "emoji": "✓",
+   "cjk": "測量",
+   "mixed": "a→b"
+  }
+ },
+ {
+  "name": "escapes",
+  "value": {
+   "s": "line\nbreak\ttab \"quote\" \\slash"
+  }
+ },
+ {
+  "name": "numbers",
+  "value": {
+   "int": 42,
+   "big": 9007199254740991,
+   "exp": 1000.0,
+   "small": 1e-07,
+   "unsafe_note": "2^53+1 is REJECTED by RFC 8785 (IntegerDomainError) - spec-correct"
+  }
+ },
+ {
+  "name": "nested",
+  "value": {
+   "a": {
+    "b": [
+     1,
+     2,
+     {
+      "c": null
+     }
+    ],
+    "d": true
+   },
+   "e": false
+  }
+ },
+ {
+  "name": "arrays",
+  "value": {
+   "list": [
+    "x",
+    1,
+    {
+     "y": 2
+    },
+    [
+     3,
+     4
+    ]
+   ]
+  }
+ },
+ {
+  "name": "nulls",
+  "value": {
+   "a": null,
+   "b": {
+    "c": null
+   }
+  }
+ },
+ {
+  "name": "card-like",
+  "value": {
+   "id": "abc123",
+   "axis": "jail",
+   "score": 0.5915,
+   "n": 71,
+   "measured": true,
+   "tags": [
+    "gov",
+    "care"
+   ]
+  }
+ },
+ {
+  "name": "deep",
+  "value": {
+   "l1": {
+    "l2": {
+     "l3": {
+      "l4": {
+       "x": [
+        0.0,
+        -0.0,
+        1e-09,
+        "✓"
+       ]
+      }
+     }
+    }
+   }
+  }
+ }
+]
