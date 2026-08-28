@@ -49,5 +49,21 @@ rwa_path = os.path.join(HOME, "assets", "registers", "rwa", "index.json")
 b2, a2 = run_builder("harness.build_rwa_target_list", rwa_path)
 check(a2 == b2, f"rwa target-list regenerates deterministically (no drift)")
 
+# 3. status.json schema-contract pin: the consolidated body status MUST carry the complete binds
+# block (never a stripped status that drops the live-bind surface), + identity + register verbatim.
+# This pins the shape without requiring a regeneration pass (network-free, hermetic).
+status_path = os.path.join(HOME, "status.json")
+if os.path.exists(status_path):
+    s = json.load(open(status_path))
+    req = ["schema", "kind", "register", "identity", "board", "operational", "binds"]
+    check(all(k in s for k in req), "status.json has all required keys (binds not dropped)")
+    check(s.get("binds") and len(s.get("binds", {})) >= 4,
+          f"status.json carries the full binds block ({len(s.get('binds', {}))} binds)")
+    check(s.get("identity") == "did:web:csoai.org#card-attestation-1",
+          "status.json identity = card-attestation-1")
+    check("not a certification" in s.get("register", ""), "status.json register verbatim present")
+else:
+    check(False, "status.json present")
+
 print("\n" + ("BATCH-GUARD: OK" if not FAILS else f"BATCH-GUARD: {len(FAILS)} FAIL(s)"))
 sys.exit(0 if not FAILS else 1)

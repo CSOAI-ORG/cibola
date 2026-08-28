@@ -18,7 +18,7 @@
       "_reachable": true,
       "_verified_reachable_updated": true,
       "_content_sha256": "8a4913e9a702a457d6ead18a257c34f5906ce15c933bfa00016bd04d3f5201f9",
-      "_observation": "change"
+      "_observation": "no-change"
     },
     {
       "id": "ecfr",
@@ -34,7 +34,7 @@
       "_reachable": true,
       "_verified_reachable_updated": true,
       "_content_sha256": "32d98813c7ed29730948c4e43aec113910466e150ad14406be605eb2e46fa253",
-      "_observation": "change"
+      "_observation": "no-change"
     },
     {
       "id": "eurlex",
@@ -49,8 +49,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "538d7c90c9089fef649f529b34a616f9933de812b040aeea62f3f19c722ca307",
-      "_observation": "baseline"
+      "_content_sha256": "1b00fdbdd29563ee7dae64a59e2d08b8fa232ba73d84b17cae744e382ee25041",
+      "_observation": "change"
     },
     {
       "id": "bis",
@@ -81,8 +81,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "fd370a4f2deb91052b27e2676719cfb42d3eea00f8988449906456147fa724b3",
-      "_observation": "change"
+      "_content_sha256": "5f048e77843c0b2c338182bbbee9c2b581ac084b44d67e2bb833ab1d9176a4da",
+      "_observation": "volatile"
     }
   ],
   "note": "Free official feeds DORADO cross-references. Published for transparency (research rec #4). A change is recorded ONLY on a real SHA-256 content-hash delta on a content-stable feed; a feed that re-hashes every fetch is marked 'volatile' (anti-bot/dynamic), never reported as a regulation change; an unreachable feed is reported honestly, never fabricated."
