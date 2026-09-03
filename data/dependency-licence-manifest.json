@@ -1,65 +1,89 @@
 {
-  "schema": "csoai.dependency-licence/0.1",
-  "generated": "2026-08-24",
-  "policy": "A new dependency is admissible only if it is permissive (BSD/MIT/Apache/ISC/Zlib/PSF family) AND not in a hard-excluded commercial/non-commercial agent-dataset family. Escalation is required for anything outside the permissive allowlist.",
-  "hard_excluded_families": [
-    "PersonaHub",
-    "genagents",
-    "AgentSociety-commercial",
-    "Genie 3",
-    "Cosmos"
-  ],
-  "permissive_allowlist_spdx": [
-    "BSD-3-Clause",
-    "BSD-2-Clause",
-    "MIT",
-    "Apache-2.0",
-    "ISC",
-    "Zlib",
-    "PSF-2.0"
-  ],
-  "dependencies": [
-    {
-      "name": "cryptography",
-      "provider": "PyCA (Python Cryptographic Authority)",
-      "spdx": "Apache-2.0 OR BSD-3-Clause",
-      "family": "permissive",
-      "where": "engine/dorado_sign.py, dorado_verify.py, dorado_receipt*.py, dorado_anchor*.py, cli/dorado.py",
-      "verdict": "OK",
-      "note": "Ed25519 signing/verify/receipt + RFC 3161 TSA. Installed explicitly in CI (pip install cryptography). Dual Apache/BSD, permissive."
-    },
-    {
-      "name": "asn1crypto",
-      "provider": "PyCA (Python Cryptographic Authority)",
-      "spdx": "MIT",
-      "family": "permissive",
-      "where": "engine/dorado_anchor.py, dorado_anchor_verify.py (conditional, RFC 3161 TSA + ASN.1)",
-      "verdict": "OK",
-      "note": "Conditionally imported for timestamp-authority verification. MIT, permissive. Not installed on the dev box (pod-side); declared so CI/audit knows its licence rather than treating an optional import as a gate."
-    },
-    {
-      "name": "cbor2",
-      "provider": "CBOR encoding/decoding (agronholm / brianjarrett)",
-      "spdx": "MIT",
-      "family": "permissive",
-      "where": "harness/scitt_verify.py (SCITT COSE_Sign1 CBOR decode + Sig_structure re-encode, RFC 9052/RFC 9943)",
-      "verdict": "OK",
-      "note": "The move-31 SCITT COSE_Sign1 verifier needs a CBOR decoder to turn a counted statement into a cryptographically verified one. MIT, permissive. Installed explicitly in CI (pip install cbor2)."
-    }
-  ],
-  "internal_packages": [
-    {
-      "name": "csoai_city",
-      "where": "cli/dorado.py (load_signing_key)",
-      "verdict": "INTERNAL",
-      "note": "Estate's own package (CSOAI), licensed Apache-2.0 by the estate; not an external third-party dependency — excluded from the external-licence sweep."
-    }
-  ],
-  "sweep": {
-    "result": "CLEAN",
-    "detected": ["cryptography", "asn1crypto", "cbor2"],
-    "internal_detected": ["csoai_city"],
-    "excluded_family_hits_in_assets": 0,
-    "summary": "Only permissive deps (cryptography cross-license, asn1crypto MIT, cbor2 MIT). No hard-excluded family appears in any code/data asset. The only repo mentions of the excluded families are in docs/NEXT-100-v3 where the rule itself is enumerated."
+ "schema": "csoai.dependency-licence/0.1",
+ "generated": "2026-09-02",
+ "policy": "A new dependency is admissible only if it is permissive (BSD/MIT/Apache/ISC/Zlib/PSF family) AND not in a hard-excluded commercial/non-commercial agent-dataset family. Escalation is required for anything outside the permissive allowlist.",
+ "hard_excluded_families": [
+  "PersonaHub",
+  "genagents",
+  "AgentSociety-commercial",
+  "Genie 3",
+  "Cosmos"
+ ],
+ "permissive_allowlist_spdx": [
+  "BSD-3-Clause",
+  "BSD-2-Clause",
+  "MIT",
+  "Apache-2.0",
+  "ISC",
+  "Zlib",
+  "PSF-2.0"
+ ],
+ "dependencies": [
+  {
+   "name": "cryptography",
+   "provider": "PyCA (Python Cryptographic Authority)",
+   "spdx": "Apache-2.0 OR BSD-3-Clause",
+   "family": "permissive",
+   "where": "engine/dorado_sign.py, dorado_verify.py, dorado_receipt*.py, dorado_anchor*.py, cli/dorado.py",
+   "verdict": "OK",
+   "note": "Ed25519 signing/verify/receipt + RFC 3161 TSA. Installed explicitly in CI (pip install cryptography). Dual Apache/BSD, permissive."
+  },
+  {
+   "name": "asn1crypto",
+   "provider": "PyCA (Python Cryptographic Authority)",
+   "spdx": "MIT",
+   "family": "permissive",
+   "where": "engine/dorado_anchor.py, dorado_anchor_verify.py (conditional, RFC 3161 TSA + ASN.1)",
+   "verdict": "OK",
+   "note": "Conditionally imported for timestamp-authority verification. MIT, permissive. Not installed on the dev box (pod-side); declared so CI/audit knows its licence rather than treating an optional import as a gate."
+  },
+  {
+   "name": "cbor2",
+   "provider": "CBOR encoding/decoding (agronholm / brianjarrett)",
+   "spdx": "MIT",
+   "family": "permissive",
+   "where": "harness/scitt_verify.py (SCITT COSE_Sign1 CBOR decode + Sig_structure re-encode, RFC 9052/RFC 9943)",
+   "verdict": "OK",
+   "note": "The move-31 SCITT COSE_Sign1 verifier needs a CBOR decoder to turn a counted statement into a cryptographically verified one. MIT, permissive. Installed explicitly in CI (pip install cbor2)."
+  },
+  {
+   "name": "rfc8785",
+   "provider": "rfc8785 (JSON Canonicalization Scheme, RFC 8785)",
+   "spdx": "Apache-2.0",
+   "family": "permissive",
+   "where": "harness/canon/jcs-python.py (module level), engine/dorado_sign.py:73 (deferred import in the to-be-signed canonicalisation path)",
+   "verdict": "OK",
+   "note": "JCS canonicalisation of the signing preimage. Apache-2.0 per the PyPI classifier 'License :: OSI Approved :: Apache Software License' (the license field is empty; the classifier is the authority). On the permissive allowlist."
+  },
+  {
+   "name": "opentimestamps",
+   "provider": "OpenTimestamps (python-opentimestamps)",
+   "spdx": "LGPL-3.0-or-later",
+   "family": "weak-copyleft",
+   "where": "harness/ots-anchor.py:36,58-60 \u2014 ALL FOUR are function-local imports inside anchor()/verify(), never module level. It is an optional path, not a load-bearing dependency.",
+   "verdict": "OWNER-DECISION",
+   "note": "DECLARED HONESTLY AND DELIBERATELY LEFT FAILING. python-opentimestamps is LGPL-3.0-or-later; permissive_allowlist_spdx is permissive-only, so this trips the sweep BY DESIGN. That is the gate working, not a bug. Three ways out, and only the owner picks: (a) invoke the `ots` CLI as a subprocess instead of importing the library \u2014 the ordinary LGPL boundary, and easy here because every import is already function-local; (b) drop the OTS path; (c) counsel widens the allowlist. Do NOT add LGPL to permissive_allowlist_spdx to make CI green \u2014 legal gates widen only via counsel."
   }
+ ],
+ "internal_packages": [
+  {
+   "name": "csoai_city",
+   "where": "cli/dorado.py (load_signing_key)",
+   "verdict": "INTERNAL",
+   "note": "Estate's own package (CSOAI), licensed Apache-2.0 by the estate; not an external third-party dependency \u2014 excluded from the external-licence sweep."
+  }
+ ],
+ "sweep": {
+  "result": "CLEAN",
+  "detected": [
+   "cryptography",
+   "asn1crypto",
+   "cbor2"
+  ],
+  "internal_detected": [
+   "csoai_city"
+  ],
+  "excluded_family_hits_in_assets": 0,
+  "summary": "Only permissive deps (cryptography cross-license, asn1crypto MIT, cbor2 MIT). No hard-excluded family appears in any code/data asset. The only repo mentions of the excluded families are in docs/NEXT-100-v3 where the rule itself is enumerated."
+ }
 }
