@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DORADO — Measurement Registers (live)</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:900px;margin:3rem auto;padding:0 1rem;line-height:1.5;color:#111}
+h1{color:#047857}h2{color:#0f766e;margin-top:2rem}code{background:#f0f4f3;padding:2px 5px;border-radius:4px}
+table{border-collapse:collapse;width:100%;margin-top:.6rem}th,td{border:1px solid #d1d5db;padding:6px 10px;text-align:left;font-size:.92rem}
+th{background:#f9fafb}.reg{color:#6b7280;font-style:italic;font-size:.9rem}.ok{color:#047857}.warn{color:#b45309}
+.box{background:#f8fafb;border:1px solid #e2e8f0;border-radius:8px;padding:1rem 1.2rem;margin:1rem 0}
+</style></head><body>
+<h1>Measurement Registers (live)</h1>
+<p>These are <strong>measurement target lists</strong> and <strong>change-detection registers</strong> —
+the estate's documented instruments for the tokenized-RWA universe and live-regulation tracking.
+<em>A register is measurement, never a certification.</em></p>
+
+<div class="box">
+<p class="reg">Register (verbatim): a measurement target list / change record. It is <strong>not</strong> a
+certification, endorsement, or conformity mark, and must not be presented as one.</p>
+<p class="reg">Neutrality: <strong>records the measured target, never certifies it.</strong></p>
+</div>
+
+<h2>Tokenized-RWA target list</h2>
+<p class="reg">The measurable universe of tokenized real-world assets — the input to the attestation
+engine. Never a certification of any issuer.</p>
+<table id="rwa"><thead><tr><th>XRPL</th><th>EVM clusters</th><th>Total</th></tr></thead><tbody>
+<tr><td id="rwa-xrpl">–</td><td id="rwa-evm">–</td><td id="rwa-total">–</td></tr></tbody></table>
+
+<h2>Regulation-change cross-reference</h2>
+<p class="reg">Free official feeds DORADO cross-references, SHA-256 change-detection. A re-hashing
+(volatile) feed is never reported as a regulation change.</p>
+<table id="feeds"><thead><tr><th>Feed</th><th>Jurisdiction</th><th>Reachable</th><th>Licence</th></tr></thead><tbody></tbody></table>
+
+<h2>Content engine (AEO / search-ready)</h2>
+<p class="reg">Measurement-derived, search-ready content — never an endorsement.</p>
+<table id="ce"><thead><tr><th>Title</th></tr></thead><tbody></tbody></table>
+
+<p class="reg">CSOAI Ltd (Council of AI, UK 16939677) · did:web:csoai.org#card-attestation-1 ·
+Measurement credential, not certification. <button onclick="loadAll()">Reload live</button></p>
+
+<script>
+async function get(p){ const r=await fetch(p); return r.ok? r.json(): null; }
+async function loadAll(){
+  // RWA target list
+  try{ const d=await get('assets/registers/rwa/index.json');
+    if(d){ document.getElementById('rwa-xrpl').textContent=d.counts.xrpl;
+      document.getElementById('rwa-evm').textContent=d.counts.evm_clusters;
+      document.getElementById('rwa-total').textContent=d.counts.total; } }catch(e){}
+  // Regulation feeds
+  try{ const d=await get('assets/registers/regulation-feeds/regulatory-feeds-registry.json');
+    if(d){ const tb=document.querySelector('#feeds tbody'); tb.innerHTML='';
+      d.feeds.forEach(f=>{ const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${f.name}</td><td>${f.jurisdiction}</td>
+          <td class="${f._reachable?'ok':'warn'}">${f._reachable?'reachable':'unreachable'}</td>
+          <td>${(f.licence||'').slice(0,26)}</td>`;
+        tb.appendChild(tr); }); } }catch(e){}
+  // Content engine
+  try{ const d=await get('assets/content-engine/index.json');
+    if(d){ const tb=document.querySelector('#ce tbody'); tb.innerHTML='';
+      (d.items||[]).forEach(it=>{ const tr=document.createElement('tr');
+        tr.innerHTML=`<td><a href="${it.slug? '#'+it.slug : '#'}">${it.title}</a></td>`; tb.appendChild(tr); }); } }catch(e){}
+}
+loadAll();
+</script>
+</body></html>
