@@ -106,8 +106,8 @@
           "_last_fetch_status": 200,
           "_reachable": true,
           "_verified_reachable_updated": true,
-          "_content_sha256": "51a5bbb53b2df300d1c01ca15b46928dee6817e7a94de4f645da87226e63afc1",
-          "_observation": "volatile"
+          "_content_sha256": "7df654c44bc4c49314593529ffc7e86d992de939604e27385c535bc75b2ce008",
+          "_observation": "change"
         }
       ],
       "note": "Free official feeds DORADO cross-references. Published for transparency (research rec #4). A change is recorded ONLY on a real SHA-256 content-hash delta on a content-stable feed; a feed that re-hashes every fetch is marked 'volatile' (anti-bot/dynamic), never reported as a regulation change; an unreachable feed is reported honestly, never fabricated."

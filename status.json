@@ -565,14 +565,14 @@
       "observed_on": "behavioural axes 2026-08-12 \u00b7 jail 2026-08-18 \u00b7 financial-fact axes 2026-08-25"
     },
     "hub": {
-      "cells": 874,
-      "measured": 874,
+      "cells": 885,
+      "measured": 885,
       "unmeasured": 0,
       "complete": null,
       "indexes_read": null,
       "indexes_total": null
     },
-    "verified_at": "2026-09-07T05:05:18Z"
+    "verified_at": "2026-09-07T05:16:48Z"
   },
   "relative": {
     "method": "elo",
