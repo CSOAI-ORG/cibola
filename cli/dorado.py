@@ -1058,6 +1058,35 @@ def _build_status() -> dict:
     from dorado_board import rebuild_index, load_entries
     from or_telemetry import load as load_tel
     board = rebuild_index()
+
+    # Live runtime truth (observed, never assumed): the authoritative deployed board + Hub
+    # population. If the fetch fails, we record honest "unreachable" — never a fabricated number.
+    runtime = {"board": {"slots": None, "measured": None, "unmeasured": None},
+               "hub": {"cells": None, "measured": None, "unmeasured": None,
+                       "complete": None, "indexes_read": None, "indexes_total": None},
+               "verified_at": None}
+    try:
+        import urllib.request as _ur
+        _UA = {"User-Agent": "csoai-dorado-status/0.1 (measurement; bot-gate-respecting)"}
+        def _getj(url):
+            req = _ur.Request(url, headers=_UA)
+            with _ur.urlopen(req, timeout=15) as r:
+                return json.load(r)
+        _g = _getj("https://councilof.ai/api/gspc")
+        _t = _g["totals"]
+        runtime["board"] = {"slots": _t.get("axes"), "measured": _t.get("measured_axes"),
+                            "unmeasured": _t.get("unmeasured_axes"),
+                            "public_count": _t.get("public_count")}
+        runtime["board"]["observed_on"] = _g.get("measured_on", {}).get("date")
+        _h = _getj("https://councilof.ai/api/hub-cards")
+        _c = _h.get("counts", {})
+        runtime["hub"] = {"cells": _c.get("cells"), "measured": _c.get("measured"),
+                          "unmeasured": _c.get("unmeasured"), "complete": _h.get("complete"),
+                          "indexes_read": _h.get("indexes_read"), "indexes_total": _h.get("indexes_total")}
+        runtime["verified_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    except Exception as e:
+        runtime["error"] = f"{type(e).__name__}: {str(e)[:60]} — runtime unreachable, not fabricated"
+
     status = {
         "schema": "csoai.dorado-status/0.1",
         "kind": "measurement body status — a MEASUREMENT summary, never a certification",
@@ -1066,6 +1095,7 @@ def _build_status() -> dict:
         "identity": "did:web:csoai.org#card-attestation-1",
         "board": {"count": board.get("count"), "chainOk": board.get("chainOk"),
                   "linked": board.get("linked"), "measurements": board.get("measurements", [])},
+        "runtime": runtime,
         "relative": json.load(open(os.path.join(ROOT, "board", "elo.json"))) if
                     os.path.exists(os.path.join(ROOT, "board", "elo.json")) else None,
         "operational": {"records": len(load_tel()),

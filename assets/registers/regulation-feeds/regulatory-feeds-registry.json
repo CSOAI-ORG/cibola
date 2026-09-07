@@ -17,8 +17,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "8a4913e9a702a457d6ead18a257c34f5906ce15c933bfa00016bd04d3f5201f9",
-      "_observation": "no-change"
+      "_content_sha256": "6ef768d003a4d065799e5141b387c3124a1d19556f5ec4ac2ba5b5df7b0028e4",
+      "_observation": "change"
     },
     {
       "id": "ecfr",
@@ -33,8 +33,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "32d98813c7ed29730948c4e43aec113910466e150ad14406be605eb2e46fa253",
-      "_observation": "no-change"
+      "_content_sha256": "77279f0b1e3dbcde3cae86ba1f27cacf827ca825b60d6bc59fffacf98c005f41",
+      "_observation": "change"
     },
     {
       "id": "eurlex",
@@ -46,11 +46,10 @@
       "verified_reachable": true,
       "verified_http": 202,
       "notes": "CELEX content resolver; the EU AI Act CELEX shown as the reference anchor. CELLAR SPARQL endpoint path varies \u2014 treat resolver as the stable free surface.",
-      "_last_fetch_status": 200,
-      "_reachable": true,
-      "_verified_reachable_updated": true,
-      "_content_sha256": "9956f30025730c05940bcda6d17dbf987422b1eee3464974ab9c3809a546d585",
-      "_observation": "volatile"
+      "_last_fetch_status": 202,
+      "_reachable": false,
+      "_verified_reachable_updated": false,
+      "_observation": "unreachable"
     },
     {
       "id": "bis",
@@ -62,11 +61,10 @@
       "verified_reachable": true,
       "verified_http": 200,
       "notes": "BIS publication listing page.",
-      "_last_fetch_status": 200,
-      "_reachable": true,
-      "_verified_reachable_updated": true,
-      "_content_sha256": "3816796b36c79efd20b6b067599a8afb661eeee776ea5c10306f15b9e62330f4",
-      "_observation": "no-change"
+      "_last_fetch_status": 404,
+      "_reachable": false,
+      "_verified_reachable_updated": false,
+      "_observation": "unreachable"
     },
     {
       "id": "iosco",
@@ -81,8 +79,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "e6ce60507af918d077b87c535493f9ba786b0699a3ca0518f384c374ad1c9add",
-      "_observation": "change"
+      "_content_sha256": "55b63c199aca62f22f2e5498ffc372481c082444666d6fa8a6f0e04fdb171b85",
+      "_observation": "volatile"
     }
   ],
   "note": "Free official feeds DORADO cross-references. Published for transparency (research rec #4). A change is recorded ONLY on a real SHA-256 content-hash delta on a content-stable feed; a feed that re-hashes every fetch is marked 'volatile' (anti-bot/dynamic), never reported as a regulation change; an unreachable feed is reported honestly, never fabricated."

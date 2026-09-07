@@ -556,6 +556,24 @@
       }
     ]
   },
+  "runtime": {
+    "board": {
+      "slots": 22,
+      "measured": 22,
+      "unmeasured": 0,
+      "public_count": "22 axis \u00b7 22 measured",
+      "observed_on": "behavioural axes 2026-08-12 \u00b7 jail 2026-08-18 \u00b7 financial-fact axes 2026-08-25"
+    },
+    "hub": {
+      "cells": 856,
+      "measured": 856,
+      "unmeasured": 0,
+      "complete": null,
+      "indexes_read": null,
+      "indexes_total": null
+    },
+    "verified_at": "2026-09-07T04:09:16Z"
+  },
   "relative": {
     "method": "elo",
     "n_min": 30,
