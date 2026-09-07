@@ -11,7 +11,7 @@
 | JCS v2 | RFC 8785 corpus 12/12 + real-card 8/8 · canon-dispatch operational in sign/verify (--jcs) · v1 backward-compat proven |
 | Outreach | 22 contacts / 13 messages logged · IANA + NLnet pre-check + EF ESP + Longview + AIUC + Armilla sent · METR (info@) · TB proposal issue · Equidam reply |
 | Funding staged | NLnet €20K (Sep 3 armed) · arXiv pack (endorser = only blocker) · insurer feed pitch + sample bundle |
-| Repos | cibola 121 · councilof-ai 3,133 · 35 MCP repos · 292-registry honesty rule |
+| Repos | cibola 121 · councilof-ai 3,133 · 372 MCP-named repos · 330-registry honesty rule |
 
 ## 🔴 NOT DONE — the A++ gap list (ranked)
 1. **www.csoai.org SSL broken** (ticks 334-342 — CF dashboard, Nick) · csoai.org apex drift resolved
