@@ -476,7 +476,10 @@ def cmd_batch(args):
     # 3. regulation-feeds SHA-256 change-detection — honest baseline/change/volatile/unreachable.
     from fetch_regulation_feeds import main as _rf
     _run("regulation-feeds", _rf)
-    # 4. consolidated body status (board + relative + operational + binds).
+    # 4. consolidated licensable measurement bundle (RWA + regulation-feeds + content-engine).
+    from build_measurement_bundle import main as _bm
+    _run("measurement-bundle", _bm)
+    # 5. consolidated body status (board + relative + operational + binds).
     from dorado_board import rebuild_index
     import sys as _sys
     _sys.path.insert(0, os.path.join(ROOT, "engine"))

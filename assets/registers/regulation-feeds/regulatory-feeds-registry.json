@@ -46,7 +46,7 @@
       "verified_reachable": true,
       "verified_http": 202,
       "notes": "CELEX content resolver; the EU AI Act CELEX shown as the reference anchor. CELLAR SPARQL endpoint path varies \u2014 treat resolver as the stable free surface.",
-      "_last_fetch_status": 403,
+      "_last_fetch_status": 202,
       "_reachable": false,
       "_verified_reachable_updated": false,
       "_observation": "unreachable"
@@ -79,8 +79,8 @@
       "_last_fetch_status": 200,
       "_reachable": true,
       "_verified_reachable_updated": true,
-      "_content_sha256": "d22dac26766d42624780a871a51eb8db681a6ad160d143069fd0d7c911285c01",
-      "_observation": "change"
+      "_content_sha256": "51a5bbb53b2df300d1c01ca15b46928dee6817e7a94de4f645da87226e63afc1",
+      "_observation": "volatile"
     }
   ],
   "note": "Free official feeds DORADO cross-references. Published for transparency (research rec #4). A change is recorded ONLY on a real SHA-256 content-hash delta on a content-stable feed; a feed that re-hashes every fetch is marked 'volatile' (anti-bot/dynamic), never reported as a regulation change; an unreachable feed is reported honestly, never fabricated."

@@ -30,6 +30,21 @@ engine. Never a certification of any issuer.</p>
 (volatile) feed is never reported as a regulation change.</p>
 <table id="feeds"><thead><tr><th>Feed</th><th>Jurisdiction</th><th>Reachable</th><th>Licence</th></tr></thead><tbody></tbody></table>
 
+<h2>Regulation changes (most recent per feed)</h2>
+<p class="reg">Each row is the latest honest observation for that feed — a real content-hash delta
+is a <code>change</code>; a feed that re-hashes every fetch is <code>volatile</code> (never a
+regulation change); an unreachable feed is reported honestly, never fabricated.</p>
+<table id="delta"><thead><tr><th>Feed</th><th>Observation</th><th>Note</th></tr></thead><tbody></tbody></table>
+
+<h2>Live body status (runtime)</h2>
+<p class="reg">The authoritative deployed board + Hub population, recorded at build with
+<code>verified_at</code>. A measurement summary, never a certification.</p>
+<table id="status"><thead><tr><th>Board</th><th>Hub cells</th><th>Measured</th><th>Unmeasured</th><th>Verified at</th></tr></thead><tbody></tbody></table>
+
+<h2>Download the measurement bundle</h2>
+<p>License the measured corpus — a vendor can license the <strong>data</strong>, never a score.</p>
+<p><a href="assets/measurement-bundle.json" download>measurement-bundle.json</a> (consolidated RWA + regulation-feeds + content-engine, register-bearing)</p>
+
 <h2>Content engine (AEO / search-ready)</h2>
 <p class="reg">Measurement-derived, search-ready content — never an endorsement.</p>
 <table id="ce"><thead><tr><th>Title</th></tr></thead><tbody></tbody></table>
@@ -53,6 +68,25 @@ async function loadAll(){
           <td class="${f._reachable?'ok':'warn'}">${f._reachable?'reachable':'unreachable'}</td>
           <td>${(f.licence||'').slice(0,26)}</td>`;
         tb.appendChild(tr); }); } }catch(e){}
+  // Regulation-change deltas (latest honest observation per feed)
+  try{ const ledger=await get('assets/registers/regulation-feeds/changes.jsonl');
+    if(ledger){ const lines=(ledger.text? await ledger.text():'').trim().split('\n').filter(Boolean);
+      const latest={}; lines.forEach(l=>{ try{const r=JSON.parse(l); latest[r.feed]=r;}catch(e){} });
+      const tb=document.querySelector('#delta tbody'); tb.innerHTML='';
+      Object.entries(latest).forEach(([f,r])=>{ const tr=document.createElement('tr');
+        const cls=r.kind==='change'?'ok':(r.kind==='volatile'?'warn':'reg');
+        tr.innerHTML=`<td>${f}</td><td class="${cls}">${r.kind}</td><td>${(r.note||'').slice(0,90)}</td>`;
+        tb.appendChild(tr); }); } }catch(e){}
+  // Live body status (runtime block)
+  try{ const st=await get('status.json');
+    if(st && st.runtime){ const tb=document.querySelector('#status tbody'); tb.innerHTML='';
+      const b=st.runtime.board||{}, h=st.runtime.hub||{};
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${b.slots??'–'}·${b.measured??'–'}·${b.unmeasured??'–'}</td>
+        <td>${h.cells??'–'}</td><td>${h.measured??'–'}</td><td>${h.unmeasured??'–'}</td>
+        <td>${st.runtime.verified_at||'–'}</td>`;
+      tb.appendChild(tr); } }catch(e){}
+
   // Content engine
   try{ const d=await get('assets/content-engine/index.json');
     if(d){ const tb=document.querySelector('#ce tbody'); tb.innerHTML='';
